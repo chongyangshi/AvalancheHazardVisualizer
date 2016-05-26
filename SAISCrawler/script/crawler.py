@@ -2,12 +2,12 @@ import os
 import urlparse
 from selenium import webdriver, common
 
-#scriptParentDirectory = os.path.dirname(os.path.abspath(os.path.join(__file__, os.pardir)))
-chromedriver = "../bin/chromedriver"
-#chromedriver = scriptParentDirectory + "/bin/chromedriver"
+scriptParentDirectory = os.path.dirname(os.path.abspath(os.path.join(__file__, os.pardir)))
+chromedriver = scriptParentDirectory + "/bin/chromedriver"
 os.environ["webdriver.chrome.driver"] = chromedriver
 crawlerViewDriver = webdriver.Chrome(chromedriver)
-crawlerViewDriver.implicitly_wait(2)
+crawlerViewDriver.implicitly_wait(4)
+crawlerViewDriver.set_page_load_timeout(4)
 crawlerViewDriver.get("http://www.sais.gov.uk/creag-meagaidh/")
 
 i = 1
@@ -23,14 +23,15 @@ while True:
 #List of lists
 crawlerData = []
 
-for report in crawlerReports:
+for report_id in crawlerReports:
 
     try:
-        crawlerViewDriver.execute_script("loadReport(" + str(report) + ")")
+        crawlerViewDriver.get("http://www.sais.gov.uk/_ajax_report/?report_id=" + str(report_id))
         crawlerCrURL = crawlerViewDriver.find_element_by_xpath("//img[@id='cr-img']").get_attribute("src")
     except:
         #If the CR URL for that report cannot be loaded.
         crawlerCrURL = None
+        raise
 
     if crawlerCrURL != None:
         print crawlerCrURL
@@ -57,7 +58,6 @@ for report in crawlerReports:
         #Add all information to the data set.
         crawlerData.append([crawlerParsedForecastLowerBoundary, crawlerParsedForecastMiddleBoundary, crawlerParsedForecastUpperBoundary, crawlerParsedForecastDataList])
 
-crawlerViewDriver.execute_script
 crawlerViewDriver.quit()
 
 print crawlerData
