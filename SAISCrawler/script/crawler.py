@@ -1,3 +1,9 @@
+###############################################################
+# The crawler that loads avalanche forecast data from SAIS website 
+# and update them into the database.
+# TODO: OOP, and implement DB when db_manager.py is done.
+###############################################################
+
 import os
 import urlparse
 from selenium import webdriver, common
@@ -60,7 +66,7 @@ for location in crawlerLocations:
             #Decode the integer string data.
             crawlerParsedForecastData = str(crawlerParsedQuery['val'][0])
             crawlerParsedForecastLowerBoundary = str(crawlerParsedQuery['txts'][0])
-            #In case some reports not setting the middle boundary (found on 6095): 
+            #In case some reports not setting the middle boundary (found on Report #6095): 
             try:
                 crawlerParsedForecastMiddleBoundary = str(crawlerParsedQuery['txtm'][0])
             except KeyError:
