@@ -1,35 +1,27 @@
 ###############################################################
-# The crawler that loads avalanche forecast data from SAIS website
+# The crawler that loads avalanche forecast data from SAIS website 
 # and update them into the database.
 # TODO: OOP, and implement DB when db_manager.py is done.
 ###############################################################
 
-import sys
 import os
-import re
 import urlparse
 from selenium import webdriver, common
 
-import utils
-
 #Report locations to be crawled, first is name, second is data listing source.
-crawlerLocations = [#("Creag Meagaidh", "http://www.sais.gov.uk/creag-meagaidh/"),
-                    #("Glencoe", "http://www.sais.gov.uk/glencoe/"),
-                    #("Lochaber", "http://www.sais.gov.uk/lochaber/"),
-                    #("Nothern Cairngorms", "http://www.sais.gov.uk/northern-cairngorms/"),
-                    #("Southern Cairngorms", "http://www.sais.gov.uk/southern-cairngorms/"),
+crawlerLocations = [("Creag Meagaidh", "http://www.sais.gov.uk/creag-meagaidh/"),
+                    ("Glencoe", "http://www.sais.gov.uk/glencoe/"),
+                    ("Lochaber", "http://www.sais.gov.uk/lochaber/"),
+                    ("Nothern Cairngorms", "http://www.sais.gov.uk/northern-cairngorms/"),
+                    ("Southern Cairngorms", "http://www.sais.gov.uk/southern-cairngorms/"),
                     ("Torridon", "http://www.sais.gov.uk/torridon/")]
 
 #The API source of report request.
 crawlerReportURL = "http://www.sais.gov.uk/_ajax_report/?report_id="
 
 #Configure the crawler.
-scriptParentDirectory = utils.get_project_full_path()
-chromedriver = scriptParentDirectory
-if sys.platform == "linux2":
-    chromedriver += "/bin/chromedriver_linux" #This is the Linux driver.
-else:
-    chromedriver += "/bin/chromedriver_osx" #Assume it's on OS X otherwise, not using Win.
+scriptParentDirectory = os.path.dirname(os.path.abspath(os.path.join(__file__, os.pardir)))
+chromedriver = scriptParentDirectory + "/bin/chromedriver"
 os.environ["webdriver.chrome.driver"] = chromedriver
 crawlerViewDriver = webdriver.Chrome(chromedriver)
 crawlerViewDriver.implicitly_wait(4)
@@ -73,16 +65,14 @@ for location in crawlerLocations:
 
             #Decode the integer string data.
             crawlerParsedForecastData = str(crawlerParsedQuery['val'][0])
-
-            #Decode the altitude parameters. They may not always be integers (e.g. "1055m"), so match first int found.
-            crawlerParsedForecastLowerBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txts'][0]))
-            #In case some reports not setting the middle boundary (found on Report #6095):
+            crawlerParsedForecastLowerBoundary = str(crawlerParsedQuery['txts'][0])
+            #In case some reports not setting the middle boundary (found on Report #6095): 
             try:
-                crawlerParsedForecastMiddleBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txtm'][0]))
+                crawlerParsedForecastMiddleBoundary = str(crawlerParsedQuery['txtm'][0])
             except KeyError:
-                crawlerParsedForecastMiddleBoundary = 0
-            crawlerParsedForecastUpperBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txte'][0]))
-
+                crawlerParsedForecastMiddleBoundary = "0"
+            crawlerParsedForecastUpperBoundary = str(crawlerParsedQuery['txte'][0])
+            
             #Check that the data is of correct length.
             if len(crawlerParsedForecastData) != 32:
                 raise ValueError("Invalid forecast data from webpage.")
@@ -93,7 +83,7 @@ for location in crawlerLocations:
             for data in crawlerParsedForecastData:
                 #Primary, Secondary values for lower, upper sectors.
                 crawlerParsedForecastDataList.append(((data[0], data[2]), (data[1], data[3])))
-
+            
             #Add all information to the data set.
             crawlerData.append([crawlerCrDate, crawlerParsedForecastLowerBoundary, crawlerParsedForecastMiddleBoundary, crawlerParsedForecastUpperBoundary, crawlerParsedForecastDataList])
 
