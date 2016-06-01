@@ -3,6 +3,7 @@
 ###############################################################
 
 import os
+import json
 import datetime
 
 def get_project_full_path():
@@ -33,3 +34,16 @@ def check_direction(direction):
         return True
     else:
         return False
+
+
+def read_config(requestedKey):
+    ''' Return the configuration value of requestedKey. '''
+
+    configFile = get_project_full_path() + "/script/config.json"
+
+    if not os.path.isfile(configFile):
+        raise ValueError("The configuration file config.json does not exist!")
+
+    with open(configFile) as SettingsFile:
+        SettingsData = json.load(SettingsFile)
+        return SettingsData[requestedKey]

@@ -35,6 +35,15 @@ class CrawlerDB:
         return locations
 
 
+    def select_all_location_id(self):
+        ''' Returns a list of all locations' location_id. '''
+
+        self.__CrawlerDBCursor.execute("SELECT location_id FROM locations")
+        locations = self.__CrawlerDBCursor.fetchall()
+
+        return [i[0] for i in locations]
+
+
     def add_location(self, locationName, locationURL):
         ''' Add a new location, returning the new location ID. If parameter
             invalid, return 0.'''
