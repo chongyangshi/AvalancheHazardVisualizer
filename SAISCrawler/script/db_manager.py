@@ -19,7 +19,8 @@ class CrawlerDB:
         ''' Returns a single tuple containing the information for a location
             of the given ID: (ID, Name, ForecastURL).'''
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE location_id == ?", (locationID,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE\
+            location_id == ?", (locationID,))
         location = self.__CrawlerDBCursor.fetchone()
 
         return location
@@ -29,7 +30,8 @@ class CrawlerDB:
         ''' Returns a list of tuples containing the information for locations
             with name partially matching locationName, possibly empty. '''
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE location_name LIKE '%' || ? || '%'", (locationName,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE\
+            location_name LIKE '%' || ? || '%'", (locationName,))
         locations = self.__CrawlerDBCursor.fetchall()
 
         return locations
@@ -53,8 +55,11 @@ class CrawlerDB:
         if (len(locationURL) == 0) or (not locationURL.startswith("http")):
             return 0
 
-        self.__CrawlerDBCursor.execute("INSERT INTO locations VALUES (NULL, ?, ?)", (locationName, locationURL,))
-        newID = self.__CrawlerDBCursor.execute("SELECT location_id FROM locations WHERE location_name = ? AND location_forecast_url = ?", (locationName, locationURL,)).fetchone()
+        self.__CrawlerDBCursor.execute("INSERT INTO locations VALUES\
+            (NULL, ?, ?)", (locationName, locationURL,))
+        newID = self.__CrawlerDBCursor.execute("SELECT location_id FROM\
+            locations WHERE location_name = ? AND location_forecast_url = ?",\
+            (locationName, locationURL,)).fetchone()
         self.__CrawlerDBConnection.commit()
 
         return newID[0]
@@ -70,7 +75,8 @@ class CrawlerDB:
         if self.select_location_by_id(locationID) == None:
             return False
 
-        self.__CrawlerDBCursor.execute("DELETE FROM locations WHERE location_id = ?", (locationID,))
+        self.__CrawlerDBCursor.execute("DELETE FROM locations WHERE\
+            location_id = ?", (locationID,))
         self.__CrawlerDBConnection.commit()
 
         return True
@@ -82,7 +88,8 @@ class CrawlerDB:
         if forecastID <= 0:
             return None
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE forecast_id = ?", (forecastID,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            forecast_id = ?", (forecastID,))
         forecast = self.__CrawlerDBCursor.fetchone()
 
         return forecast
@@ -105,7 +112,9 @@ class CrawlerDB:
         if not utils.check_direction(direction): #If invalid direction
             return None
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE location_id = ? AND forecast_date = ? AND direction = ?", (locationID, forecastDate, direction,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            location_id = ? AND forecast_date = ? AND direction = ?",\
+            (locationID, forecastDate, direction,))
         forecast = self.__CrawlerDBCursor.fetchone()
 
         return forecast
@@ -124,7 +133,9 @@ class CrawlerDB:
         if not utils.check_direction(direction): #If invalid direction
             return None
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE location_id = ? AND direction = ? ORDER BY date(forecast_date) DESC", (forecastID, direction,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            location_id = ? AND direction = ? ORDER BY date(forecast_date) DESC",\
+            (forecastID, direction,))
         forecast = self.__CrawlerDBCursor.fetchone()
 
 
@@ -138,13 +149,14 @@ class CrawlerDB:
         if self.select_location_by_id(locationID) == None:
             return []
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE location_id = ?", (locationID,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            location_id = ?", (locationID,))
         forecasts = self.__CrawlerDBCursor.fetchall()
 
         return forecasts
 
 
-    def add_forecast(self, locationID, forecast_date, boundaries, dataset):
+    def add_forecast(self, locationID, forecastDate, boundaries, dataset):
         ''' Add a forecast data set into the database, locationID must match an
             existing location, boundaries must be a three-value tuple containing
             the three levels in the graph, with the lower boundary being smaller
@@ -163,19 +175,36 @@ class CrawlerDB:
         if int(boundaries[0]) >= int(boundaries[2]):
             return False
 
-        if not utils.check_date_string(forecast_date):
+        if not utils.check_date_string(forecastDate):
             return False
 
         directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
         if len(dataset) != len(directions): #Mismatched number of records.
             return False
+
         for i in range(0, len(dataset)):
+            #First check if record already exists, if so, update existing record.
             data = dataset[i]
             direction = directions[i]
-            self.__CrawlerDBCursor.execute("INSERT INTO forecasts VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",\
-                (locationID, forecast_date, direction, boundaries[0],\
-                boundaries[1], boundaries[2], data[0][0], data[0][1],\
-                data[1][0], data[1][1],))
+            existenceCheck = self.lookup_forecast_by_precise_search(locationID,
+             forecastDate, direction)
+
+            if existenceCheck != None: #Record already exists.
+                self.__CrawlerDBCursor.execute("UPDATE forecasts SET\
+                    lower_boundary = ?, middle_boundary = ?, upper_boundary = ?,\
+                    lower_primary_colour = ?, lower_secondary_colour = ?,\
+                    upper_primary_colour = ?, upper_secondary_colour = ? WHERE\
+                    forecast_id = ?", (boundaries[0], boundaries[1],\
+                    boundaries[2], data[0][0], data[0][1],\
+                    data[1][0], data[1][1], existenceCheck[0],))
+
+            else: #Add new record.
+                self.__CrawlerDBCursor.execute("INSERT INTO forecasts VALUES\
+                    (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",\
+                    (locationID, forecastDate, direction, boundaries[0],\
+                    boundaries[1], boundaries[2], data[0][0], data[0][1],\
+                    data[1][0], data[1][1],))
+
         self.__CrawlerDBConnection.commit()
 
         return True
@@ -191,7 +220,8 @@ class CrawlerDB:
         if self.lookup_forecast_by_forecast_id(forecastID) == None:
             return False
 
-        self.__CrawlerDBCursor.execute("DELETE FROM forecasts WHERE forecast_id = ?", (forecastID,))
+        self.__CrawlerDBCursor.execute("DELETE FROM forecasts WHERE\
+            forecast_id = ?", (forecastID,))
         self.__CrawlerDBConnection.commit()
 
         return True
@@ -209,7 +239,8 @@ class CrawlerDB:
         if self.lookup_forecasts_by_location_id(locationID) == []:
             return False
 
-        self.__CrawlerDBCursor.execute("DELETE FROM forecasts WHERE location_id = ?", (locationID,))
+        self.__CrawlerDBCursor.execute("DELETE FROM forecasts WHERE\
+            location_id = ?", (locationID,))
         self.__CrawlerDBConnection.commit()
 
         return True
