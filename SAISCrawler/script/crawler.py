@@ -33,7 +33,7 @@ class Crawler:
 
         self._crawlerViewDriver = webdriver.Chrome(chromedriver)
         self._crawlerViewDriver.implicitly_wait(4)
-        self._crawlerViewDriver.set_page_load_timeout(4)
+        self._crawlerViewDriver.set_page_load_timeout(8)
 
         #Configure the DB interface.
         dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
@@ -64,7 +64,18 @@ class Crawler:
 
         for location in crawlerLocations:
 
-            self._crawlerViewDriver.get(location[1])
+            retry_count = 0 
+            load_success = False
+
+            # Attempt to load the page three times, if not working then give up and throw exception.
+            while not load_success:
+                try:
+                    self._crawlerViewDriver.get(location[1])
+                    load_success = True
+                except common.exceptions.TimeoutException:
+                    retry_count += 1
+                    if retry_count >= 3:
+                        raise
 
             i = 1
             crawlerReports = []
@@ -80,6 +91,9 @@ class Crawler:
             #List of lists.
             crawlerData = []
 
+            if len(crawlerReports) == 0:
+                raise Exception("SAISCrawler has failed to obtain any data for this location, likely a network error.")
+
             for report_id in crawlerReports:
 
                 try:
@@ -93,7 +107,7 @@ class Crawler:
 
                 if crawlerCrURL != None:
                     #Wait a little while for throttling.
-                    sleep(0.5)
+                    sleep(1)
 
                     #Parse a compassrose URL, with a integer string on length 32 as forecast data, and three altitude boundaries.
                     crawlerParsedURL = urlparse.urlparse(crawlerCrURL)
