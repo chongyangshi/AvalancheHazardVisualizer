@@ -38,7 +38,8 @@ for i in range(start_level, end_level, -1): #No need to build below end_level, s
     run_cmd("ctb-tile --output-format GTiff --output-dir " + temp_dir + "/ --start-zoom " + current_level + " --end-zoom " + current_level + " " + input_raster)
     
     # Build Virtual Raster for current level from the GDAL tileset.
-    run_cmd("find " + temp_dir + "/" + current_level + " -name '*.tif' | xargs gdalbuildvrt " + temp_dir + "/level" + current_level + ".vrt")
+    run_cmd("find " + temp_dir + "/" + current_level + " -name '*.tif' -print > " + temp_dir + "/level" + current_level + ".list")
+    run_cmd("gdalbuildvrt -input_file_list " + temp_dir + "/level" + current_level + ".list " + temp_dir + "/level" + current_level + ".vrt")
 
     # Finally build the terrain for next level based on the Virtual Raster.
     run_cmd("ctb-tile -o " + output_dir + "/ --start-zoom " + next_level + " --end-zoom " + next_level + " " + temp_dir + "/level" + current_level + ".vrt")
