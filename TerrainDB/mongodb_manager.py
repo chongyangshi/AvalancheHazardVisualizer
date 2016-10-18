@@ -49,25 +49,30 @@ class MongoDBManager:
         else:
             return False
     
-    def add_aspects(self, aspects):
-        ''' Add a list of aspect tuples (latitude, longitude, aspect) 
+    def add_aspects(self, data):
+        ''' Add aspects from data tuple (latitudes, longitudes, aspects) 
             into aspects database.'''
 
         # Validate that all values to be floats.
         records = []
-        for aspect in aspects:
+        latitudes, longitudes, aspects = data
+        if (len(latitudes) != len(longitudes)) or (len(longitudes) != len(aspects)):
+            print("Error: add_aspects receives data of different lengths.")
+            return False
+        
+        for i in range(len(latitudes)):
             try:
-                latitude = float(aspect[0])
-                longitude = float(aspect[1])
-                asp = float(aspect[2])
+                latitude = float(latitudes[i])
+                longitude = float(longitudes[i])
+                asp = float(aspects[i])
                 records.append({
                     "coordinate" : [longitude, latitude],
                     "aspect": asp
                 })
             except ValueError:
-                print("Error: add_aspects receives invalid record: " + aspect[0] + ", " + aspect[1] + ", " + aspect[2])
+                print("Error: add_aspects receives invalid record: " + latitude + ", " + longitude + ", " + asp)
                 return False
-        
+            
         # Insert records.
         insertion_success = self._aspects.insert_many(records)
 
@@ -164,18 +169,3 @@ class MongoDBManager:
         deletion_success = self._aspects.remove({"coordinate": delete_set})
 
         return deletion_success
-
-
-'''
-test = MongoDBManager()
-test.remove_all_aspects()
-test.add_aspect(10, 20, 12)
-test.add_aspects([(21, 41, 24), (31, 61, 36), (41, 81, 48)])
-print("1: ", test.get_aspect(None, None, 12))
-print("2: ", test.get_aspect(10, 20, 12))
-for i in test.get_aspects_by_range([9, 51], [19, 80]):
-    print(i)
-print("N: ", test.get_nearest_aspect(32, 62))
-test.remove_aspect(10, 20)
-print("3: ", test.get_aspect(None, None, 12))
-'''
