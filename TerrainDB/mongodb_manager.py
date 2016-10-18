@@ -79,7 +79,7 @@ class MongoDBManager:
                         "aspect": asp
                     })
             except ValueError:
-                print("Error: add_aspects receives invalid record: " + str(latitude) + ", " + str(longitude) + ", " + str(asp))
+                print("Error: add_aspects receives invalid record: " + str(latitude) + ", " + str(longitude))
                 return False
             
         # Insert records.
