@@ -23,7 +23,7 @@ class TerrainReader:
             print("Error: error opening raster file " + raster_file + ".")
             raise
 
-        # Check raster file to be in the correct format.
+        # Check DEM raster file to be in the correct format.
         # Read meta information in order.
         try:
             self.__raster_ncols = int(self.__raster_file.readline().split(" ")[-1])
@@ -31,6 +31,7 @@ class TerrainReader:
             self.__raster_xllcorner = float(self.__raster_file.readline().split(" ")[-1])
             self.__raster_yllcorner = float(self.__raster_file.readline().split(" ")[-1])
             self.__raster_cellsize = float(self.__raster_file.readline().split(" ")[-1])
+            self.__raster_nodata_val = float(self.__raster_file.readline().split(" ")[-1])
         except ValueError:
             print("Error: the raster file is not in a valid ASC (llcorner-based) form.")
             raise
