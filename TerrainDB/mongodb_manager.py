@@ -38,6 +38,10 @@ class MongoDBManager:
         except ValueError:
             print("Error: add_aspect receives invalid record: " + latitude + ", " + longitude + ", " + aspect)
             return False
+
+        # Drop invalid aspect.
+        if (aspect < 0) or (aspect > 360):
+            return False
         
         insertion_success = self._aspects.insert_one({
             "coordinate" : [longitude, latitude],
@@ -65,10 +69,15 @@ class MongoDBManager:
                 latitude = float(latitudes[i])
                 longitude = float(longitudes[i])
                 asp = float(aspects[i])
-                records.append({
-                    "coordinate" : [longitude, latitude],
-                    "aspect": asp
-                })
+                
+                #Silently drop invalid data from the list, useful for terrain models with gaps, saving space.
+                if (asp < 0) or (asp > 360):
+                    continue
+                else:
+                    records.append({
+                        "coordinate" : [longitude, latitude],
+                        "aspect": asp
+                    })
             except ValueError:
                 print("Error: add_aspects receives invalid record: " + latitude + ", " + longitude + ", " + asp)
                 return False

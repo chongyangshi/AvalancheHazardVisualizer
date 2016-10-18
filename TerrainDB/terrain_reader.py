@@ -38,8 +38,6 @@ class TerrainReader:
         # Initialise coordinate tracking, we only need the current northing and latitude.
         self._current_bng_easting = self.__raster_xllcorner # National Grid Easting
         self._current_bng_northing = self.__raster_yllcorner # National Grid Northing
-        #self._current_wgs_longitude = convert_lonlat([self._current_bng_easting], [self._current_bng_northing])[0][0] # Coordinate Longitude
-        #self._current_wgs_latitude = convert_lonlat([self._current_bng_easting], [self._current_bng_northing])[1][0] # Coordinate Latitude
         self._current_line_count = 0
     
     def read_all_aspects(self):
