@@ -36,7 +36,7 @@ class MongoDBManager:
             longitude = float(longitude)
             aspect = float(aspect)
         except ValueError:
-            print("Error: add_aspect receives invalid record: " + latitude + ", " + longitude + ", " + aspect)
+            print("Error: add_aspect receives invalid record: " + str(latitude) + ", " + str(longitude) + ", " + str(aspect))
             return False
 
         # Drop invalid aspect.
@@ -79,7 +79,7 @@ class MongoDBManager:
                         "aspect": asp
                     })
             except ValueError:
-                print("Error: add_aspects receives invalid record: " + latitude + ", " + longitude + ", " + asp)
+                print("Error: add_aspects receives invalid record: " + str(latitude) + ", " + str(longitude) + ", " + str(asp))
                 return False
             
         # Insert records.
