@@ -81,7 +81,12 @@ class MongoDBManager:
             except ValueError:
                 print("Error: add_aspects receives invalid record: " + str(latitude) + ", " + str(longitude))
                 return False
-            
+        
+        # If there is no valid aspect (all -9999s blank row, for example),
+        # return True as the line is processed but non inserted.
+        if len(records) == 0:
+            return True
+
         # Insert records.
         insertion_success = self._aspects.insert_many(records)
 
