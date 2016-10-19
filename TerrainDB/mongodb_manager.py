@@ -1,5 +1,7 @@
 import sys
+
 from pymongo import MongoClient, GEO2D
+from bson.son import SON
 
 DB_SERVER = "mongodb://localhost:27017/"
 
@@ -156,7 +158,7 @@ class MongoDBManager:
             raise
 
         # Perform DB lookup.
-        result = self._aspects.find_one({ "coordinate" : { "$near" : lookup_set}})
+        result = self._aspects.find_one({ "coordinate" : SON([("$near", lookup_set), ("$maxDistance", 0.0000625)])}) #Approximately 500m if the coordinate is not spot on.
 
         return result
     

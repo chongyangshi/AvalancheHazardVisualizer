@@ -1,0 +1,39 @@
+{
+    "avalanche_risk" : {
+
+        "nodata" : {
+            "level_code" : -1,
+            "level_image" : "nodata.png"
+        }, 
+
+        "none" : {
+            "level_code" : 0,
+            "level_image" : "none.png"
+        },
+        
+        "low" : {
+            "level_code" : 1,
+            "level_image" : "low.png"
+        },
+
+        "moderate" : {
+            "level_code" : 2,
+            "level_image" : "moderate.png"
+        },
+
+        "considerable" : {
+            "level_code" : 3,
+            "level_image" : "considerable.png"
+        },
+
+        "high" : {
+            "level_code" : 4,
+            "level_image" : "high.png"
+        },
+
+        "veryhigh" : {
+            "level_code" : 5,
+            "level_image" : "veryhigh.png"
+        }
+    }
+}

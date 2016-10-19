@@ -1,3 +1,6 @@
 virtualenv
+selenium
 pymongo
 convertbng
+flask
+
