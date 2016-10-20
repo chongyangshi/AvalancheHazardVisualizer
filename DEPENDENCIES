@@ -3,4 +3,4 @@ selenium
 pymongo
 convertbng
 flask
-
+uwsgi
