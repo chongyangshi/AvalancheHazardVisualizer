@@ -12,10 +12,6 @@ from TerrainDB import mongodb_manager as terrain_db
 scriptDirectory = os.path.abspath(os.path.join(__file__, os.pardir))
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 
-# Initialise databases.
-forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
-terrain_dbm = terrain_db.MongoDBManager()
-
 # Load imagery configuration json.
 print("api_server: Server is loading overlay images...")
 overlaysData = utils.load_imagery_config()
@@ -27,7 +23,7 @@ try:
     data = overlaysData["avalanche_risk"]
     for overlay in data:
         level_code = int(data[overlay]["level_code"])
-        levels[level_code] = scriptDirectory + "/overlays/" + data[overlay]["level_image"]
+        levels[level_code] = scriptDirectory + "/Overlays/" + data[overlay]["level_image"]
     
     # Check that we have all levels from 0 to 5, and all files exist.
     levels_complete = False if False in [i in levels for i in range(-1,5)] else True
@@ -47,6 +43,12 @@ app = Flask(__name__)
 def get_risk(altitude, longitude, latitude):
     ''' Return a color-code-filled image containing the risk of the requested coordinate and altitude. '''
     
+    # Initialise databases, not done earlier due to pymongo's connect after fork requirement.
+    forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
+    terrain_dbm = terrain_db.MongoDBManager()
+
+    not_found_message = ""
+ 
     try:
         
         altitude_parsed = int(round(float(altitude)))
@@ -67,17 +69,20 @@ def get_risk(altitude, longitude, latitude):
         # Request aspect from terrain database.
         tile_aspect_lookup = terrain_dbm.get_nearest_aspect(latitude_parsed, longitude_parsed)
         if not tile_aspect_lookup: # No data returned
+            not_found_message = "Nearest aspect unavailable."
             abort(404)
         tile_aspect = tile_aspect_lookup["aspect"]
         
         # Request forecast from SAIS.
         location_name = geocoordinate_to_location.get_location_name(latitude_parsed, longitude_parsed).strip()
         if location_name == "":
+            not_found_message = "Location name unavailable."
             abort(404)
             
         # Just in case multiple location ids are returned, take first one.
         location_id_list = forecast_dbm.select_location_by_name(location_name)
         if not location_id_list:
+            not_found_message = "Location list empty."
             abort(404)
         location_id = int(location_id_list[0][0])
         location_forecast = forecast_dbm.lookup_newest_forecast_by_location_id(location_id, utils.get_facing_from_aspect(tile_aspect))
@@ -93,7 +98,7 @@ def get_risk(altitude, longitude, latitude):
         # Always return a result and not get held up by exception.
         if os.path.isfile(API_LOG):
             with open(API_LOG, "a") as log_file:
-                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + "\n")
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
 
         return send_file(levels[-1], mimetype='image/png')
 

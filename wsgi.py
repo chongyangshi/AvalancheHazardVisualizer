@@ -1,4 +1,4 @@
-import api_server
+from api_server import app
 
 if __name__ == "__main__":
-    api_server.app.run()
+    app.run(host="127.0.0.1", port=10001)
