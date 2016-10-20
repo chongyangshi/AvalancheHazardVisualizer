@@ -16,7 +16,7 @@ locations = {
         "start" : [-5.30671228924, 56.3790416259],
         "end" : [-4.52777017063, 56.8467419929]
     },
-    "Southern Carngorms" : {
+    "Southern Cairngorms" : {
         "start" : [-3.78318124708, 56.6893284359],
         "end" : [-2.97874558556, 57.1474411178]
     },
@@ -33,8 +33,8 @@ def get_location_name(latitude, longitude):
     
     found = False
     for l in locations:
-        if (longitude > l["start"][0]) and ((longitude < l["end"][0])):
-            if (latitude > l["start"][1]) and ((longitude < l["end"][1])):
+        if (longitude > locations[l]["start"][0]) and ((longitude < locations[l]["end"][0])):
+            if (latitude > locations[l]["start"][1]) and ((longitude < locations[l]["end"][1])):
                 return l
     
     if not found:

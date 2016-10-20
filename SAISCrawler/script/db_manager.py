@@ -11,7 +11,7 @@ class CrawlerDB:
         crawler to use.'''
 
     def __init__(self, dbFileName):
-        self.__CrawlerDBConnection = sqlite3.connect(dbFileName)
+        self.__CrawlerDBConnection = sqlite3.connect(dbFileName, check_same_thread=False)
         self.__CrawlerDBCursor = self.__CrawlerDBConnection.cursor()
 
 
@@ -135,8 +135,10 @@ class CrawlerDB:
 
         self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
             location_id = ? AND direction = ? ORDER BY date(forecast_date) DESC",\
-            (forecastID, direction,))
+            (locationID, direction,))
         forecast = self.__CrawlerDBCursor.fetchone()
+
+        return forecast
 
 
     def lookup_forecasts_by_location_id(self, locationID):

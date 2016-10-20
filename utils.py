@@ -41,12 +41,20 @@ def match_altitude_to_forecast(forecast, altitude):
     ''' Operate on the one record of SAIS forecast to see which altitude range
         does the altitude fit in. '''
     
-    if (altitude < forecast["lower_boundary"]):
+    lower_boundary = int(forecast[4])
+    middle_boundary = int(forecast[5])
+    upper_boundary = int(forecast[6])
+    lower_primary_colour = int(forecast[7])
+    lower_secondary_colour = int(forecast[8])
+    upper_primary_colour = int(forecast[9])
+    upper_secondary_colour = int(forecast[10])
+
+    if (altitude < lower_boundary):
         #Below snow line, no altitude-related risk.
         return 0
-    elif (altitude >= forecast["lower_boundary"]) and (altitude < forecast["middle_boundary"]):
+    elif (altitude >= lower_boundary) and (altitude < middle_boundary):
         return max(lower_primary_colour, lower_secondary_colour)
-    elif (altitude >= forecast["middle_boundary"]) and (altitude <= forecast["upper_boundary"]):
+    elif (altitude >= middle_boundary) and (altitude <= upper_boundary):
         return max(upper_primary_colour, upper_secondary_colour)
     else:
         #Above snow line, no altitude-related risk.
