@@ -35,6 +35,7 @@ def get_location_name(latitude, longitude):
     for l in locations:
         if (longitude > locations[l]["start"][0]) and ((longitude < locations[l]["end"][0])):
             if (latitude > locations[l]["start"][1]) and ((longitude < locations[l]["end"][1])):
+                found = True
                 return l
     
     if not found:
