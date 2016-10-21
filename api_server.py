@@ -11,6 +11,7 @@ from TerrainDB import mongodb_manager as terrain_db
 
 scriptDirectory = os.path.abspath(os.path.join(__file__, os.pardir))
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
+LOG_REQUESTS = False
 
 # Load imagery configuration json.
 print("api_server: Server is loading overlay images...")
@@ -91,12 +92,18 @@ def get_risk(altitude, longitude, latitude):
         
         # Return forecast colour.
         location_colour = utils.match_altitude_to_forecast(location_forecast, altitude_parsed)
+
+        # Log successful request if this is the case.
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
+            with open(API_LOG, "a") as log_file:
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": Forecast found: " + str(location_forecast) + ", final colour: " + str(location_colour)+ ", altitude: " + str(altitude_parsed) + ".\n")
+        
         return send_file(levels[location_colour], mimetype='image/png')
        
     except Exception as e:
         
         # Always return a result and not get held up by exception.
-        if os.path.isfile(API_LOG):
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
 
