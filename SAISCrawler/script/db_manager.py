@@ -150,9 +150,10 @@ class CrawlerDB:
         if self.select_location_by_id(locationID) == None:
             return None
 
-        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
-            location_id = ? ORDER BY date(forecast_date) DESC",\
-            (locationID,))
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE location_id = ? \
+            AND forecast_date = (SELECT MAX(forecast_date) FROM forecasts WHERE\
+            location_id = ?);",\
+            (locationID, locationID))
         forecast = self.__CrawlerDBCursor.fetchall()
 
         return forecast

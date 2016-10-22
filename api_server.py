@@ -46,8 +46,8 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
             abort(400)
         not_found_message = ""
 
-        # Preclude requests that are too large (limit is approximately 10 km each direction)
-        if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.02) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.01):
+        # Preclude requests that are too large.
+        if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
             not_found_message = "Request too large."
             abort(404)
         
