@@ -1,21 +1,6 @@
 import os
 import json
 
-def load_imagery_config():
-    ''' Load data from imagery configration file. '''
-    
-    scriptDirectory = os.path.abspath(os.path.join(__file__, os.pardir))
-    configFile = scriptDirectory + "/overlays.json"
-
-    if not os.path.isfile(configFile):
-        raise ValueError("The imagery configuration file overlays.json does not exist!")
-
-    with open(configFile) as overlaysFile:
-        overlaysData = json.load(overlaysFile)
-
-    return overlaysData
-
-
 def get_facing_from_aspect(aspect):
     ''' Convert an aspect value (0-360.0) to a direction, clockwise by ArcGIS definition. '''
 
