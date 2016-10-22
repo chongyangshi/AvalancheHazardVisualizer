@@ -102,7 +102,7 @@ class RasterReader:
         # Calculate the indices for the two corners, and validate them.
         x1, y1 = self.coordinate_to_index(id(self._height_map), initial_x, initial_y)
         xn, yn = self.coordinate_to_index(id(self._height_map), end_x, end_y)
-
+        
         if (not yn >= y1) or (not xn >= x1):
             return False
         
@@ -172,7 +172,7 @@ class RasterReader:
                 return False
             if (coord_y > self.__corners[raster_id]['upper_left_corner'][1]) or (coord_y < self.__corners[raster_id]['lower_left_corner'][1]):
                 return False
-
+            
             return True
 
         except KeyError:
@@ -230,6 +230,7 @@ if __name__ == "__main__":
         reader = RasterReader(height_map=sys.argv[1], aspect_map=sys.argv[2])
     else:
         reader = RasterReader()
+    # Simple tests.
     print(reader.get_limits("heights"))
     print(reader.get_limits("aspects"))
     print(reader.read_height(-4.0385629, 57.1513943))

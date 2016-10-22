@@ -1,6 +1,7 @@
 virtualenv
 selenium
-pymongo
 convertbng
 flask
 uwsgi
+gdal
+Pillow

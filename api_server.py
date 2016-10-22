@@ -1,81 +1,72 @@
+from __future__ import division
 import os
 import sys
+import StringIO
 from time import gmtime, strftime
 from flask import Flask, send_file, abort
+from PIL import Image
 
 import utils
 import geocoordinate_to_location
 from SAISCrawler.script import db_manager as forecast_db
 from SAISCrawler.script import utils as forecast_utils
-from TerrainDB import mongodb_manager as terrain_db
+from GeoData import raster_reader 
 
-scriptDirectory = os.path.abspath(os.path.join(__file__, os.pardir))
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
 
-# Load imagery configuration json.
-print("api_server: Server is loading overlay images...")
-overlaysData = utils.load_imagery_config()
-
-# Load overlay images.
-try:
-    
-    levels = {}
-    data = overlaysData["avalanche_risk"]
-    for overlay in data:
-        level_code = int(data[overlay]["level_code"])
-        levels[level_code] = scriptDirectory + "/Overlays/" + data[overlay]["level_image"]
-    
-    # Check that we have all levels from 0 to 5, and all files exist.
-    levels_complete = False if False in [i in levels for i in range(-1,5)] else True
-    levels_all_exist = False if False in [os.path.isfile(levels[i]) for i in range(-1,5)] else True
-    
-    if (not levels_complete) or (not levels_all_exist):
-        print("api_server: error reading overlays.json, which may be incomplete.")
-        sys.exit(1)
-
-except ValueError:
-    print("api_server: error reading overlays.json.")
+# Initialise forecast database and raster reader.
+forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
+raster = raster_reader.RasterReader()
 
 # Main API app.
 app = Flask(__name__)
 
-@app.route('/imagery/api/v1.0/avalanche_risks/<string:altitude>/<string:longitude>/<string:latitude>', methods=['GET'])
-def get_risk(altitude, longitude, latitude):
-    ''' Return a color-code-filled image containing the risk of the requested coordinate and altitude. '''
-    
-    # Initialise databases, not done earlier due to pymongo's connect after fork requirement.
-    forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
-    terrain_dbm = terrain_db.MongoDBManager()
+@app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
+def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final):
+    ''' Return a color-code image containing the risk of the requested coordinate and altitude area. '''
 
     not_found_message = ""
  
     try:
         
-        altitude_parsed = int(round(float(altitude)))
-
-        # Impossible altitudes.
-        if (altitude_parsed < 0) or (altitude_parsed > 10000):
-            return send_file(levels[-1], mimetype='image/png')
-        
-        longitude_parsed = float(longitude)
-        latitude_parsed = float(latitude)
+        upper_left_corner = map(float, [longitude_initial, latitude_initial])
+        lower_right_corner = map(float, [longitude_final, latitude_final])
+        center_coordinates = [sum(e)/len(e) for e in zip(*[upper_left_corner, lower_right_corner])]
         
         # Impossible geodetic coordinates.
-        if (longitude_parsed < -180.0) or (longitude_parsed > 180.0):
+        not_found_message = "Invalid input data."
+        if (upper_left_corner[0] < -180.0) or (upper_left_corner[0] > 180.0):
             abort(400)
-        if (latitude_parsed < -90.0) or (latitude_parsed > 90.0):
+        if (upper_left_corner[1] < -90.0) or (upper_left_corner[1] > 90.0):
             abort(400)
-        
-        # Request aspect from terrain database.
-        tile_aspect_lookup = terrain_dbm.get_nearest_aspect(latitude_parsed, longitude_parsed)
-        if not tile_aspect_lookup: # No data returned
-            not_found_message = "Nearest aspect unavailable."
+        if (lower_right_corner[0] < -180.0) or (lower_right_corner[0] > 180.0):
+            abort(400)
+        if (lower_right_corner[1] < -90.0) or (lower_right_corner[1] > 90.0):
+            abort(400)
+        not_found_message = ""
+
+        # Preclude requests that are too large (limit is approximately 10 km each direction)
+        if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.02) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.01):
+            not_found_message = "Request too large."
             abort(404)
-        tile_aspect = tile_aspect_lookup["aspect"]
+        
+        # Request heights and aspects from the raster.
+        heights_matrix = raster.read_heights(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        aspects_matrix = raster.read_aspects(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        # If no data returned.
+        if (heights_matrix is False) or (aspects_matrix is False): 
+            not_found_message = "Heights or aspects out of range."
+            abort(400)
+        if (len(heights_matrix) <= 0) or (len(aspects_matrix) <= 0): 
+            not_found_message = "Heights or aspects too large to request."
+            abort(404)
+        
+        matrix_height = len(heights_matrix)
+        matrix_width = len(heights_matrix[0])
         
         # Request forecast from SAIS.
-        location_name = geocoordinate_to_location.get_location_name(latitude_parsed, longitude_parsed).strip()
+        location_name = geocoordinate_to_location.get_location_name(center_coordinates[0], center_coordinates[1]).strip()
         if location_name == "":
             not_found_message = "Location name unavailable."
             abort(404)
@@ -86,19 +77,34 @@ def get_risk(altitude, longitude, latitude):
             not_found_message = "Location list empty."
             abort(404)
         location_id = int(location_id_list[0][0])
-        location_forecast = forecast_dbm.lookup_newest_forecast_by_location_id(location_id, utils.get_facing_from_aspect(tile_aspect))
-        if location_forecast == None:
+        
+        # Look up the most recent forecasts for the location.
+        location_forecasts = forecast_dbm.lookup_newest_forecasts_by_location_id(location_id)
+        if location_forecasts == None:
+            not_found_message = "Forecast for location not found."
             abort(400)
+        location_forecast_list = list(location_forecasts)
         
-        # Return forecast colour.
-        location_colour = utils.match_altitude_to_forecast(location_forecast, altitude_parsed)
+        # Return forecast colours.
+        location_colours = []
+        for i in range(0, len(heights_matrix)):
+            colour_row = []
+            for j in range(0, len(heights_matrix[i])):
+                colour_row.append(utils.match_aspect_altitude_to_forecast(location_forecast_list, aspects_matrix[i][j], heights_matrix[i][j]))
+            location_colours.append(colour_row)
+        
+        # Build the image according to colours.
+        # Create an empty image with one pixel for each point.
+        return_image = Image.new("RGBA", (matrix_width, matrix_height), None)
+        return_image_pixels = return_image.load()
+        for i in range(return_image.size[0]):   
+            for j in range(return_image.size[1]):
+                return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i]) # 2D array is in inversed order of axis.
+        image_object = StringIO.StringIO() 
+        return_image.save(image_object, format="png") 
+        image_object.seek(0)
 
-        # Log successful request if this is the case.
-        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
-            with open(API_LOG, "a") as log_file:
-                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": Forecast found: " + str(location_forecast) + ", final colour: " + str(location_colour)+ ", altitude: " + str(altitude_parsed) + ".\n")
-        
-        return send_file(levels[location_colour], mimetype='image/png')
+        return send_file(image_object, mimetype='image/png')
        
     except Exception as e:
         
@@ -106,8 +112,14 @@ def get_risk(altitude, longitude, latitude):
         if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
-
-        return send_file(levels[-1], mimetype='image/png')
+        
+        # Return an empty image.
+        return_image = Image.new("RGBA", (1, 1), None)
+        image_object = StringIO.StringIO() 
+        return_image.save(image_object, format="png")
+        image_object.seek(0)
+        
+        return send_file(image_object, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)

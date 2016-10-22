@@ -37,10 +37,23 @@ def get_facing_from_aspect(aspect):
     return result
 
 
-def match_altitude_to_forecast(forecast, altitude):
-    ''' Operate on the one record of SAIS forecast to see which altitude range
-        does the altitude fit in. '''
+def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
+    ''' Operate on one list of SAIS forecasts in the same day
+        to see which risk altitude range does the altitude fit 
+        in. '''
     
+    # If forecasts not available.
+    if len(forecasts) <= 0:
+        return -1
+    
+    # Validate aspect.
+    if not (0 <= aspect <= 360):
+        return -1
+    forecast_search = [i for i in forecasts if str(i[3]) == get_facing_from_aspect(aspect)]
+    if len(forecast_search) < 1:
+        return -1
+    forecast = forecast_search[0]
+
     lower_boundary = int(forecast[4])
     middle_boundary = int(forecast[5])
     upper_boundary = int(forecast[6])
@@ -59,3 +72,17 @@ def match_altitude_to_forecast(forecast, altitude):
     else:
         #Above snow line, no altitude-related risk.
         return 0
+
+
+def risk_code_to_colour(risk_code):
+    ''' Return an RGB 3-tuple for the colour represented by the risk_code. '''
+
+    # [None: Gray, Low: Green, Moderate: Light Yellow, Considerable: Light Orange, High: Light Red, Very High: Dark Red]
+    risks = [(192,192,192), (153,255,153), (255,255,153), (255,178,102), (255,102,102), (102,0,0)]
+    
+    if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
+        return (255,255,255,0)
+    else:
+        # Add a 50% transparency channel (255/2)
+        risks[risk_code] = risks[risk_code] + (127,)
+        return risks[risk_code]

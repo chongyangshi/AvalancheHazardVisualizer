@@ -140,6 +140,23 @@ class CrawlerDB:
 
         return forecast
 
+    def lookup_newest_forecasts_by_location_id(self, locationID):
+        ''' Lookup the most recent forecasts for all directions for a given
+            location_id, returns None if none exist. '''
+
+        if locationID <= 0:
+            return None
+
+        if self.select_location_by_id(locationID) == None:
+            return None
+
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            location_id = ? ORDER BY date(forecast_date) DESC",\
+            (locationID,))
+        forecast = self.__CrawlerDBCursor.fetchall()
+
+        return forecast
+
 
     def lookup_forecasts_by_location_id(self, locationID):
         ''' Lookup all forecasts of a given location by location_id. Returns
