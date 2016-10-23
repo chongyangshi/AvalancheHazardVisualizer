@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="description" content="Visualize worldwide, high-resolution terrain.">
+    <meta name="cesium-sandcastle-labels" content="Tutorials, Showcases">
+    <title>Avalanche Risk Visualizor</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script type="text/javascript" src="../../../ThirdParty/requirejs-2.1.20/require.js"></script>
+    <script type="text/javascript">
+    require.config({
+        baseUrl : '../../../Source',
+        waitSeconds : 60
+    });
+    </script>
+</head>
+<body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html">
+<style>
+    @import url(../templates/bucket.css);
+</style>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar">
+<div id="terrainMenu"></div>
+<div id="zoomButtons"></div>
+<div id="toggleLighting"></div>
+<div id="sampleButtons"></div>
+<table><tbody>
+    <tr>
+        <td>Enable fog</td>
+        <td><input type="checkbox" data-bind="checked: fogEnabled"></td>
+    </tr>
+</tbody></table>
+</div>
+<script id="cesium_sandcastle_script">
+function startup(Cesium) {
+    'use strict';
+//Sandcastle_Begin
+Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
+
+var west = -4.956405;
+var south = 56.742135;
+var east = -4.894101;
+var north = 56.755276;
+
+var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
+
+Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
+
+var viewer = new Cesium.Viewer('cesiumContainer', {
+    animation : false,
+    timeline: false,
+    homeButton : false,
+    navigationHelpButton : false,
+    baseLayerPicker : false
+});
+
+var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://assets.agi.com/stk-terrain/world',
+    requestWaterMask : true,
+    requestVertexNormals : true
+});
+viewer.terrainProvider = cesiumTerrainProviderMeshes;
+
+var OSCredit = new Cesium.Credit("Ordnance Survey (GB) - Provided By EDINA Digimap Ordnance Survey Service");
+var OS5GTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/G',
+    credit : OSCredit,
+});
+OS5GTerrainProviderMeshes.cameraPos = [56.63, -4.95];
+var OS5LTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/L',
+    credit : OSCredit,
+});
+OS5LTerrainProviderMeshes.cameraPos = [56.75, -4.92];
+var OS5NCTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/NC',
+    credit : OSCredit,
+});
+OS5NCTerrainProviderMeshes.cameraPos = [57.11, -3.65];
+var OS5SCTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/SC',
+    credit : OSCredit,
+});
+OS5SCTerrainProviderMeshes.cameraPos = [57.06, -3.66];
+var OS5TTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/T',
+    credit : OSCredit,
+});
+OS5TTerrainProviderMeshes.cameraPos = [57.56, -5.49];
+var OS5CMTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
+    url : 'https://terrain.ebornet.com/tilesets/CM',
+    credit : OSCredit,
+});
+OS5CMTerrainProviderMeshes.cameraPos = [56.95, -4.60];
+
+var SAISCredit = new Cesium.Credit("Scottish Avalanche Information Service");
+var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
+    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    hasAlphaChannel : true,
+    maximumLevel : 15,
+    credit: SAISCredit
+});
+var layers = viewer.scene.imageryLayers;
+layers.addImageryProvider(avalanche_risk_map);
+
+Sandcastle.addToolbarMenu([{
+    text : 'OS5 Glencoe Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5GTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+} ,  {
+    text : 'OS5 Lochaber Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5LTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+} ,  {
+    text : 'OS5 Torridon Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5TTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+} ,  {
+    text : 'OS5 Creag Meagaidh Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5CMTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+} ,  {
+    text : 'OS5 Northern Cairngorms Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5NCTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+} ,  {
+    text : 'OS5 Southern Cairngorms Terrain',
+    onselect : function() {
+        viewer.terrainProvider = OS5SCTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+        viewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[1]), Cesium.Math.toRadians(viewer.terrainProvider.cameraPos[0]) , 2500),
+            duration: 1.0
+        });
+    }
+}, {
+    text : 'STK World Terrain',
+    onselect : function() {
+        viewer.terrainProvider = cesiumTerrainProviderMeshes;
+        viewer.scene.globe.enableLighting = false;
+    }
+}], 'terrainMenu');
+
+
+var viewModel = { fogEnabled : true };
+Cesium.knockout.track(viewModel);
+
+
+var toolbar = document.getElementById('toolbar');
+Cesium.knockout.applyBindings(viewModel, toolbar);
+Cesium.knockout.getObservable(viewModel, 'fogEnabled').subscribe(function(newValue) {
+    viewer.scene.fog.enabled = newValue;
+});
+viewModel.enabled = viewer.scene.fog.enabled; 
+//Sandcastle_End
+    Sandcastle.finishedLoading();
+}
+if (typeof Cesium !== "undefined") {
+    startup(Cesium);
+} else if (typeof require === "function") {
+    require(["Cesium"], startup);
+}
+</script>
+</body>
+</html>
