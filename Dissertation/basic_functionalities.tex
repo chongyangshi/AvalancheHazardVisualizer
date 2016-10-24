@@ -4,13 +4,28 @@
 \usepackage{graphicx}			
 \usepackage{amssymb}
 \usepackage{hyperref}
+\usepackage{listings}
 \usepackage{siunitx}
 \usepackage{cite}
 \usepackage{url}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage[parfill]{parskip}
 \setlength{\headsep}{5pt}
 \graphicspath{ {images/} }
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fixed,
+  fontadjust=true,
+  basewidth=0.5em
+}
 
+\definecolor{notapplicable}{RGB}{192,192,192}
+\definecolor{low}{RGB}{153,255,153}
+\definecolor{moderate}{RGB}{255,255,153}
+\definecolor{considerable}{RGB}{255,178,102}
+\definecolor{high}{RGB}{255,102,102}
+\definecolor{veryhigh}{RGB}{102,0,0}
 
 \title{\vspace{-1.6cm}Description of the Basic System}
 \author{\textit{An app for visualisation of avalanche hazard}}
@@ -18,19 +33,19 @@
 \begin{document}
 \maketitle
 
-\section{Structure of the Visualisation System}
+\section{Structure of the Basic System}
 
 The application developed for this project consists of user-facing programs (represented by ovals), servers providing real-time data (represented by rectangles) and data computation programs (represented by hexagons), as shown in the followed system diagram.
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.3]{System.png}
-\caption{A diagram illustrating the structure of the visualisation system.}
+\caption{A diagram illustrating the structure of the basic visualisation system.}
 \end{figure}
 
 In order to properly process and visualise data from various sources to the user, several new tools have been developed to complete the tool chain, which also includes a number of existing open source tools, such as GDAL\cite{GDAL} and the Cesium Terrain Builder \cite{cesium-terrain-builder}. The data processing and visualisation processes will be covered in more detail in the next few sections.
 
-\section{Procurement and Processing of Raster Data}
+\section{Procurement and Processing of Terrain Raster Data}
 	For the basic system, height and terrain aspect data is required for geographical areas of visualisation. Although the application is developed based on the availability of avalanche risk forecasts for Scottish Highlands, with the appropriate avalanche risk forecasts and terrain raster data, this application can be trivially adapted for other mountainous areas.
 	
 	\subsection{Choice of Data Source}
@@ -44,21 +59,21 @@ In order to properly process and visualise data from various sources to the user
 		
 	\subsection{Processing of Raster Data} \label{subsec:rasterdata}
 		Differing from EU-DEM, the Ordnance Survey Data is supplied on a tile-by-tile basis. Therefore to improve processing efficiency, the first part of the processing procedures is to merge the data into a single GeoTIFF \cite{geotiff} file with the GDAL tool:
-		\begin{verbatim}
-			find ./OS5/ -name '*.tif' | xargs gdal_merge.py -of GTiff -o OS5_Merged.tif 
-		\end{verbatim}
+		\begin{lstlisting}[breaklines]
+find ./OS5/ -name '*.tif' | xargs gdal_merge.py -of GTiff -o OS5_Merged.tif 
+		\end{lstlisting}
 		
 		The merged DEM data is then reprojected by GDAL into the WGS84 geodetic system \cite{wgs84} that is used by the majority of mapping and navigation systems:
-		\begin{verbatim}
-			gdal_translate -a_srs EPSG:4326 -of GTiff OS5_Merged.tif OS5_WGS84.tif
-		\end{verbatim}
+		\begin{lstlisting}[breaklines]
+gdal_translate -a_srs EPSG:4326 -of GTiff OS5_Merged.tif OS5_WGS84.tif
+		\end{lstlisting}
 		
 		The reprojected elevation raster \textbf{OS5\_WGS84.tif} can now be used to look up altitude for each point in the geographical area covered by the DEM Data. However, in order to obtain a dataset of terrain aspects for each point within the same boundaries and reference system, it is also necessary to produce an aspect raster, \textbf{OS5\_WGS84\_Aspects.tif} from the elevation raster:
-		\begin{verbatim}
-			gdaldem aspect OS5_WGS84.tif OS5_WGS84_Aspects.tif -of GTiff
-		\end{verbatim}
+		\begin{lstlisting}[breaklines]
+gdaldem aspect OS5_WGS84.tif OS5_WGS84_Aspects.tif -of GTiff
+		\end{lstlisting}
 		
-	\subsection{Retrieval of Processed Terrain Data}
+	\subsection{Retrieval of Processed Terrain Data} \label{subsec:rasterretrieval}
 		Two potential designs have been considered for the implementation of terrain data retrieval: a direct raster lookup system or a database-driven system. 
 		
 		A brief attempt has been made to build a key-value storage based on MongoDB\footnote{MongoDB: https://www.mongodb.com/}, with geodetic coordinates as key and taking advantage of MongoDB's geospatial system \cite{mongodb-spatial}. However, further evaluations found that although this system provides great flexibility in modifying stored data, in addition to a storage space overhead of approximately five fold, the performance of batch retrieval is insufficient for the data size involved in live operation. Therefore, this implementation has been dropped in favour of the direct raster lookup system.
@@ -115,9 +130,9 @@ In order to properly process and visualise data from various sources to the user
 		The 3D terrain model for Cesium is organised in the \textit{heightmap-1.0}\cite{heightmap} format. If the STK World Terrain is used, no model construction is required, as the model is directly available (and default in Cesium) from the STK World Terrain Server. 
 		
 		To construct a 3D terrain model from another data source, such as OS5, the Cesium Terrain Builder tool can convert a GeoTIFF raster into the \textit{heightmap-1.0} format:
-		\begin{verbatim}
-			ctb-tile --output-dir ./heightmap/ --start-zoom 18 --end-zoom 0 sourceRaster.tif
-		\end{verbatim}
+		\begin{lstlisting}[breaklines]
+ctb-tile --output-dir ./heightmap/ --start-zoom 18 --end-zoom 0 sourceRaster.tif
+		\end{lstlisting}
 		
 		However, due to the need of resampling data from the source raster, when the raster size is large, the data index can easily overflow at lower zoom levels, where the ranges of tile indices are vast.  An index overflow will trigger an error that prevents the terrain building process from completion, often after hours of computations on a high performance computer. 
 		
@@ -134,14 +149,41 @@ In order to properly process and visualise data from various sources to the user
 		\caption{\label{fig:UI}The user interface of the basic system in operation.}
 		\end{figure}
 		
-		
 		As Cesium supports switching between terrain model sources without reloading the entire JavaScript terrain viewer, both our self-hosted OS5 terrain models and the model from the STK World Terrain can be loaded by the user through selecting from the drop-down menu at top left corner of the application. 
 		
-\section{API Interfacing of \textit{GeoData} and the User Interface} \label{sec:APIServer}
+\section{The Imagery API Server} \label{sec:APIServer}
 	
+	To provide the avalanche hazard imagery layer shown in Figure \ref{fig:UI}, a new API server has been programmed with Python and the Flask framework \footnote{http://flask.pocoo.org/} to produce and return hazard imagery based on SAIS forecast data and terrain data.
 	
+	\subsection{API Request from Cesium to the API Server}
+		As Cesium displays terrain models in tiles of $65 \times $65 vertices, the geodetic coordinates of the four corners of each tile are known. In particular we use the north west corner (``initial'', upper-left) and south east corner (``Final'', lower-right) to construct an API request with Cesium's \textit{UrlTemplateImageryProvider} \cite{urltemplate} class to automatically download a PNG image with 50\% transparency, containing the hazard imagery overlay for that tile.
 		
+		The API GET request is in the format as follows, with the two coordinates separated into the longitudes and latitudes, and passed as strings:
+		\begin{lstlisting}[breaklines]
+/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>
+		\end{lstlisting}
+	
+	\subsection{The API Server Handling the Request}
+		Upon receiving a request from a Cesium client, the API server would call the handlers from the \textit{GeoData} raster interface as described in \ref{subsec:rasterretrieval} with the geodetic coordinate data received. The validation of and information retrieval based on the coordinates were described in Figure \ref{fig:retrieval}.
 		
+		If the client sends in a request that is too large in size (in terms of geographical area covered), the server will not attempt a data retrieval from the raster to prevent slowing down. The limit is current set at 0.03 in longitude, 0.02 in latitude, and no more than $9999 \times $9999 data points requested. 
+		
+		When an array of data points is returned from the raster interface, a half-transparent 50\% PNG image will be constructed with the Pillow library \footnote{https://python-pillow.org/} from the two-dimensional array. Each row of the array provides the colouring for a column of pixels of the image, and vice versa. The colouring of pixels is based on the returned risk level, and as follows:
+		\begin{figure}[h]
+		\centering
+		\begin{tabular}{ | c | c | }
+  		\hline
+		Risk Level & Description and Colour \\ \hline   
+  		0 & \cellcolor{notapplicable!25}Risk Not Applicable \\ \hline
+		1 & \cellcolor{low!50}Low Risk \\ \hline
+		2 & \cellcolor{moderate!50}Moderate Risk \\ \hline
+		3 & \cellcolor{considerable!50}Considerable Risk \\ \hline
+		4 & \cellcolor{high!50}High Risk \\ \hline
+		5 & \cellcolor{veryhigh!50}Very High Risk \\ \hline
+		\end{tabular}
+		\end{figure}
+		
+		With the image returned to the client, the API request is complete. A typical Cesium terrain view will generate hundreds of these API requests. The API server is shown to be able to quickly process these requests to produce minimal delays while the user browses the terrain model, when the client uses a well-performing mobile device to render the imagery quickly.
 		
 \bibliographystyle{IEEEtran}
 \small{\bibliography{project}}
