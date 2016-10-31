@@ -111,7 +111,8 @@ var aspect_map = new Cesium.UrlTemplateImageryProvider({
     credit: OSCredit
 });
 var layers = viewer.scene.imageryLayers;
-layers.addImageryProvider(avalanche_risk_map);
+var avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+var aspect_layer = null;
 
 Sandcastle.addToolbarMenu([{
     text : 'OS5 Glencoe Terrain',
@@ -185,14 +186,14 @@ Sandcastle.addToolbarMenu([{
 Sandcastle.addToolbarMenu([{
     text : 'View Avalanche Risk Map',
     onselect : function() {
-        layers.addImageryProvider(avalanche_risk_map);
-        layers.remove(aspect_map, false);
+        avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+        layers.remove(aspect_layer, true);
     }
 }, {
     text : 'View Terrain Aspect Map',
     onselect : function() {
-        layers.addImageryProvider(aspect_map);
-        layers.remove(avalanche_risk_map, false);
+        aspect_layer = layers.addImageryProvider(aspect_map);
+        layers.remove(avalanche_layer, true);
     }
 }], 'aspectMenu');
 

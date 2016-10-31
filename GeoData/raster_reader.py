@@ -154,8 +154,8 @@ class RasterReader:
         ''' Convert WGS84 coordinates into raster indices. '''
         
         transform_info = self.__corners[raster_id]['corner_info']
-        x = round((coord_x - transform_info[0]) / transform_info[1])
-        y = round((coord_y - transform_info[3]) / transform_info[5])
+        x = int(round((coord_x - transform_info[0]) / transform_info[1]))
+        y = int(round((coord_y - transform_info[3]) / transform_info[5]))
 
         return x, y
 
