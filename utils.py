@@ -71,3 +71,14 @@ def risk_code_to_colour(risk_code):
         # Add a 50% transparency channel (255/2)
         risks[risk_code] = risks[risk_code] + (127,)
         return risks[risk_code]
+
+
+def aspect_to_grayscale(aspect):
+    ''' Convert 0-360 degrees aspect to 0-255 grayscale. '''
+
+    if (aspect < 0) or (aspect > 360): #Invalid data.
+        return (255,255,255,0)
+    else:
+        converted_colour = round(aspect / 360 * 255)
+        return (converted_colour, converted_colour, converted_colour, 75) 
+        # Black/gray is uniform across all 3 channels, we use 75% capacity.

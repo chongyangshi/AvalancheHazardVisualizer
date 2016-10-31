@@ -121,5 +121,73 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         
         return send_file(image_object, mimetype='image/png')
 
+
+@app.route('/imagery/api/v1.0/terrain_aspects/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
+def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_final):
+    ''' Return a grayscale map of terrain aspects, with 0-360 degrees mapped to 0-255 color levels. '''
+
+    not_found_message = ""
+ 
+    try:
+        
+        upper_left_corner = map(float, [longitude_initial, latitude_initial])
+        lower_right_corner = map(float, [longitude_final, latitude_final])
+        center_coordinates = [sum(e)/len(e) for e in zip(*[upper_left_corner, lower_right_corner])]
+        
+        # Impossible geodetic coordinates.
+        not_found_message = "Invalid input data."
+        if (upper_left_corner[0] < -180.0) or (upper_left_corner[0] > 180.0):
+            abort(400)
+        if (upper_left_corner[1] < -90.0) or (upper_left_corner[1] > 90.0):
+            abort(400)
+        if (lower_right_corner[0] < -180.0) or (lower_right_corner[0] > 180.0):
+            abort(400)
+        if (lower_right_corner[1] < -90.0) or (lower_right_corner[1] > 90.0):
+            abort(400)
+        not_found_message = ""
+
+        # Preclude requests that are too large.
+        if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
+            not_found_message = "Request too large."
+            abort(404)
+        
+        # Request aspects from the raster.
+        aspects_matrix = raster.read_aspects(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        # If no data returned.
+        if (aspects_matrix is False) or (len(aspects_matrix) <= 0): 
+            not_found_message = "Heights or aspects out of range or too large to request."
+            abort(400)
+
+        matrix_height = len(aspects_matrix)
+        matrix_width = len(aspects_matrix[0])
+        
+        # Build the image according to colours.
+        # Create an empty image with one pixel for each point.
+        return_image = Image.new("RGBA", (matrix_width, matrix_height), None)
+        return_image_pixels = return_image.load()
+        for i in range(return_image.size[0]):   
+            for j in range(return_image.size[1]):
+                return_image_pixels[i,j] = utils.aspect_to_grayscale(aspects_matrix[j][i]) # 2D array is in inversed order of axis.
+        image_object = StringIO.StringIO() 
+        return_image.save(image_object, format="png") 
+        image_object.seek(0)
+
+        return send_file(image_object, mimetype='image/png')
+       
+    except Exception as e:
+        
+        # Always return a result and not get held up by exception.
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
+            with open(API_LOG, "a") as log_file:
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
+        
+        # Return an empty image.
+        return_image = Image.new("RGBA", (1, 1), None)
+        image_object = StringIO.StringIO() 
+        return_image.save(image_object, format="png")
+        image_object.seek(0)
+        
+        return send_file(image_object, mimetype='image/png')
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -23,6 +23,7 @@
 <div id="loadingOverlay"><h1>Loading...</h1></div>
 <div id="toolbar">
 <div id="terrainMenu"></div>
+<div id="aspectMenu"></div>
 <div id="zoomButtons"></div>
 <div id="toggleLighting"></div>
 <div id="sampleButtons"></div>
@@ -103,6 +104,12 @@ var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
     maximumLevel : 15,
     credit: SAISCredit
 });
+var aspect_map = new Cesium.UrlTemplateImageryProvider({
+    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/terrain_aspects/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    hasAlphaChannel : true,
+    maximumLevel : 15,
+    credit: OSCredit
+});
 var layers = viewer.scene.imageryLayers;
 layers.addImageryProvider(avalanche_risk_map);
 
@@ -173,6 +180,21 @@ Sandcastle.addToolbarMenu([{
         viewer.scene.globe.enableLighting = false;
     }
 }], 'terrainMenu');
+
+
+Sandcastle.addToolbarMenu([{
+    text : 'View Avalanche Risk Map',
+    onselect : function() {
+        layers.addImageryProvider(avalanche_risk_map);
+        layers.remove(aspect_map, false);
+    }
+}, {
+    text : 'View Terrain Aspect Map',
+    onselect : function() {
+        layers.addImageryProvider(aspect_map);
+        layers.remove(avalanche_risk_map, false);
+    }
+}], 'aspectMenu');
 
 
 var viewModel = { fogEnabled : true };
