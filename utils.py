@@ -79,6 +79,5 @@ def aspect_to_grayscale(aspect):
     if (aspect < 0) or (aspect > 360): #Invalid data.
         return (255,255,255,0)
     else:
-        converted_colour = int(round(aspect / 360 * 255))
-        return (converted_colour, converted_colour, converted_colour, 75) 
-        # Black/gray is uniform across all 3 channels, we use 75% capacity.
+        converted_capacity = int(round(aspect / 360 * 255))
+        return (255, 102, 102) + (converted_capacity, ) 
