@@ -10,14 +10,15 @@ import utils
 import geocoordinate_to_location
 from SAISCrawler.script import db_manager as forecast_db
 from SAISCrawler.script import utils as forecast_utils
-from GeoData import raster_reader 
+from GeoData import raster_reader, raster_reader_bng
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
+SPATIAL_READER = raster_reader_bng
 
 # Initialise forecast database and raster reader.
 forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
-raster = raster_reader.RasterReader()
+raster = SPATIAL_READER.RasterReader()
 
 # Main API app.
 app = Flask(__name__)
