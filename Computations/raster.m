@@ -2,6 +2,7 @@ SOURCE_RASTER = 'NM98NESEAspects.tif';
 TARGET_RASTER = 'NM98NESEAspectsFitted.tif';
 
 % Disable warnings.
+parpool;
 pctRunOnAll warning off;
 
 % Read input raster and initialize.
