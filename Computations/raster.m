@@ -26,7 +26,8 @@ parfor x = 2:x_max
 end
 
 % Write output raster.
-geotiffwrite(TARGET_RASTER, output, raster_info);
+CoordRefSysCode = 27700;
+geotiffwrite(TARGET_RASTER, output, raster_info, 'CoordRefSysCode', CoordRefSysCode);
 
 % Re-enable warnings.
 pctRunOnAll warning on;
