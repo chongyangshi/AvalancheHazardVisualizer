@@ -1,5 +1,5 @@
-SOURCE_RASTER = 'NM98NESEAspects.tif';
-TARGET_RASTER = 'NM98NESEAspectsFitted.tif';
+SOURCE_RASTER = 'NM98Aspects.tif';
+TARGET_RASTER = 'NM98AspectsFitted.tif';
 
 % Disable warnings.
 parpool;
@@ -11,7 +11,7 @@ x_list = 1:size(rst,1);
 y_list = 1:size(rst,2);
 x_max = size(x_list,2) - 1;
 y_max = size(y_list,2) - 1;
-output = zeros(size(x_list, 2), size(y_list, 2));
+output = rst;
 
 % Find neighbours of each point that is not on an edge, and choose the
 % points that have all valid neighbours (non-zero), fit a surface for the
