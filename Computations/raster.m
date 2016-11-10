@@ -1,5 +1,5 @@
-SOURCE_RASTER = 'NM98Aspects.tif';
-TARGET_RASTER = 'NM98AspectsFitted.tif';
+SOURCE_RASTER = '/mnt/Shared/OS5/NN14152425Aspects.tif';
+TARGET_RASTER = '/mnt/Shared/OS5/NN14152425AspectsFitted.tif';
 
 % Disable warnings.
 parpool;
@@ -12,6 +12,10 @@ y_list = 1:size(rst,2);
 x_max = size(x_list,2) - 1;
 y_max = size(y_list,2) - 1;
 output = rst;
+
+% Start timer.
+disp('Surface fittings started...');
+tic;
 
 % Find neighbours of each point that is not on an edge, and choose the
 % points that have all valid neighbours (non-zero), fit a surface for the
@@ -26,9 +30,15 @@ parfor x = 2:x_max
     end
 end
 
+% Stop timer and report performance.
+seconds = toc;
+fprintf('Surface fitting completed in %f seconds.\r', seconds);
+disp('Writing output to the target raster...');
+
 % Write output raster.
 CoordRefSysCode = 27700;
 geotiffwrite(TARGET_RASTER, output, raster_info, 'CoordRefSysCode', CoordRefSysCode);
+disp('Output written to the target raster, all done.');
 
 % Re-enable warnings.
 pctRunOnAll warning on;
