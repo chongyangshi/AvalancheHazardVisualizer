@@ -116,9 +116,9 @@ def aspect_to_rbg(aspect):
             else:
                 colours.append(CHANNEL_COLOURINGS[channel][segment][0] + copysign(1, CHANNEL_COLOURINGS[channel][segment][1] - CHANNEL_COLOURINGS[channel][segment][0]) * offset)
 
-        #Postprocessing: 75% capacity, 25% transparency.
+        #Postprocessing: 50% capacity, 50% transparency.
         colours = map(lambda x: int(round(x)), colours)
-        colours.append(191)
+        colours.append(127)
         colours = tuple(colours)
 
         return colours
