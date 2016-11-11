@@ -1,5 +1,18 @@
+from __future__ import division
+
 import os
 import json
+from collections import OrderedDict
+from math import copysign
+
+# Conversion table for aspect 0-360 degrees to RGB values, represented by linear changes in six segments.
+CHANNEL_RANGE = 255
+CHANNEL_COLOURINGS = {
+    "R" : [(CHANNEL_RANGE, CHANNEL_RANGE), (CHANNEL_RANGE, 0), (0, 0), (0, 0), (0, CHANNEL_RANGE), (CHANNEL_RANGE, CHANNEL_RANGE)],
+    "G" : [(0, CHANNEL_RANGE), (CHANNEL_RANGE, CHANNEL_RANGE), (CHANNEL_RANGE, CHANNEL_RANGE), (CHANNEL_RANGE, 0), (0, 0), (0, 0)],
+    "B" : [(0, 0), (0, 0), (0, CHANNEL_RANGE), (CHANNEL_RANGE, CHANNEL_RANGE), (CHANNEL_RANGE, CHANNEL_RANGE), (CHANNEL_RANGE, 0)]
+}
+
 
 def get_facing_from_aspect(aspect):
     ''' Convert an aspect value (0-360.0) to a direction, clockwise by ArcGIS definition. '''
@@ -81,3 +94,31 @@ def aspect_to_grayscale(aspect):
     else:
         converted_capacity = int(round(aspect / 360 * 255))
         return (255, 102, 102) + (converted_capacity, ) 
+
+
+def aspect_to_rbg(aspect):
+    ''' Convert aspect value to a spectrum of RGB colours. '''
+
+    if (aspect < 0) or (aspect > 360): #Invalid data.
+        return (255,255,255,0)
+    elif (aspect == 0) or (aspect == 360): # Special case
+        return (255, 0, 0)
+    else:
+        # Calculate the weird RGB coding.
+        aspect = int(round(aspect))
+        segment = aspect // 60
+        partition = aspect % 60
+        offset = partition / 60.0 * 255.0
+        colours = ()
+
+        for channel in CHANNEL_COLOURINGS:
+            if CHANNEL_COLOURINGS[channel][segment][1] == CHANNEL_COLOURINGS[channel][segment][0]:
+                colours += (CHANNEL_COLOURINGS[channel][segment][1],)
+            else:
+                colours += (CHANNEL_COLOURINGS[channel][segment][0] + copysign(1, CHANNEL_COLOURINGS[channel][segment][1] - CHANNEL_COLOURINGS[channel][segment][0]) * offset, )
+
+        #Postprocessing: 75% capacity, 25% transparency.
+        colours = tuple(map(lambda x: int(round(x)), colours))
+        colours += (191,)
+
+        return colours
