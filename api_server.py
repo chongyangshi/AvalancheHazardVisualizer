@@ -168,7 +168,7 @@ def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_fi
         return_image_pixels = return_image.load()
         for i in range(return_image.size[0]):   
             for j in range(return_image.size[1]):
-                return_image_pixels[i,j] = utils.aspect_to_grayscale(aspects_matrix[j][i]) # 2D array is in inversed order of axis.
+                return_image_pixels[i,j] = utils.aspect_to_rbg(aspects_matrix[j][i]) # 2D array is in inversed order of axis.
         image_object = StringIO.StringIO() 
         return_image.save(image_object, format="png") 
         image_object.seek(0)

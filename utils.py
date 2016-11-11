@@ -105,20 +105,20 @@ def aspect_to_rbg(aspect):
         return (255, 0, 0)
     else:
         # Calculate the weird RGB coding.
-        aspect = int(round(aspect))
-        segment = aspect // 60
+        segment = int(aspect // 60)
         partition = aspect % 60
         offset = partition / 60.0 * 255.0
-        colours = ()
+        colours = []
 
         for channel in CHANNEL_COLOURINGS:
             if CHANNEL_COLOURINGS[channel][segment][1] == CHANNEL_COLOURINGS[channel][segment][0]:
-                colours += (CHANNEL_COLOURINGS[channel][segment][1],)
+                colours.append(CHANNEL_COLOURINGS[channel][segment][1])
             else:
-                colours += (CHANNEL_COLOURINGS[channel][segment][0] + copysign(1, CHANNEL_COLOURINGS[channel][segment][1] - CHANNEL_COLOURINGS[channel][segment][0]) * offset, )
+                colours.append(CHANNEL_COLOURINGS[channel][segment][0] + copysign(1, CHANNEL_COLOURINGS[channel][segment][1] - CHANNEL_COLOURINGS[channel][segment][0]) * offset)
 
         #Postprocessing: 75% capacity, 25% transparency.
-        colours = tuple(map(lambda x: int(round(x)), colours))
-        colours += (191,)
+        colours = map(lambda x: int(round(x)), colours)
+        colours.append(191)
+        colours = tuple(colours)
 
         return colours
