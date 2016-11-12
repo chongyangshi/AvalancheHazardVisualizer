@@ -1,0 +1,12 @@
+[Unit]
+Description=uWSGI instance for the Terrain Imagery API server.
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/home/BEngProject
+ExecStart=/usr/local/bin/uwsgi --ini wsgi.conf
+
+[Install]
+WantedBy=multi-user.target

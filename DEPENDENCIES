@@ -3,5 +3,4 @@ selenium
 convertbng
 flask
 uwsgi
-gdal
 Pillow
