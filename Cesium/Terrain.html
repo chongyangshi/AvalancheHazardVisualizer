@@ -110,6 +110,12 @@ var aspect_map = new Cesium.UrlTemplateImageryProvider({
     maximumLevel : 15,
     credit: OSCredit
 });
+var aspect_map_experimental = new Cesium.UrlTemplateImageryProvider({
+    url : 'https://avalanche.ebornet.com/experimental/api/imagery/api/v1.0/terrain_aspects/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    hasAlphaChannel : true,
+    maximumLevel : 15,
+    credit: OSCredit
+});
 var layers = viewer.scene.imageryLayers;
 var avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
 var aspect_layer = null;
@@ -192,7 +198,15 @@ Sandcastle.addToolbarMenu([{
 }, {
     text : 'View Terrain Aspect Map',
     onselect : function() {
+        layers.remove(aspect_layer);
         aspect_layer = layers.addImageryProvider(aspect_map);
+        layers.remove(avalanche_layer, true);
+   }
+}, {
+    text : 'View Terrain Aspect Map (Experimental Version)',
+    onselect : function() {
+        layers.remove(aspect_layer);
+        aspect_layer = layers.addImageryProvider(aspect_map_experimental);
         layers.remove(avalanche_layer, true);
     }
 }], 'aspectMenu');

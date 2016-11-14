@@ -32,4 +32,9 @@ server {
         include uwsgi_params;
         uwsgi_pass unix:/home/BEngProject/wsgi.sock;
     }
+    location /experimental {
+        rewrite /experimental/(.*) /$1 break;
+        proxy_buffering off;
+        proxy_pass https://avalanche_testing.ebornet.com/api;
+    }
 }
