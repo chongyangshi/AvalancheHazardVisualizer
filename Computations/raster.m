@@ -1,5 +1,5 @@
-SOURCE_RASTER = '/mnt/Shared/OS5/NN14152425Aspects.tif';
-TARGET_RASTER = '/mnt/Shared/OS5/NN14152425AspectsFitted.tif';
+SOURCE_RASTER = '~/Documents/NN2627.tif';
+TARGET_RASTER = '~/Documents/NN2627Fitted.tif';
 
 % Disable warnings.
 parpool;
@@ -25,6 +25,12 @@ parfor x = 2:x_max
         neighbours = pickneighbours(rst, x, y);
         if (any(isnan(neighbours(:))) == 0) && (any(neighbours(:,3)) == 1) % Check that boundaries are valid and no data is 0 (no-data in raster).
             surface_fitted = fit([neighbours(:,1), neighbours(:,2)], neighbours(:,3), 'poly22');
+            % Differentiate to compute gradients and therefore surface
+            % normal
+            % From normal, infer aspect
+            % Aspect = atan2(ny,nx);
+            % Slope angle will be to do with nz, theta = acos(nz);
+            % ... curvature, convexity...
             output(x,y) = surface_fitted(x,y);
         end
     end
