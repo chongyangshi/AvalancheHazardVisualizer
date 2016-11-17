@@ -15,7 +15,7 @@
 \usepackage[parfill]{parskip}
 \setlength{\headsep}{5pt}
 
-\title{An app for visualisation of avalanche hazard}
+\title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
 \date{(to-be-completed)}							
 \begin{document}
@@ -46,13 +46,33 @@ The course of the project was divided into four development and evaluation stage
 
 \textbf{Stage 4 - Usability Testing:} The final stage of the project focus on the human-computer interaction aspects of the application. Experienced mountaineers were consulted and invited to test use the application to provide feedbacks on usability, as well as the effectiveness of the application guiding them away from avalanches that would have occurred in real use. Some improvements were made based on the feedbacks.
 
-\section{Considerations and Statements on Ethics}
+\section{Considerations and statements on ethics}
 
 The application was designed as a tool to improve winter mountaineering safety, therefore evidently the foremost consideration on ethics regarding the accuracy and robustness of avalanche hazards projected by the application. If a location with imminent avalanche threat is reported as safe by the application, a user relying on the guidance of this application could be placed in serious danger; conversely, if the application indicate avalanche warnings to users at a location where an avalanche is unlikely to occur, undue anxiety could be caused.
 
 Due to the constraints placed on this project, it is difficult to conduct an extensive peer review process to examine the accuracy of hazard projections. And while most open source libraries utilised during the development process have been widely-used and well-tested, software errors may still occur and affect the safety assurance of the product. Furthermore, the lack of a known commercial or academic product with comparable functionalities eliminates the possibilities of cross-testing the software product.
 
 As a result, while the application is functional and showed promise during our own evaluations, it is not considered as a product ready for real-life use -- a warning of which is displayed when a user initially accesses the application.
+
+\section{Structure of this report}
+
+A literature review is conducted in Chapter \ref{ch:lit-review} over existing research and developments in the various aspects of Computer Science involved in this project. The procurement and processing of both avalanche forecast and topographical data used across all stages of the project are discussed in Chapter \ref{ch:data}. Chapter \ref{ch:app-description} describes in detail the features and internal architectures of the application, as well as its development process. This is followed by Chapter \ref{ch:app-testing}, which describes the evaluation and testing conducted on the application and the quality of its data, mainly conducted during \textbf{Stage 4}. Finally, Chapter \ref{ch:conclusions} concludes the report and discusses the potential uses and future developments of the application.
+
+\chapter{Literature Review} \label{ch:lit-review}
+
+\section{History of Avalanche Forecasting}
+
+Snow avalanches occur when large masses of snow or ice move rapidly down a mountainside or over a precipice, often triggered from the snow cover \cite[p. 1]{91097820150101}. Avalanches can either be triggered naturally due to certain combinations of geographical \cite[p. 17]{91097820150101} and meteorological \cite[p. 23]{91097820150101} conditions, or triggered by human activities nearby \cite{schweizer2001characteristics}. Regardless of triggering source, avalanches are often deadly to human present nearby, especially when travelling outside areas with built-up defense \cite{91097820150101}, as it often occurs to mountaineers. During the 45 years leading up to 1999, a total of 440 fatalities from avalanche incidents were recorded in the United States \cite{PAGE1999146}; where in the UK, Scottish mountain avalanches alone claimed tens of lives during the same time period \cite{scottish-avalanches}.
+
+With a prosperous winter sport tourism industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, the role of accurate avalanche forecasts is becoming increasingly important to prevent disasters.
+
+\chapter{Procurement and Processing of Data} \label{ch:data}
+
+\chapter{Description of the Application} \label{ch:app-description}
+
+\chapter{Evaluation and Testing of the Application} \label{ch:app-testing}
+
+\chapter{Conclusions} \label{ch:conclusions}
 
 \small{\bibliography{project}}
 \end{document}  
