@@ -14,6 +14,7 @@
 \usepackage{url}
 \usepackage[parfill]{parskip}
 \setlength{\headsep}{5pt}
+\graphicspath{ {images/} }
 
 \title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
@@ -60,11 +61,24 @@ A literature review is conducted in Chapter \ref{ch:lit-review} over existing re
 
 \chapter{Literature Review} \label{ch:lit-review}
 
-\section{History of Avalanche Forecasting}
+\section{Avalanche forecasting and related researches}
 
 Snow avalanches occur when large masses of snow or ice move rapidly down a mountainside or over a precipice, often triggered from the snow cover \cite[p. 1]{91097820150101}. Avalanches can either be triggered naturally due to certain combinations of geographical \cite[p. 17]{91097820150101} and meteorological \cite[p. 23]{91097820150101} conditions, or triggered by human activities nearby \cite{schweizer2001characteristics}. Regardless of triggering source, avalanches are often deadly to human present nearby, especially when travelling outside areas with built-up defense \cite{91097820150101}, as it often occurs to mountaineers. During the 45 years leading up to 1999, a total of 440 fatalities from avalanche incidents were recorded in the United States \cite{PAGE1999146}; where in the UK, Scottish mountain avalanches alone claimed tens of lives during the same time period \cite{scottish-avalanches}.
 
-With a prosperous winter sport tourism industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, the role of accurate avalanche forecasts is becoming increasingly important to prevent disasters.
+With a prosperous winter sport industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, accurate forecasting of avalanches is becoming increasingly critical. Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
+
+While historically forecasting had been mainly conducted through observations by experienced meteorologists and mountain guides, the vast increase in accessible computing power since the 1990s has provided broad opportunities of applying computation models in avalanche forecasting, as McClung \cite{McClung1994}. has explored as early as in 1994. Numerous models have since been developed, including a snow profile comparison method by Lehning \textit{et al.} \cite{Lehning2001253} and later improved by Hirashima \textit{et al.} in 2007; as well as a method based on observations of tree-rings by Christophe \textit{et al.} \cite{Christophe2010107}. However, the most widely used method -- the Nearest Neighbour (NN) method was initially developed by Buser \cite{buser1983avalanche} in 1983, which has been improved and supplemented by various studies, such as Purves \textit{et al.} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004.
+
+The most notable application of the NN method is by the Scottish Avalanche Information Service (SAIS) \cite{sais}, which is a government agency responsible for providing daily avalanche information and forecasts of major Scottish mountain attractions during the winter sports season. Avalanche forecasts from the SAIS achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1988 and 2002 \cite[p. 351] {Purves2003343}. With up to 205 avalanches reported by mountaineers during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. The SAIS forecasts would also be a major influence factor in data processing and imagery generation of this project.
+
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.4]{ScotAvalanches1516.png}
+		\caption{\label{fig:scotava1516} User-reported avalanches in the Cairngorms and the Glencoe regions during winter sports season of 2015-2016, produced by the SAIS.\cite{sais-map}}
+\end{figure}
+
+\section{Motivations behind the application}
 
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
