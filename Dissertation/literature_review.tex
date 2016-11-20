@@ -82,6 +82,16 @@ The most notable application of the NN method is by the Scottish Avalanche Infor
 
 \section{Motivations behind the application}
 
+In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in \ref{fig:realrose}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in \ref{fig:realrose}.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.5]{RealDangerousRose.png}
+		\caption{\label{fig:realrose} An example compass rose produced by the SAIS on Jan 1, 2016 for Lochaber, showing a steep transition of risk levels. \cite{sais-lochaber0106}}
+\end{figure}
+
+Therefore, the purpose of \textbf{Stage 1} of this application is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the risk levels at each location in the region. 
+
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
 \chapter{Description of the Application} \label{ch:app-description}
