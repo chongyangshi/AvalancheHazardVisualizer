@@ -1,10 +1,10 @@
-SOURCE_RASTER = '/mnt/Shared/OS5/Full/NN2627.tif';
-TARGET_RASTER = '/mnt/Shared/OS5/Full/NN2627Fitted.tif';
-ASPECT_RASTER = '/mnt/Shared/OS5/Full/NN2627Aspects.tif';
+SOURCE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNG.tif';
+TARGET_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGFitted.tif';
+%ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGAspects.tif';
 
 % Disable warnings.
-parpool;
-pctRunOnAll warning off;
+%parpool;
+%pctRunOnAll warning off;
 
 % Read input raster and initialize.
 [rst, raster_info] = geotiffread(SOURCE_RASTER);
@@ -13,7 +13,7 @@ y_list = 1:size(rst,2);
 x_max = size(x_list,2) - 1;
 y_max = size(y_list,2) - 1;
 output = rst;
-aspects = zeros(size(rst));
+%aspects = zeros(size(rst));
 
 % Start timer.
 disp('Surface fittings started...');
@@ -37,9 +37,9 @@ A(:,6) = 1;
 % points that have all valid neighbours (non-zero), fit a surface for the
 % neighbourhood and move the point onto the surface.
 parfor_progress(x_max);
-parfor x = 2:x_max
-    ux = sym('ux');
-    uy = sym('uy');
+for x = 2:x_max
+    %ux = sym('ux');
+    %uy = sym('uy');
     for y = 2:y_max
         neighbours = pickneighbours(rst, x, y);
         if (any(isnan(neighbours(:))) == 0) && (any(neighbours(:,3)) == 1) % Check that boundaries are valid and no data is 0 (no-data in raster).
@@ -86,4 +86,4 @@ disp('Output written to the target raster, all done.');
 %disp('Output written to the aspect raster, all done.');
 
 % Close off.
-delete(gcp('nocreate'));
+% delete(gcp('nocreate'));
