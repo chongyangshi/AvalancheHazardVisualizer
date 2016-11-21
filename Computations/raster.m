@@ -1,5 +1,5 @@
 SOURCE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNG.tif';
-TARGET_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGFittedTest.tif';
+%TARGET_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGFittedTest.tif';
 ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGAspectsTest.tif';
 PARALLEL = 0;
 WORKERS = 0;
@@ -16,11 +16,9 @@ end
 
 % Read input raster and initialize.
 [rst, raster_info] = geotiffread(SOURCE_RASTER);
-x_list = 1:size(rst,1);
-y_list = 1:size(rst,2);
-x_max = size(x_list,2) - 1;
-y_max = size(y_list,2) - 1;
-output = rst;
+x_max = size(rst,1) - 1;
+y_max = size(rst,2) - 1;
+%output = rst;
 aspects = zeros(size(rst));
 
 % Start timer.
@@ -58,7 +56,7 @@ parfor (x = 2:x_max, WORKERS) %if WORKERS = 0 as initially set, no parallel.
             % Fit and calculate height.
             z = neighbours(:,3);
             C = A\z;
-            output(x,y) = C(6);
+            %output(x,y) = C(6);
             
             % Partial differentials (gradients) are always constant due to 
             % always taking (0,0), this calculates the aspect with 0 
@@ -90,12 +88,14 @@ parfor_progress(0);
 % Stop timer and report performance.
 seconds = toc;
 fprintf('Surface fitting completed in %f seconds.\r', seconds);
+disp('Purging original input from memory...');
+clear rst;
 disp('Writing output to the target rasters...');
 
 % Write output rasters.
 CoordRefSysCode = 27700; % British National Grid.
-geotiffwrite(TARGET_RASTER, output, raster_info, 'CoordRefSysCode', CoordRefSysCode);
-disp('Output written to the target raster, all done.');
+%geotiffwrite(TARGET_RASTER, output, raster_info, 'CoordRefSysCode', CoordRefSysCode);
+%disp('Output written to the target raster, all done.');
 geotiffwrite(ASPECT_RASTER, aspects, raster_info, 'CoordRefSysCode', CoordRefSysCode);
 disp('Output written to the aspect raster, all done.');
 
