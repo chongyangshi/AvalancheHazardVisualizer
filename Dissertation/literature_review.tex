@@ -41,15 +41,21 @@ The project incorporated tools and techniques from various aspects of Computer S
 
 As a front-runner of digital avalanche forecasts, the Scottish Avalanche Information Service \cite{sais} have been providing frequent and reliable winter avalanche forecasts for decades in Scotland.
 
-In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in \ref{fig:mapping}.
+In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in Figure \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in Figure \ref{fig:mapping}.
+
+Therefore, the primary purpose of this project is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis}.
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=1]{Mapping.png}
-		\caption{\label{fig:mapping} An example compass rose produced by the SAIS on Jan 1, 2016 for Lochaber (left), showing a steep transition of risk levels; and an example manual inference of risk levels based on the compass ross and contour lines near Ben Nevis, Lochaber (right).  \cite{sais-lochaber0106}}
+		\caption{\label{fig:mapping} An example compass rose produced by the SAIS on January 6, 2016 for Lochaber (left), showing a steep transition of risk levels; and an example manual inference of risk levels based on the compass ross and contour lines near Ben Nevis, Lochaber (right).  \cite{sais-lochaber0106}}
 \end{figure}
 
-Therefore, the primary purpose of this project is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. 
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.3]{Stage1BenNevis.png}
+		\caption{\label{fig:stage1bennevis} The avalanche hazard visualisation of the same area mapped in Figure \ref{fig:mapping}, generated in the 3D terrain viewer by the project's initial stage product, using the same avalanche forecast on January 6, 2016}
+\end{figure}
 
 In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
 
