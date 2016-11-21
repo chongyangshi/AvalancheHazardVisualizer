@@ -37,6 +37,22 @@ A model for projecting localised avalanche hazards based on carefully sourced an
 
 The project incorporated tools and techniques from various aspects of Computer Science, including software engineering, geographic information system (GIS) modelling, human-computer interaction, computer graphics and algorithms. Many of these tools and techniques are associated with current research in these areas.
 
+\section{Motivations behind the application}
+
+As a front-runner of digital avalanche forecasts, the Scottish Avalanche Information Service \cite{sais} have been providing frequent and reliable winter avalanche forecasts for decades in Scotland.
+
+In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in \ref{fig:mapping}.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=1]{Mapping.png}
+		\caption{\label{fig:mapping} An example compass rose produced by the SAIS on Jan 1, 2016 for Lochaber (left), showing a steep transition of risk levels; and an example manual inference of risk levels based on the compass ross and contour lines near Ben Nevis, Lochaber (right).  \cite{sais-lochaber0106}}
+\end{figure}
+
+Therefore, the primary purpose of this project is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. 
+
+In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
+
 \section{Stages of the project}
 
 The course of the project was divided into four development and evaluation stages, in order to effectively track and manage the workload. As the product from each stage is able to function independently of work done in other stages, risks from unforeseen difficulties encountered in research and development can be effectively mitigated. The four stages are described as followed:
@@ -73,24 +89,12 @@ While historically forecasting had been mainly conducted through observations by
 
 The most notable application of the NN method is by the Scottish Avalanche Information Service (SAIS) \cite{sais}, which is a government agency responsible for providing daily avalanche information and forecasts of major Scottish mountain attractions during the winter sports season. Avalanche forecasts from the SAIS achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1988 and 2002 \cite[p. 351] {Purves2003343}. With up to 205 avalanches reported by mountaineers during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. The SAIS forecasts would also be a major influence factor in data processing and imagery generation of this project.
 
-
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.4]{ScotAvalanches1516.png}
 		\caption{\label{fig:scotava1516} User-reported avalanches in the Cairngorms and the Glencoe regions during winter sports season of 2015-2016, produced by the SAIS.\cite{sais-map}}
 \end{figure}
 
-\section{Motivations behind the application}
-
-In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in \ref{fig:realrose}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in \ref{fig:realrose}.
-
-\begin{figure}[h]
-		\centering
-		\includegraphics[scale=0.5]{RealDangerousRose.png}
-		\caption{\label{fig:realrose} An example compass rose produced by the SAIS on Jan 1, 2016 for Lochaber, showing a steep transition of risk levels. \cite{sais-lochaber0106}}
-\end{figure}
-
-Therefore, the purpose of \textbf{Stage 1} of this application is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the risk levels at each location in the region. 
 
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
