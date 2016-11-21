@@ -5,7 +5,7 @@ locations = {
         "end" : [-5.11817626423, 57.7821005754]
     },
     "Creag Meagaidh" : {
-        "start" : [-4.99675917528, 56.7327671068],
+        "start" : [-4.99675917528, 57.0479096188],
         "end" : [-4.20660165144, 57.1985659148]
     },
     "Lochaber" : {
@@ -34,7 +34,8 @@ def get_location_name(longitude, latitude):
     found = False
     for l in locations:
         if (longitude > locations[l]["start"][0]) and ((longitude < locations[l]["end"][0])):
-            if (latitude > locations[l]["start"][1]) and ((longitude < locations[l]["end"][1])):
+            if (latitude > locations[l]["start"][1]) and ((latitude < locations[l]["end"][1])):
+                #print(str(locations[l]["start"][0]) + "<" + str(longitude) + "<" + str(locations[l]["end"][0]) + " " + str(locations[l]["start"][1]) + "<" + str(latitude) + "<" + str(locations[l]["end"][1]))
                 found = True
                 return l
     
