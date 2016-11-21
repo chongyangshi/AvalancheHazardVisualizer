@@ -1,10 +1,18 @@
 SOURCE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNG.tif';
-TARGET_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGFitted.tif';
-%ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGAspects.tif';
+TARGET_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGFittedTest.tif';
+ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/BNGAspectsTest.tif';
+PARALLEL = 0;
+WORKERS = 0;
 
 % Disable warnings.
-%parpool;
-%pctRunOnAll warning off;
+if PARALLEL == 1
+    c = parcluster('local');
+    WORKERS = c.NumWorkers;
+    parpool;
+    pctRunOnAll warning off;
+else
+    warning off;
+end
 
 % Read input raster and initialize.
 [rst, raster_info] = geotiffread(SOURCE_RASTER);
@@ -13,7 +21,7 @@ y_list = 1:size(rst,2);
 x_max = size(x_list,2) - 1;
 y_max = size(y_list,2) - 1;
 output = rst;
-%aspects = zeros(size(rst));
+aspects = zeros(size(rst));
 
 % Start timer.
 disp('Surface fittings started...');
@@ -37,32 +45,38 @@ A(:,6) = 1;
 % points that have all valid neighbours (non-zero), fit a surface for the
 % neighbourhood and move the point onto the surface.
 parfor_progress(x_max);
-for x = 2:x_max
-    %ux = sym('ux');
-    %uy = sym('uy');
+
+parfor (x = 2:x_max, WORKERS) %if WORKERS = 0 as initially set, no parallel.
     for y = 2:y_max
+        
+        % Pick our neighbours.
         neighbours = pickneighbours(rst, x, y);
-        if (any(isnan(neighbours(:))) == 0) && (any(neighbours(:,3)) == 1) % Check that boundaries are valid and no data is 0 (no-data in raster).
+        
+        % Check that boundaries are valid and no data is 0 (no-data in raster).
+        if (any(isnan(neighbours(:))) == 0) && (any(neighbours(:,3)) == 1) 
+            
+            % Fit and calculate height.
             z = neighbours(:,3);
             C = A\z;
             output(x,y) = C(6);
             
+            % Partial differentials (gradients) are always constant due to 
+            % always taking (0,0), this calculates the aspect with 0 
+            % degrees being north-facing.
+            raw_aspect_value = 180 * atan2(C(5), C(4)) / pi; 
+            
+            % Store aspect value.
+            if raw_aspect_value == 0 % Special case to prevent 270 being 0 degrees.
+                aspects(x, y) = 0
+            else 
+                aspects(x, y) = mod(270-raw_aspect_value, 360);
+            end
             % Differentiate to compute gradients and therefore surface
             % normal
             % From normal, infer aspect
             % Aspect = atan2(ny,nx);
             % Slope angle will be to do with nz, theta = acos(nz);
             % ... curvature, convexity...
-            % The following (aspect calculation makes this ten times
-            % slower when ran:
-            %{
-            equation = C(1) * ux^2 + C(2) * uy^2 + C(3) * ux * uy + C(4) * ux + C(5) * uy + C(6);
-            dx = diff(equation, ux);
-            dy = diff(equation, uy);
-            nx = -1 / single(subs(dx, [ux, uy], [0 0]));
-            ny = -1 / single(subs(dy, [ux, uy], [0 0]));
-            aspects(x, y) = rad2deg(atan2(ny, nx)); 
-            %}
             
             
         end
@@ -82,8 +96,8 @@ disp('Writing output to the target rasters...');
 CoordRefSysCode = 27700; % British National Grid.
 geotiffwrite(TARGET_RASTER, output, raster_info, 'CoordRefSysCode', CoordRefSysCode);
 disp('Output written to the target raster, all done.');
-%geotiffwrite(ASPECT_RASTER, aspects, raster_info, 'CoordRefSysCode', CoordRefSysCode);
-%disp('Output written to the aspect raster, all done.');
+geotiffwrite(ASPECT_RASTER, aspects, raster_info, 'CoordRefSysCode', CoordRefSysCode);
+disp('Output written to the aspect raster, all done.');
 
 % Close off.
-% delete(gcp('nocreate'));
+delete(gcp('nocreate'));
