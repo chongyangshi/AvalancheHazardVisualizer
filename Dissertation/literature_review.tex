@@ -45,6 +45,8 @@ In addition to written observations on conditions of the snowpack and weather, a
 
 Therefore, the primary purpose of this project is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain raster model), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis}.
 
+In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
+
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=1]{Mapping.png}
@@ -53,11 +55,11 @@ Therefore, the primary purpose of this project is to vastly simply this process,
 
 \begin{figure}[h]
 		\centering
-		\includegraphics[scale=0.3]{Stage1BenNevis.png}
-		\caption{\label{fig:stage1bennevis} The avalanche hazard visualisation of the same area mapped in Figure \ref{fig:mapping}, generated in the 3D terrain viewer by the project's initial stage product, using the same avalanche forecast on January 6, 2016}
+		\includegraphics[scale=0.25]{Stage1BenNvisDuo.png}
+		\caption{\label{fig:stage1bennevis} The avalanche hazard visualisation of the same area mapped in Figure \ref{fig:mapping}, generated in the 3D terrain viewer by the initial stage product using the same avalanche forecast. The same slope is viewed from two different angles.}
 \end{figure}
 
-In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
+
 
 \section{Stages of the project}
 
@@ -85,11 +87,23 @@ A literature review is conducted in Chapter \ref{ch:lit-review} over existing re
 
 \chapter{Literature Review} \label{ch:lit-review}
 
-\section{Avalanche forecasting and related researches}
+As an application designed to improve the usability of snow avalanche forecasts, it is necessary to first consider and evaluate past research and efforts made to understand and predict avalanches. While the term avalanche can be applied to various types of moving substances, such as rock and mud \cite[p. 1]{91097820150101}, only snow avalanches are studied by this project.
 
-Snow avalanches occur when large masses of snow or ice move rapidly down a mountainside or over a precipice, often triggered from the snow cover \cite[p. 1]{91097820150101}. Avalanches can either be triggered naturally due to certain combinations of geographical \cite[p. 17]{91097820150101} and meteorological \cite[p. 23]{91097820150101} conditions, or triggered by human activities nearby \cite{schweizer2001characteristics}. Regardless of triggering source, avalanches are often deadly to human present nearby, especially when travelling outside areas with built-up defense \cite{91097820150101}, as it often occurs to mountaineers. During the 45 years leading up to 1999, a total of 440 fatalities from avalanche incidents were recorded in the United States \cite{PAGE1999146}; where in the UK, Scottish mountain avalanches alone claimed tens of lives during the same time period \cite{scottish-avalanches}.
+\section{Snow Avalanches}
 
-With a prosperous winter sport industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, accurate forecasting of avalanches is becoming increasingly critical. Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
+Accumulated snow covers generally are not stable structures -- snow found in avalanches are usually 80s\% air, and cover structures gradually deform as environment temperature approaches the melting point of snow \cite[p. 16]{mcclung2006avalanche}. This instability allows avalanches to occur easily.
+
+Snow avalanches occur when large masses of snow or ice move rapidly down a mountainside or over a precipice, often triggered from the snow cover \cite[p. 1]{91097820150101}. Avalanches can either be triggered naturally due to combinations of certain geographical \cite[p. 17]{91097820150101} and meteorological \cite[p. 23]{91097820150101} conditions, or triggered by human activities nearby \cite{schweizer2001characteristics}. Often the latter is constructive to the former when an avalanche is triggered \cite[p. 17]{mcclung2006avalanche}\cite[p .48]{scottish-avalanches}.
+
+McClung and Schaerer \cite[p. 73]{mcclung2006avalanche} classified snow avalanches into two general types: loose snow avalanches, which usually involves surface snow and starts from a single area of the slope; and slab avalanches which are due to failures in the snow cover, resulting in blocks of snow to fall down the slope destructively. This classification is in agreement with most schemes, such as the avalanche classification by the UNESCO \cite{unesco-avalanche}, which also diversifies the classification by types of originating zones, paths and deposition zones. The diversified classification has been further improved by more recent researches \cite{91097820150101}.
+
+Regardless of type and triggering source, avalanches are often deadly to human present nearby, especially when travelling outside areas with built-up defense \cite{91097820150101}, as it often occurs to mountaineers. During the 45 years leading up to 1999, a total of 440 fatalities from avalanche incidents were recorded in the United States \cite{PAGE1999146}; while in the UK, avalanches in Scottish mountains alone claimed at least 73 lives during a similar time period \cite{scottish-avalanches}. 
+
+With a prosperous winter sport industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, accurate forecasting of avalanches is becoming increasingly critical. 
+
+\section{Avalanche Forecasting}
+
+Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
 
 While historically forecasting had been mainly conducted through observations by experienced meteorologists and mountain guides, the vast increase in accessible computing power since the 1990s has provided broad opportunities of applying computation models in avalanche forecasting, as McClung \cite{McClung1994}. has explored as early as in 1994. Numerous models have since been developed, including a snow profile comparison method by Lehning \textit{et al.} \cite{Lehning2001253} and later improved by Hirashima \textit{et al.} in 2007; as well as a method based on observations of tree-rings by Christophe \textit{et al.} \cite{Christophe2010107}. However, the most widely used method -- the Nearest Neighbour (NN) method was initially developed by Buser \cite{buser1983avalanche} in 1983, which has been improved and supplemented by various studies, such as Purves \textit{et al.} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004.
 
