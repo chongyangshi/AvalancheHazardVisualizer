@@ -1,4 +1,4 @@
-\documentclass[openany]{UoYCSproject}
+    \documentclass[openany]{UoYCSproject}
 
 \protect\BEng
 \protect\supervisor{Dr William Smith}
@@ -8,7 +8,7 @@
 \protect\abstract{This project produces a functional mobile application to visualise potential avalanche hazards along popular winter mountaineering routes within a 3D terrain reality, with a primary focus on Scottish mountains while providing excellent adaptability for other regions with appropriate data sources. Avalanche hazards were projected from a combination of professional avalanche forecasts and spatial analysis of mountain terrain models. Both the accuracy and the usability of the application were evaluated through various methods. The safety and ethical considerations on the application being put into real world use were also discussed.}
 
 \usepackage[left=26mm,top=26mm,right=26mm,bottom=26mm]{geometry}    
-\geometry{a4paper}                   		
+\geometry{a4paper}            		
 \usepackage{graphicx}					
 \usepackage{amssymb}
 \usepackage{url}
@@ -39,7 +39,7 @@ The project incorporated tools and techniques from various aspects of Computer S
 
 \section{Motivations behind the application}
 
-As a front-runner of digital avalanche forecasts, the Scottish Avalanche Information Service \cite{sais} have been providing frequent and reliable winter avalanche forecasts for decades in Scotland.
+As a front-runner of digital avalanche forecasts, the Scottish Avalanche Information Service (SAIS) \cite{sais} have been providing frequent and reliable winter avalanche forecasts for decades in Scotland.
 
 In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in Figure \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, and prone to errors as risk levels could vary sharply between neighbouring aspects and altitudes, as shown in Figure \ref{fig:mapping}.
 
@@ -105,17 +105,26 @@ With a prosperous winter sport industry bringing millions to mountains and resor
 
 Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
 
-While historically forecasting had been mainly conducted through observations by experienced meteorologists and mountain guides, the vast increase in accessible computing power since the 1990s has provided broad opportunities of applying computation models in avalanche forecasting, as McClung \cite{McClung1994}. has explored as early as in 1994. Numerous models have since been developed, including a snow profile comparison method by Lehning \textit{et al.} \cite{Lehning2001253} and later improved by Hirashima \textit{et al.} in 2007; as well as a method based on observations of tree-rings by Christophe \textit{et al.} \cite{Christophe2010107}. However, the most widely used method -- the Nearest Neighbour (NN) method was initially developed by Buser \cite{buser1983avalanche} in 1983, which has been improved and supplemented by various studies, such as Purves \textit{et al.} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004.
+A conventionally approach to avalanche forecasting involves extensive field observations and testings of the snow cover by experienced forecasters and mountain guides, cross-referencing of historic meteorological and avalanche records, and utilisation of statistical and information theory methods on data collected to reduce decision uncertainties, as summarised by LaChapelle \cite{lachapelle1980fundamental} in 1980. This is still very similar to the approach the Scottish Avalanche Information Service (SAIS) today \cite[p. 5]{sais2014-15}. In this style of approach, final decisions on hazard levels are heavily reliant on the experience and judgement of the experienced forecasters. LaChapelle noted \cite[p. 76]{lachapelle1980fundamental} that while inaccuracies do occur in forecasters' decisions, complete failures are rare. McClung \cite{mcclung2006avalanche} further analysed the influence of human perceptions in avalanche forecasting, and gave a formalised decision-making process to eliminate biases and improve accuracy.
 
-The most notable application of the NN method is by the Scottish Avalanche Information Service (SAIS) \cite{sais}, which is a government agency responsible for providing daily avalanche information and forecasts of major Scottish mountain attractions during the winter sports season. Avalanche forecasts from the SAIS achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1988 and 2002 \cite[p. 351] {Purves2003343}. With up to 205 avalanches reported by mountaineers during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. The SAIS forecasts would also be a major influence factor in data processing and imagery generation of this project.
+While human decision-making still plays a dominant role in forecasting avalanche hazard levels, computational models have been developed to improve data analysis and to provide supplementary opinions through machine learning methods, backed by a vast increase in accessible computing power, as McClung \cite{McClung1994} has explored as early as in 1994. Numerous models have since been developed, with computations performed on different data sources. 
+
+\textit{SNOWPACK}, a snow profile comparison method was first published by Lehning \textit{et al.} \cite{Lehning2001253} in 2001. The method attempts to establish a numerical profile of snow cover conditions based on various measured properties of the cover, such as the size and type of snow grains, temperature and density of the environments. A agreement score could then be established by comparing the numerical profile with an observed profile in the field, with high agreement scores reached by the experiments, indicating that the numerical profile would be suitable for use in avalanche forecasts. 
+
+However, attempts to apply SNOWPACK to other regions with different snow conditions have identified weaknesses in the assumptions made in the model, which was originally developed for the Swiss Alps. A notable attempt was made by Hirashima \textit{et al.} \cite{Hirashima2008191} from 2005 to 2006 in Tsunan, Japan. While numerical profiles computed were in reasonable agreement with the observed snow profiles in Tsunan, it was found that the stability index estimators embedded in the model was not suitable for the shear strength Japanese snow, and an alternative method for calculating the index had to be adopted. This suggests adaptation of \textit{SNOWPACK} to a new region may require appropriate changes to the model based on local snow conditions.
+
+While SNOWPACK was developed as a specialised method for analysis of snow covers, more generalised models such as the Nearest Neighbours (NN) method have also been developed. The NN model was initially developed by Buser \cite{buser1983avalanche} in 1983, which has been improved and supplemented by various studies, such as Purves \textit{et al.} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004. The NN method applies a machine learning approach on historic avalanche and meteorological records, as well as spatial data to estimate the likelihood of an avalanche under the current conditions of a location. As the NN method has difficulties with high dimensional data, an alternative method based on Support Vector Machines (SVMs) have been proposed and developed \cite{Lehning2001253} \cite{pozdnoukhov2011spatio}.
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.4]{ScotAvalanches1516.png}
-		\caption{\label{fig:scotava1516} User-reported avalanches in the Cairngorms and the Glencoe regions during winter sports season of 2015-2016, produced by the SAIS.\cite{sais-map}}
+		\caption{\label{fig:scotava1516} User-reported avalanches in the Cairngorms and the Glencoe regions during winter sports season of 2015-2016, generated by the SAIS.\cite{sais-map}}
 \end{figure}
 
+The most notable application of the NN method is by the SAIS. Avalanche forecasts from the SAIS partially dependent on the NN method achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1988 and 2002 \cite[p. 351] {Purves2003343}. With up to 205 avalanches reported by mountaineers during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. Data from SAIS forecasts would also be a critical component in data sourcing and hazard modelling during this project.
 
+In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in temporal avalanche forecasts, as the formation of general vegetation conditions requires a long period of time. However, for the purpose of this project this model could potentially be used for establishing a static risk level for each point in the terrain, to be included in the overall risk model.
+ 
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
 \chapter{Description of the Application} \label{ch:app-description}
