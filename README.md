@@ -10,7 +10,7 @@ Locations of the height map and aspect raster files are defined in `GeoData/rast
 
 Install system-level dependencies:
 
-        sudo apt-get install libgdal-dev python-setuptools python-pip virtualenv nginx 
+        sudo apt-get install libgdal-dev python-setuptools python-pip virtualenv nginx uwsgi 
 
 Download Cesium and place it in a directory for NGINX:
 

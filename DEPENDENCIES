@@ -2,5 +2,4 @@ virtualenv
 selenium
 convertbng
 flask
-uwsgi
 Pillow
