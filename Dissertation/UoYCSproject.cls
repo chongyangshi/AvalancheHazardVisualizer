@@ -56,7 +56,7 @@
 
 % Reference control
 \RequirePackage[numbers,sort&compress,square,comma]{natbib}
-\bibliographystyle{IEEEtranN}
+\bibliographystyle{ieeetrurl}
 
 \typearea[current]{calc} % force page layout recalculation after
                          % changing all the fonts
