@@ -79,7 +79,7 @@ The application was designed as a tool to improve winter mountaineering safety, 
 
 Due to the constraints placed on this project, it is difficult to conduct an extensive peer review process to examine the accuracy of hazard projections. And while most open source libraries utilised during the development process have been widely-used and well-tested, software errors may still occur and affect the safety assurance of the product. Furthermore, the lack of a known commercial or academic product with comparable functionalities eliminates the possibilities of cross-testing the software product.
 
-As a result, while the application is functional and showed promise during our own evaluations, it is not considered as a product ready for real-life use -- a warning of which is displayed when a user initially accesses the application.
+As a result, while the application is functional and shown promise during our own evaluations, it is not considered as a product ready for real-life use -- a warning of which is displayed when a user initially accesses the application.
 
 \section{Structure of this report}
 
@@ -89,7 +89,7 @@ A literature review is conducted in Chapter \ref{ch:lit-review} over existing re
 
 As an application designed to improve the usability of snow avalanche forecasts, it is necessary to first consider and evaluate past research and efforts made to understand and predict avalanches. While the term avalanche can be applied to various types of moving substances, such as rock and mud \cite[p. 1]{91097820150101}, only snow avalanches are studied by this project.
 
-\section{Snow Avalanches}
+\section{Snow avalanches}
 
 Accumulated snow covers generally are not stable structures -- snow found in avalanches are usually 80s\% air, and cover structures gradually deform as environment temperature approaches the melting point of snow \cite[p. 16]{mcclung2006avalanche}. This instability allows avalanches to occur easily.
 
@@ -101,11 +101,11 @@ Regardless of type and triggering source, avalanches are often deadly to human p
 
 With a prosperous winter sport industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, accurate forecasting of avalanches is becoming increasingly critical. 
 
-\section{Avalanche Forecasting}
+\section{Avalanche forecasting}
 
 Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
 
-A conventionally approach to avalanche forecasting involves extensive field observations and testings of the snow cover by experienced forecasters and mountain guides, cross-referencing of historic meteorological and avalanche records, and utilisation of statistical and information theory methods on data collected to reduce decision uncertainties, as summarised by LaChapelle \cite{lachapelle1980fundamental} in 1980. This is still very similar to the approach the Scottish Avalanche Information Service (SAIS) today \cite[p. 5]{sais2014-15}. In this style of approach, final decisions on hazard levels are heavily reliant on the experience and judgement of the experienced forecasters. LaChapelle noted \cite[p. 76]{lachapelle1980fundamental} that while inaccuracies do occur in forecasters' decisions, complete failures are rare. McClung \cite{mcclung2006avalanche} further analysed the influence of human perceptions in avalanche forecasting, and gave a formalised decision-making process to eliminate biases and improve accuracy.
+A conventionally approach to avalanche forecasting involves extensive field observations and testings of the snow cover by experienced forecasters and mountain guides, cross-referencing of historic meteorological and avalanche records, and utilisation of statistical and information theory methods on data collected to reduce decision uncertainties, as summarised by LaChapelle \cite{lachapelle1980fundamental} in 1980. This is still very similar to the approach the Scottish Avalanche Information Service (SAIS) use today \cite[p. 5]{sais2014-15}. In this style of approach, final decisions on hazard levels are heavily reliant on the experience and judgement of the experienced forecasters. LaChapelle noted \cite[p. 76]{lachapelle1980fundamental} that while inaccuracies do occur in forecasters' decisions, complete failures are rare. McClung \cite{mcclung2006avalanche} further analysed the influence of human perceptions in avalanche forecasting, and gave a formalised decision-making process to eliminate biases and improve accuracy.
 
 While human decision-making still plays a dominant role in forecasting avalanche hazard levels, computational models have been developed to improve data analysis and to provide supplementary opinions through machine learning methods, backed by a vast increase in accessible computing power, as McClung \cite{McClung1994} has explored as early as in 1994. Numerous models have since been developed, with computations performed on different data sources. 
 
@@ -124,6 +124,10 @@ While SNOWPACK was developed as a specialised method for analysis of snow covers
 The most notable application of the NN method is by the SAIS. Avalanche forecasts from the SAIS partially dependent on the NN method achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1988 and 2002 \cite[p. 351] {Purves2003343}. With up to 205 avalanches reported by mountaineers during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. Data from SAIS forecasts would also be a critical component in data sourcing and hazard modelling during this project.
 
 In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in temporal avalanche forecasts, as the formation of general vegetation conditions requires a long period of time. However, for the purpose of this project this model could potentially be used for establishing a static risk level for each point in the terrain, to be included in the overall risk model.
+
+\section{Visualisation of risk in GIS}
+
+
  
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
