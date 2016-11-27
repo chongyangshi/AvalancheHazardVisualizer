@@ -14,7 +14,7 @@ from GeoData import raster_reader, raster_reader_bng
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
-SPATIAL_READER = raster_reader_bng
+SPATIAL_READER = raster_reader
 
 # Initialise forecast database and raster reader.
 forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
