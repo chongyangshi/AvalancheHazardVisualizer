@@ -1,4 +1,4 @@
-    \documentclass[openany]{UoYCSproject}
+\documentclass[openany]{UoYCSproject}
 
 \protect\BEng
 \protect\supervisor{Dr William Smith}
@@ -49,7 +49,7 @@ In later stages of the project, we also seek to improve hazard representation th
 
 \begin{figure}[h]
 		\centering
-		\includegraphics[scale=1]{Mapping.png}
+		\includegraphics[scale=0.9]{Mapping.png}
 		\caption{\label{fig:mapping} An example compass rose produced by the SAIS on January 6, 2016 for Lochaber (left), showing a steep transition of risk levels; and an example manual inference of risk levels based on the compass ross and contour lines near Ben Nevis, Lochaber (right).  \cite{sais-lochaber0106}}
 \end{figure}
 
@@ -65,7 +65,7 @@ In later stages of the project, we also seek to improve hazard representation th
 
 The course of the project was divided into four development and evaluation stages, in order to effectively track and manage the workload. As the product from each stage is able to function independently of work done in other stages, risks from unforeseen difficulties encountered in research and development can be effectively mitigated. The four stages are described as followed:
 
-\textbf{Stage 1 - Basic Functionalities:} The aim of this stage was to select an appropriate application framework and libraries to produce a basic but functional application -- a 3D terrain viewer with a hazard map overlay, the data for which would be derived solely from forecasts by the Scottish Avalanche Information Service \cite{sais}. The WebGL framework Cesium \cite{cesium} was chosen as the foundation for front-end developments, while Python was chosen to be used to develop the backend, and to interface other systems such as GIS processors with its vast range of interfacing libraries. A functional product was delivered for this stage in early November, 2016.
+\textbf{Stage 1 - Basic Functionalities:} The aim of this stage was to select an appropriate application framework and libraries to produce a basic but functional application -- a 3D terrain viewer with a hazard map overlay, the data for which would be derived solely from forecasts by the Scottish Avalanche Information Service \cite{sais}. The WebGL framework Cesium \cite{cesium} was chosen as the foundation for front-end developments, while Python was chosen to be used to develop the backend, and to interface other systems such as GIS processors with its vast range of interfacing libraries.
 
 \textbf{Stage 2 - Improved Spatial Analysis and Evaluation:} This stage of the project expands the data source for generating the hazard map overlay by performing surface fitting and spatial analysis on the terrain model data \cite{os-5}, in order to make the hazards more localised, and to better reflect the hazard posed by unique terrain features such as concave slopes. MATLAB \cite{matlab-primer} was used to perform the computations for these purposes. Evaluations on the localised hazard map against avalanche records were also conducted at this stage, with a focus on the avalanche ``blackspots'' of Scottish mountains.
 
@@ -101,13 +101,13 @@ Regardless of type and triggering source, avalanches are often deadly to human p
 
 With a prosperous winter sport industry bringing millions to mountains and resorts every year\cite{hudson2003sport}, accurate forecasting of avalanches is becoming increasingly critical. 
 
-\section{Avalanche forecasting}
+\section{Avalanche forecasting} \label{sec:avalanche-forecasting}
 
 Avalanche forecasting is defined as predictions of current and future snow instability in space and time relative to a given triggering level for avalanche initiation \cite[p. 131]{McClung2002}. When applied, the main concerns of such predictions are of risk to humans or property. 
 
 A conventionally approach to avalanche forecasting involves extensive field observations and testings of the snow cover by experienced forecasters and mountain guides, cross-referencing of historic meteorological and avalanche records, and utilisation of statistical and information theory methods on data collected to reduce decision uncertainties, as summarised by LaChapelle \cite{lachapelle1980fundamental} in 1980. This is still very similar to the approach the Scottish Avalanche Information Service (SAIS) use today \cite[p. 5]{sais2014-15}. In this style of approach, final decisions on hazard levels are heavily reliant on the experience and judgement of the experienced forecasters. LaChapelle noted \cite[p. 76]{lachapelle1980fundamental} that while inaccuracies do occur in forecasters' decisions, complete failures are rare. McClung \cite{mcclung2006avalanche} further analysed the influence of human perceptions in avalanche forecasting, and gave a formalised decision-making process to eliminate biases and improve accuracy.
 
-While human decision-making still plays a dominant role in forecasting avalanche hazard levels, computational models have been developed to improve data analysis and to provide supplementary opinions through machine learning methods, backed by a vast increase in accessible computing power, as McClung \cite{McClung1994} has explored as early as in 1994. Numerous models have since been developed, with computations performed on different data sources. 
+While human decision-making still plays a dominant role in forecasting avalanche hazard levels, computational models have been developed to improve data analysis and to provide supplementary opinions through machine learning methods, backed by a vast increase in accessible computing power, as McClung \cite{McClung1994} has explored as early as in 1994. Numerous models have since been developed, with computations performed on different types of data. 
 
 \textit{SNOWPACK}, a snow profile comparison method was first published by Lehning \textit{et al.} \cite{Lehning2001253} in 2001. The method attempts to establish a numerical profile of snow cover conditions based on various measured properties of the cover, such as the size and type of snow grains, temperature and density of the environments. A agreement score could then be established by comparing the numerical profile with an observed profile in the field, with high agreement scores reached by the experiments, indicating that the numerical profile would be suitable for use in avalanche forecasts. 
 
@@ -125,9 +125,23 @@ The most notable application of the NN method is by the SAIS. Avalanche forecast
 
 In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in temporal avalanche forecasts, as the formation of general vegetation conditions requires a long period of time. However, for the purpose of this project this model could potentially be used for establishing a static risk level for each point in the terrain, to be included in the overall risk model.
 
-\section{Visualisation of risk in GIS}
+\section{Modelling of avalanche hazard in GIS}
 
+In order to effective store large amounts of geographical data for computing the hazard map overlay of the project, a geographic information system (GIS) \cite{clarke1986advances} is the most suitable method of organising avalanche hazard data.
 
+While a majority of implemented avalanche forecasting methods -- such as those discussed in Section \label{sec:avalanche-forecasting} -- provide a generalised risk level in respect to unique sets of environmental conditions, these risk levels cannot be easily converted into localised hazards in a GIS, as these forecasting methods alone operate on smaller subsets of parameters contributing to an avalanche. To evaluate the avalanche hazard of a specific location (e.g. Red Ben in Ben Nevis, Lochaber), it is necessary to develop a systematic method of calculating risk for each point in the region, taking into account of as many hazard parameters as possible.
+
+According to Bühler \textit{et al.} \cite{buhler2013automated}, parameters influencing avalanche hazards can generally be placed in one of the three categories: (a) terrain topography features at each point in the modelled area; (b) meteorological data of the general area; and (c) characteristics of the snow cover in the area.
+
+Terrain topography features, such as aspect and slope \cite[pp. 17-18]{1456186}, convexity and concavity \cite[p. 267]{de2007geospatial}, and roughness \cite[p. 12]{wilson2007multiscale} can be computed directly from a terrain height-map raster. For the main area of study in this project (Scotland), the government owned Ordnance Survey has mapped the entire terrain of the British Isles (excluding Republic of Ireland) into a raster with resolution of 5 meters \cite{os-5-manual}. The data is updated frequently, and has a root-mean-square error of 2.5 meters in mountainous area, which is sufficient for the need of this project. As terrain features outside urban areas are not subject to frequent change, once the aforementioned terrain features are computed, they do not need to be re-computed until the source terrain data updates.
+
+Meteorological and snow profile data, on the other hand, are largely dependent on the current and recent weather conditions in the forecasting regions. Commonly examined parameters by past researches include temperature change, snow accumulation \cite{WARD1984109}, humidity\cite{durand1993meteorological}, and wind direction \cite{veitinger2014slab}; as well as snow profile parameters such as snow grain size and density (as analysed in the SNOWPACK model \cite{Lehning2001253}). However, as most past researches relied on weather forecasts in the regions in which they were conducted, not all parameters they used are available in Scotland. Fortunately, each SAIS avalanche forecast is also accompanied by a snow profile, containing measured meteorological and snow conditions observed during the field work of that forecast \cite{sais-snow-profiles}. 
+
+A number of efforts have been made to produce GIS models of avalanche hazards based on some or all of the aforementioned hazard parameters. 
+
+(...different papers...).
+
+Many of the efforts above have been able to produced hazard maps that could visualise locations with significant avalanche hazards to a map-reading user, as shown in Figure (...an image of different visualisations...). However, most of these maps are in 2D only, and are static once computed, providing no interactive capabilities. To our knowledge, only Pistocchi and Notarnicola \cite{Pistocchi2013} constructed a static 3D model with an avalanche risk overlay, similar to the 3D model constructed in this project. The interactive 3D model proposed by this project would also provide capabilities of displaying additional image layers and map features (such as a planned route) "on the fly", and the ability to observe from different angles and distances.
  
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
