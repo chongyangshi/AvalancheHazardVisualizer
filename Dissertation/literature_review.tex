@@ -14,9 +14,18 @@
 \usepackage{url}
 \usepackage[parfill]{parskip}
 \usepackage{natbib}
-\setlength{\headsep}{5pt}
+\usepackage{array}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\setlength{\headsep}{7pt}
 \graphicspath{ {images/} }
 \setlength{\bibsep}{3pt plus 3ex}
+\definecolor{notapplicable}{RGB}{192,192,192}
+\definecolor{low}{RGB}{153,255,153}
+\definecolor{moderate}{RGB}{255,255,153}
+\definecolor{considerable}{RGB}{255,178,102}
+\definecolor{high}{RGB}{255,102,102}
+\definecolor{veryhigh}{RGB}{102,0,0}
 
 \title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
@@ -125,7 +134,7 @@ The most notable application of the NN method is by the SAIS. Avalanche forecast
 
 In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in temporal avalanche forecasts, as the formation of general vegetation conditions requires a long period of time. However, for the purpose of this project this model could potentially be used for establishing a static risk level for each point in the terrain, to be included in the overall risk model.
 
-\section{Modelling of avalanche hazard in GIS}
+\section{Modelling of avalanche hazard in GIS} \label{sec:modelling-avalanche}
 
 In order to effective store large amounts of geographical data for computing the hazard map overlay of the project, a geographic information system (GIS) \cite{clarke1986advances} is the most suitable method of organising avalanche hazard data.
 
@@ -139,21 +148,63 @@ Meteorological and snow profile data, on the other hand, are largely dependent o
 
 A number of efforts have been made to produce GIS models of avalanche hazards based on some or all of the aforementioned hazard parameters.
 
-Grêt-Regamey and Straub \cite{Straub2006192} utilised a Bayesian network to study the relation between snow accumulation and flow model of avalanches, and visualised \cite{gret2006spatially} risks of avalanche impacts in an area with the trained network. A more comprehensive risk model was used by Cappabianca \textit{et al.} (top-left) \cite{Cappabianca2008193} to produce a similar visualisation, as shown in Figure \ref{fig:previous-visualisations} (top-left). 
-
-However, neither of the two studies above considered the full topography features of the triggering zones (e.g. convexity and terrain roughness), which significantly affect the probability of release, as shown by Ghinoi and Chung \cite{Ghinoi2005305}. Bühler \textit{et al.} \cite{buhler2013automated} devised a considerably accurate release zone identification algorithm based on terrain topography features alone, as visualised in Figure \ref{fig:previous-visualisations} (top-right). 
-
-More recent researches have also included meteorological analysis in the risk model. A notable example is by Veitinger \textit{et al.} \cite{veitinger2016potential} in 2016. In addition to topography features such as slope and roughness, wind sheltering effects of terrain was computed based on the direction of wind, and included in the fuzzy logic computations of per-point risk. The algorithm's visualisation of avalanche release risk on a slope where a real avalanche took place is shown in Figure \ref{fig:previous-visualisations} (bottom-right). While evaluations showed that little accuracy improvement was achieved in the general case due to potential mapping errors, the algorithm was significantly more accurate than its predecessor in locating frequent avalanche release areas.
-
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.5]{PreviousVisualisations.png}
 		\caption{\label{fig:previous-visualisations} Hazard maps produced by prior efforts in visualising avalanche hazards: flow model and snow profile analysis by Cappabianca \textit{et al.} (top-left) \cite{Cappabianca2008193}; data-driven analysis by Pistocchi and Notarnicola (bottom-left) \cite{Pistocchi2013}; terrain topography analysis by Bühler \textit{et al.} (top-right) \cite{buhler2013automated}; and terrain topography and wind shelter analysis by Veitinger \textit{et al.} (bottom-right) \cite{veitinger2016potential}.}
 \end{figure}
 
+Grêt-Regamey and Straub \cite{Straub2006192} utilised a Bayesian network to study the relation between snow accumulation and flow model of avalanches, and visualised \cite{gret2006spatially} risks of avalanche impacts in an area with the trained network. A more comprehensive risk model was used by Cappabianca \textit{et al.} (top-left) \cite{Cappabianca2008193} to produce a similar visualisation, as shown in Figure \ref{fig:previous-visualisations} (top-left). 
+
+However, neither of the two studies above considered the full topography features of the triggering zones (e.g. convexity and terrain roughness), which significantly affect the probability of release, as shown by Ghinoi and Chung \cite{Ghinoi2005305}. Bühler \textit{et al.} \cite{buhler2013automated} devised a considerably accurate release zone identification algorithm based on terrain topography features alone, as visualised in Figure \ref{fig:previous-visualisations} (top-right). 
+
+More recent researches have also included meteorological analysis in the risk model. A notable example is by Veitinger \textit{et al.} \cite{veitinger2016potential} in 2016. In addition to topography features such as slope and roughness, wind sheltering effects of terrain was computed based on the direction of wind, and included in the fuzzy logic computations of per-point risk. The algorithm's visualisation of avalanche release risk on a slope where a real avalanche took place is shown in Figure \ref{fig:previous-visualisations} (bottom-right). While evaluations showed that little accuracy improvement was achieved in the general case due to potential mapping errors, the algorithm was significantly more accurate than its predecessor in locating frequent avalanche release areas.
+
 Most hazard map visualisations of the aforementioned studies are in 2D only and are static once computed, providing no interactive capabilities. To our knowledge, only Pistocchi and Notarnicola \cite{Pistocchi2013} constructed a static 3D model with an avalanche risk overlay, as shown in Figure \ref{fig:previous-visualisations} (bottom-left), similar to the 3D model constructed in this project. The interactive 3D model proposed by this project would also provide capabilities of displaying additional image layers and map features (such as a planned route) "on the fly", and the ability to observe from different angles and distances.
 
-\section{Representation of hazards}
+\section{Colour representation of risks}
+
+While a realistic imagery of the surface can be produced in the 3D viewer by covering with corresponding aerial photographs, an appropriate colour representation scheme needs to be chosen for the hazard map overlay, which visualises the risk level at each point in the terrain model. Considerations need to be made regarding the choice of the colouring scheme, as well as in what form the colours are displayed. While all colouring schemes should have an unique representation for each distinct level of risk, how well an average user of the application perceives the colouring scheme is a usability issue. The two main colouring schemes proposed by existing researches and some attempts of applying them will be discussed in this section.
+
+\subsection{Saturation-based colouring}
+
+This is the simplest colour representation scheme. A single colour determined by a hue value is chosen, and in the context of visualising hazards the colour of choice is often red \cite{aerts2003testing} \cite{cheong2016evaluating}. The saturation of this colour at different points in the visualisation would vary, dependent on the level of risk at that point. As summarised by Cheong \textit{et al.} \cite[Ch. 2]{cheong2016evaluating}, there have been conflicting conclusions from researches on the effectiveness of saturation-based risk visualisations, when compared with visualisations using other schemes. Experiments also conducted by Cheong \textit{et al.} showed that the accuracy of user decisions under this scheme is good while multitasking, but otherwise not as good. 
+
+While the risk mapped by the visualisation of Cheong \textit{et al.} is wildfire hazard, a known visualisation of avalanche hazard under this saturation-based scheme was by Bühler \textit{et al.} \cite{buhler2013automated} as discussed in Section \ref{sec:modelling-avalanche}, however no human-computer interaction (HCI) evaluation was conducted. This scheme is also used by Spachinger \textit{et al.} \cite{spachinger2008flood} for flood risks.
+
+\subsection{Hue-based colouring} \label{subsec:hue-based-colouring}
+
+This colour representation scheme is similar to the saturation-based scheme, but uses different hues of colours (e.g. yellow and red) for different levels of risk in the visualisation. The European Avalanche Hazard Scale \cite[pp. 93-94]{91097820150101} -- also used by the SAIS in the UK -- applies such a hue-based scheme, as shown in Figure \ref{fig:eu-avalanche-scale}. This scheme is also used in visualisation of avalanche hazards by most studies discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:previous-visualisations}. 
+
+\begin{figure}[h]
+\small
+\centering
+\begin{tabular}{|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.9cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}| } 
+ \hline
+ \cellcolor{low!50}Low Risk 
+ & \cellcolor{moderate!50}Moderate Risk
+ & \cellcolor{considerable!50}Considerable Risk
+ & \cellcolor{high!50}High Risk
+ & \cellcolor{veryhigh!50}Very High Risk \\
+ \hline
+\end{tabular}
+\caption{\label{fig:eu-avalanche-scale} Colouring scheme reconstructed from the European Avalanche Hazard Scale, used by the SAIS \cite{sais-report}.}
+\end{figure}
+		
+However, some studies have found that the hue-based scheme used in Figure \ref{fig:eu-avalanche-scale} to be less effective, most notably by Conger \cite{conger2004review}, which found that using green to represent low risk deviates from the common perception of green being a safe-indicating colour, which is not always the case in avalanche forecasting. Orange was also found to be inappropriate in association with a risk, and more difficult to print cartographically \cite[Ch. 4.2]{conger2004review}. Therefore Conger has suggested that the risk scale should be rescaled into four, in order to abolish the use of orange. 
+
+HCI evaluations conducted by Cheong \textit{et al.} \cite[Ch. 5]{cheong2016evaluating} concluded that while a hue-based scheme is often most preferred by users, its user decision accuracy is not the best among different colour representation schemes.
+ 
+Other variations of applying hue-based colouring include an attempt by Gavaldà and Moner \cite{gavalda2008mountaineeroriented} to represent mountaineering route hazards with red-yellow-green traffic signals; and a method developed by Saito \textit{et al.} \cite{saito2005two}, using two tones of hue to represent hazard at each level, which unfortunately is unsuitable for the steep transitions of risk frequently occurring in avalanche hazard maps. Conger \cite[Ch. 5.2]{conger2004review} also suggested a method of partially filling hazard areas with triangles, which are coloured according to the colouring scheme. This however would be difficult to implement in practice, due to the size variations of neighbouring points with the same risk level.
+
+
+
+
+
+
+
+
+
 
 \section{Cost-based path finding in 3D model}
 
