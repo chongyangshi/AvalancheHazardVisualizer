@@ -129,7 +129,7 @@ In addition to analysis of snow and terrain conditions and past avalanche record
 
 In order to effective store large amounts of geographical data for computing the hazard map overlay of the project, a geographic information system (GIS) \cite{clarke1986advances} is the most suitable method of organising avalanche hazard data.
 
-While a majority of implemented avalanche forecasting methods -- such as those discussed in Section \label{sec:avalanche-forecasting} -- provide a generalised risk level in respect to unique sets of environmental conditions, these risk levels cannot be easily converted into localised hazards in a GIS, as these forecasting methods alone operate on smaller subsets of parameters contributing to an avalanche. To evaluate the avalanche hazard of a specific location (e.g. Red Ben in Ben Nevis, Lochaber), it is necessary to develop a systematic method of calculating risk for each point in the region, taking into account of as many hazard parameters as possible.
+While a majority of implemented avalanche forecasting methods -- such as those discussed in Section \label{sec:avalanche-forecasting} -- provide a generalised risk level in respect to unique sets of environmental conditions, these risk levels cannot be easily converted into localised hazards in a GIS, as these forecasting methods only operate on smaller subsets of parameters contributing to an avalanche. To evaluate the avalanche hazard of a specific location (e.g. Red Ben in Ben Nevis, Lochaber), it is necessary to develop a systematic method of calculating risk for each point in the region, taking into account of as many hazard parameters as possible.
 
 According to Bühler \textit{et al.} \cite{buhler2013automated}, parameters influencing avalanche hazards can generally be placed in one of the three categories: (a) terrain topography features at each point in the modelled area; (b) meteorological data of the general area; and (c) characteristics of the snow cover in the area.
 
@@ -137,11 +137,27 @@ Terrain topography features, such as aspect and slope \cite[pp. 17-18]{1456186},
 
 Meteorological and snow profile data, on the other hand, are largely dependent on the current and recent weather conditions in the forecasting regions. Commonly examined parameters by past researches include temperature change, snow accumulation \cite{WARD1984109}, humidity\cite{durand1993meteorological}, and wind direction \cite{veitinger2014slab}; as well as snow profile parameters such as snow grain size and density (as analysed in the SNOWPACK model \cite{Lehning2001253}). However, as most past researches relied on weather forecasts in the regions in which they were conducted, not all parameters they used are available in Scotland. Fortunately, each SAIS avalanche forecast is also accompanied by a snow profile, containing measured meteorological and snow conditions observed during the field work of that forecast \cite{sais-snow-profiles}. 
 
-A number of efforts have been made to produce GIS models of avalanche hazards based on some or all of the aforementioned hazard parameters. 
+A number of efforts have been made to produce GIS models of avalanche hazards based on some or all of the aforementioned hazard parameters.
 
-(...different papers...).
+Grêt-Regamey and Straub \cite{Straub2006192} utilised a Bayesian network to study the relation between snow accumulation and flow model of avalanches, and visualised \cite{gret2006spatially} risks of avalanche impacts in an area with the trained network. A more comprehensive risk model was used by Cappabianca \textit{et al.} (top-left) \cite{Cappabianca2008193} to produce a similar visualisation, as shown in Figure \ref{fig:previous-visualisations} (top-left). 
 
-Many of the efforts above have been able to produced hazard maps that could visualise locations with significant avalanche hazards to a map-reading user, as shown in Figure (...an image of different visualisations...). However, most of these maps are in 2D only, and are static once computed, providing no interactive capabilities. To our knowledge, only Pistocchi and Notarnicola \cite{Pistocchi2013} constructed a static 3D model with an avalanche risk overlay, similar to the 3D model constructed in this project. The interactive 3D model proposed by this project would also provide capabilities of displaying additional image layers and map features (such as a planned route) "on the fly", and the ability to observe from different angles and distances.
+However, neither of the two studies above considered the full topography features of the triggering zones (e.g. convexity and terrain roughness), which significantly affect the probability of release, as shown by Ghinoi and Chung \cite{Ghinoi2005305}. Bühler \textit{et al.} \cite{buhler2013automated} devised a considerably accurate release zone identification algorithm based on terrain topography features alone, as visualised in Figure \ref{fig:previous-visualisations} (top-right). 
+
+More recent researches have also included meteorological analysis in the risk model. A notable example is by Veitinger \textit{et al.} \cite{veitinger2016potential} in 2016. In addition to topography features such as slope and roughness, wind sheltering effects of terrain was computed based on the direction of wind, and included in the fuzzy logic computations of per-point risk. The algorithm's visualisation of avalanche release risk on a slope where a real avalanche took place is shown in Figure \ref{fig:previous-visualisations} (bottom-right). While evaluations showed that little accuracy improvement was achieved in the general case due to potential mapping errors, the algorithm was significantly more accurate than its predecessor in locating frequent avalanche release areas.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.5]{PreviousVisualisations.png}
+		\caption{\label{fig:previous-visualisations} Hazard maps produced by prior efforts in visualising avalanche hazards: flow model and snow profile analysis by Cappabianca \textit{et al.} (top-left) \cite{Cappabianca2008193}; data-driven analysis by Pistocchi and Notarnicola (bottom-left) \cite{Pistocchi2013}; terrain topography analysis by Bühler \textit{et al.} (top-right) \cite{buhler2013automated}; and terrain topography and wind shelter analysis by Veitinger \textit{et al.} (bottom-right) \cite{veitinger2016potential}.}
+\end{figure}
+
+Most hazard map visualisations of the aforementioned studies are in 2D only and are static once computed, providing no interactive capabilities. To our knowledge, only Pistocchi and Notarnicola \cite{Pistocchi2013} constructed a static 3D model with an avalanche risk overlay, as shown in Figure \ref{fig:previous-visualisations} (bottom-left), similar to the 3D model constructed in this project. The interactive 3D model proposed by this project would also provide capabilities of displaying additional image layers and map features (such as a planned route) "on the fly", and the ability to observe from different angles and distances.
+
+\section{Representation of hazards}
+
+\section{Cost-based path finding in 3D model}
+
+\section{Usability evaluations of a 3D model}
  
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
