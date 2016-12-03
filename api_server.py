@@ -16,12 +16,13 @@ API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
 SPATIAL_READER = raster_reader
 
-# Initialise forecast database and raster reader.
-forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
-raster = SPATIAL_READER.RasterReader()
-
 # Main API app.
 app = Flask(__name__)
+
+# Initialise forecast database and raster reader within application context.
+with app.app_context():
+    forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
+    raster = SPATIAL_READER.RasterReader()
 
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final):
