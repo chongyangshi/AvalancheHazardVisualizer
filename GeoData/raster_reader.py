@@ -13,7 +13,7 @@ class RasterReader:
         raster files, in order to read raster without 
         loading them in full in memory. '''
 
-    def __init__(self, height_map=HEIGHT_MAP_RASTER, aspect_map=ASPECT_MAP_RASTER, contour_map=COUNTER_MAP_RASTER):
+    def __init__(self, height_map=HEIGHT_MAP_RASTER, aspect_map=ASPECT_MAP_RASTER, contour_map=CONTOUR_MAP_RASTER):
         
         self.__height_map_raster = height_map
         self.__aspect_map_raster = aspect_map
