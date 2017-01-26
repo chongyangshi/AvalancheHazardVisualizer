@@ -6,7 +6,7 @@ from osgeo import gdal
 
 HEIGHT_MAP_RASTER = "/mnt/Shared/OS5/Full/WGS.tif"
 ASPECT_MAP_RASTER = "/mnt/Shared/OS5/Full/WGSAspects.tif"
-CONTOUR_MAP_RASTER = "/mnt/Shared/OS5/Full/WGSContours.tif"
+CONTOUR_MAP_RASTER = "/mnt/Shared/OS5/Full/WGS_Map.tif"
 
 class RasterReader:
     ''' Interface for GDAL access of height map and aspect 

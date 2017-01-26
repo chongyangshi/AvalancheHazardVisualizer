@@ -124,9 +124,15 @@ def aspect_to_rbg(aspect):
         return colours
 
 
-def contour_to_rbg(contour):
+def contour_to_rbg(pixel_grayscale):
     ''' Return contour values as 50% capacity and transparency grey. '''
-    if contour > 0.9:
-        return (105, 105, 105, 127)
-    else:
+    try:
+
+        grayscale_int = int(pixel_grayscale)
+        if not (0 <= pixel_grayscale <= 255):
+            return (255, 255, 255, 0)
+        inversed_int = 255 - grayscale_int  
+        return (inversed_int, inversed_int, inversed_int, 127)
+
+    except ValueError:
         return (255, 255, 255, 0)
