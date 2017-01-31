@@ -157,10 +157,12 @@ class RasterReader:
     
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print("Usage: python raster_reader.py RASTER_FILE")
+        print("Loading default raster...")
+        reader = RasterReader(DEFAULT_RASTER)
     else:
-        reader = RasterReader(sys.argv[2])
-    # Simple tests.
+        reader = RasterReader(sys.argv[1])
+        # Simple tests.
     print(reader.read_point(-4.0385629, 57.1513943))
     print(reader.read_points(-4.0385629, 57.1513943, -3.9985629, 57.1213943))
