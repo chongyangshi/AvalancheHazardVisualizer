@@ -25,6 +25,7 @@ with app.app_context():
     height_raster = SPATIAL_READER.RasterReader(rasters.HEIGHT_RASTER)
     aspect_raster = SPATIAL_READER.RasterReader(rasters.ASPECT_RASTER)
     contour_raster = SPATIAL_READER.RasterReader(rasters.CONTOUR_RASTER)
+    static_risk_raster = SPATIAL_READER.RasterReader(rasters.RISK_RASTER)
 
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final):
@@ -55,14 +56,16 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
             not_found_message = "Request too large."
             abort(404)
         
-        # Request heights and aspects from the raster.
+        # Request heights and aspects from the raster, as well as static risk value from the static risk raster.
         heights_matrix = height_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         aspects_matrix = aspect_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        static_risk_matrix = static_risk_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+
         # If no data returned.
-        if (heights_matrix is False) or (aspects_matrix is False): 
+        if (heights_matrix is False) or (aspects_matrix is False) or (static_risk_matrix is False):
             not_found_message = "Heights or aspects out of range."
             abort(400)
-        if (len(heights_matrix) <= 0) or (len(aspects_matrix) <= 0): 
+        if (len(heights_matrix) <= 0) or (len(aspects_matrix) <= 0) or (len(static_risk_matrix) <= 0):
             not_found_message = "Heights or aspects too large to request."
             abort(404)
         
@@ -103,7 +106,7 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         return_image_pixels = return_image.load()
         for i in range(return_image.size[0]):   
             for j in range(return_image.size[1]):
-                return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i]) # 2D array is in inversed order of axis.
+                return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i], static_risk_matrix[j][i]) # 2D array is in inversed order of axis.
         image_object = StringIO.StringIO() 
         return_image.save(image_object, format="png") 
         image_object.seek(0)
