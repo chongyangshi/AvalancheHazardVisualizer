@@ -4,6 +4,7 @@ import os
 import json
 from collections import OrderedDict
 from math import copysign
+from colorsys import hsv_to_rgb
 
 from GeoData import rasters
 
@@ -77,16 +78,17 @@ def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
 def risk_code_to_colour(risk_code, static_risk):
     ''' Return an RGB 3-tuple for the colour represented by the risk_code
         and static risk (represented by capacity). '''
-
+    
+    # HSV (Hue, Value)
     # [None: Gray, Low: Faint Yellow, Moderate: Dark Yellow, Considerable: Orange, High: Red, Very High: Dark Red]
-    risks = [(192,192,192), (255,255,178), (254,204,92), (253,141,60), (240,59,32), (189,0,38)]
+    risks = [(0, 0.753), (0.167, 1), (0.115, 0.996), (0.070, 0.992), (0.022, 0.941), (0.966, 0.741)]
     
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
-        capacity = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN) * 255
-        risks[risk_code] = risks[risk_code] + (capacity,)
-        return risks[risk_code]
+        saturation = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
+        rgb_colour = list(map(lambda x: int(round(x * 255)), hsv_to_rgb(risks[risk_code][0], saturation, risks[risk_code][1])))
+        return tuple(rgb_colour)
 
 
 def aspect_to_grayscale(aspect):
