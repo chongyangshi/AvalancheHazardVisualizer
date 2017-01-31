@@ -1,10 +1,8 @@
-function[risk] = curvature_risk(x)
-lower = -0.79;
-upper = 0.79;
-if (lower <= x) && (x <= upper)
-    risk = x.^3 + 0.5;
-elseif (x < lower)
-    risk = 0;
-else
-    risk = 1;
-end;
+function[risk, normalization] = curvature_risk(x)
+risk = curvature_calc(x);
+normalization = 0.7937 + (max(abs(x), 0.7937) - 0.7937);
+
+function[val] = curvature_calc(n)
+n(n < -0.79) = 0;
+n(n > 0.79) = 0.7937; % 0.7937^3 + 0.5 ~= 1
+val = n.^3 + 0.5;

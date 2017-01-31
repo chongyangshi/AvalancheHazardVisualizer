@@ -34,10 +34,10 @@ for y = 1:y_min_size
     for x = 1:x_min_size
         
         % Slope risk with pre-defined function.
-        current_slope_risk = slope_risk(slope_r(y, x));
+        [current_slope_risk, slope_nmz] = slope_risk(slope_r(y, x));
         
         % Curvature risk with pre-defined function.
-        current_curvature_risk = curvature_risk(curvature_r(y, x));
+        [current_curvature_risk, curvature_nmz] = curvature_risk(curvature_r(y, x));
         
         % Repeat sides when getting neighbours.
         current_position = 1;
@@ -54,10 +54,11 @@ for y = 1:y_min_size
         end
         
         % Now we can get the roughness risk.
-        current_roughness_risk = roughness_risk(slope_neighbours, aspect_neighbours);
+        [current_roughness_risk, roughness_nmz] = roughness_risk(slope_neighbours, aspect_neighbours);
     
-        % Tally them together, currently just a multiply.
-        total_risk = current_slope_risk * current_curvature_risk * current_roughness_risk;
+        % Tally them together, currently just a mean (multiply made it too
+        % small).
+        total_risk = (current_slope_risk / slope_nmz) * (current_curvature_risk / curvature_nmz) * (current_roughness_risk / roughness_nmz);
         static_risk_r(y, x) = total_risk;
         if total_risk > current_max
             current_max = total_risk;
@@ -78,11 +79,11 @@ disp('Purging original inputs from memory...');
 clear slope_r;
 clear aspect_r;
 clear curvature_r;
-fprintf('The maximum multiplicative risk is %f, and the minimum multiplicative risk is %f', current_max, current_min);
+fprintf('The maximum multiplicative risk is %f, and the minimum multiplicative risk is %f.\n', current_max, current_min);
 disp('Writing output to the target rasters...');
 
 
 % Write output rasters.
-CoordRefSysCode = 4326; % WGS
+CoordRefSysCode = 4326; % WGS           
 geotiffwrite(RISK_RASTER, static_risk_r, slope_r_info, 'CoordRefSysCode', CoordRefSysCode);
 disp('Output written to the static risk raster, all done.');
