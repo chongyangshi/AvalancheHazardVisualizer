@@ -78,7 +78,6 @@ disp('Purging original inputs from memory...');
 clear slope_r;
 clear aspect_r;
 clear curvature_r;
-clear risk_r;
 fprintf('The maximum multiplicative risk is %f, and the minimum multiplicative risk is %f', current_max, current_min);
 disp('Writing output to the target rasters...');
 
