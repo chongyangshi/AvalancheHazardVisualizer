@@ -5,6 +5,8 @@ import json
 from collections import OrderedDict
 from math import copysign
 
+from GeoData import rasters
+
 # Conversion table for aspect 0-360 degrees to RGB values, represented by linear changes in six segments.
 CHANNEL_RANGE = 255
 CHANNEL_COLOURINGS = {
@@ -72,17 +74,18 @@ def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
         return 0
 
 
-def risk_code_to_colour(risk_code):
-    ''' Return an RGB 3-tuple for the colour represented by the risk_code. '''
+def risk_code_to_colour(risk_code, static_risk):
+    ''' Return an RGB 3-tuple for the colour represented by the risk_code
+        and static risk (represented by capacity). '''
 
-    # [None: Gray, Low: Green, Moderate: Light Yellow, Considerable: Light Orange, High: Light Red, Very High: Dark Red]
-    risks = [(192,192,192), (153,255,153), (255,255,153), (255,178,102), (255,102,102), (102,0,0)]
+    # [None: Gray, Low: Faint Yellow, Moderate: Dark Yellow, Considerable: Orange, High: Red, Very High: Dark Red]
+    risks = [(192,192,192), (255,255,178), (254,204,92), (253,141,60), (240,59,32), (189,0,38)]
     
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
-        # Add a 50% transparency channel (255/2)
-        risks[risk_code] = risks[risk_code] + (127,)
+        capacity = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN) * 255
+        risks[risk_code] = risks[risk_code] + (capacity,)
         return risks[risk_code]
 
 

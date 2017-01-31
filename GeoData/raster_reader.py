@@ -4,41 +4,31 @@ import struct
 import sys
 from osgeo import gdal
 
-HEIGHT_MAP_RASTER = "/mnt/Shared/OS5/Full/WGS.tif"
-ASPECT_MAP_RASTER = "/mnt/Shared/OS5/Full/WGSAspects.tif"
-CONTOUR_MAP_RASTER = "/mnt/Shared/OS5/Full/WGS_Map.tif"
+DEFAULT_RASTER = "/mnt/Shared/OS5/Full/WGS.tif"
 
 class RasterReader:
-    ''' Interface for GDAL access of height map and aspect 
+    ''' Interface for GDAL access of external
         raster files, in order to read raster without 
         loading them in full in memory. '''
 
-    def __init__(self, height_map=HEIGHT_MAP_RASTER, aspect_map=ASPECT_MAP_RASTER, contour_map=CONTOUR_MAP_RASTER):
+    def __init__(self, raster_file=DEFAULT_RASTER):
         
-        self.__height_map_raster = height_map
-        self.__aspect_map_raster = aspect_map
-        self.__contour_map_raster = contour_map
+        self.__raster_file = raster_file
+        self._raster = gdal.Open(self.__raster_file)
 
-        # Test to see if both rasters can be read.
-        self._height_map = gdal.Open(self.__height_map_raster)
-        self._aspect_map = gdal.Open(self.__aspect_map_raster)
-        self._contour_map = gdal.Open(self.__contour_map_raster)
-
-        if (type(self._height_map) is not gdal.Dataset) or (type(self._aspect_map) is not gdal.Dataset) or (type(self._contour_map) is not gdal.Dataset):
-            self.log_error("Error, either height map or aspect map raster is not valid.")
+        if (type(self._raster) is not gdal.Dataset):
+            self.log_error("Error, raster data from " + self.__raster_file + " is not valid.")
             sys.exit()
         
         # Try to read the upper left corners to make sure that the rasters are not empty.
-        test_read_height = self._height_map.ReadRaster(0,0,1,1,buf_type=gdal.GDT_Float32)
-        test_read_aspect = self._aspect_map.ReadRaster(0,0,1,1,buf_type=gdal.GDT_Float32)
-        test_read_contour = self._contour_map.ReadRaster(0,0,1,1,buf_type=gdal.GDT_Float32)
-        if (not self.validate_read(test_read_height)) or (not self.validate_read(test_read_aspect)) or (not self.validate_read(test_read_contour)):
-            self.log_error("Error, either height map or aspect map raster is empty, cannot use that.")
+        test_read = self._raster.ReadRaster(0,0,1,1,buf_type=gdal.GDT_Float32)
+        if (not self.validate_read(test_read)):
+            self.log_error("Error, the " + self.__raster_file + " raster is empty, cannot use that.")
             sys.exit()
 
         # Compute the corners of the raster.
         self.__corners = {}
-        for raster_map in [self._height_map, self._aspect_map, self._contour_map]:
+        for raster_map in [self._raster]:
 
             # Initialise.
             object_id = id(raster_map) 
@@ -55,58 +45,38 @@ class RasterReader:
             self.__corners[object_id]['lower_left_corner'] = [corner_info[0], corner_info[3] + raster_map.RasterYSize * corner_info[5]]
             self.__corners[object_id]['lower_right_corner'] = [corner_info[0] + raster_map.RasterXSize * corner_info[1], corner_info[3] + raster_map.RasterYSize * corner_info[5]]
             self.__corners[object_id]['center'] = [sum(e)/len(e) for e in zip(*[self.__corners[object_id]['upper_left_corner'], self.__corners[object_id]['lower_right_corner']])]
-        
-        # Warn the user if corners do not match.
-        if not (self.__corners[id(self._height_map)] == self.__corners[id(self._aspect_map)] == self.__corners[id(self._aspect_map)]):
-            self.log_error("Warning, the height map raster does not have identical corners to the aspect map's, this may or may not be a problem.")
 
 
-    def read_height(self, coord_x, coord_y):
-        ''' Get a single height from the height map raster, 
+    def read_point(self, coord_x, coord_y):
+        ''' Get data of a single point from the raster,
             return False if invalid coordinate read.'''
         
-        if not self.check_access_window(id(self._height_map), coord_x, coord_y):
+        if not self.check_access_window(id(self._raster), coord_x, coord_y):
             return False
 
-        index_x, index_y = self.coordinate_to_index(id(self._height_map), coord_x, coord_y)
-        height = self._height_map.ReadRaster(index_x, index_y, 1, 1, buf_type=gdal.GDT_Float32)
+        index_x, index_y = self.coordinate_to_index(id(self._raster), coord_x, coord_y)
+        data = self._raster.ReadRaster(index_x, index_y, 1, 1, buf_type=gdal.GDT_Float32)
         
-        if (self.validate_read(height)):
-            return struct.unpack('f', height)[0]
-        else:
-            return False
-
-
-    def read_aspect(self, coord_x, coord_y):
-        ''' Get a single aspect from the height map raster, 
-            return False if invalid coordinate read.'''
-        
-        if not self.check_access_window(id(self._aspect_map), coord_x, coord_y):
-            return False
-
-        index_x, index_y = self.coordinate_to_index(id(self._aspect_map), coord_x, coord_y)
-        aspect = self._aspect_map.ReadRaster(index_x, index_y, 1, 1, buf_type=gdal.GDT_Float32)
-        
-        if (self.validate_read(aspect)):
-            return struct.unpack('f', aspect)[0]
+        if (self.validate_read(data)):
+            return struct.unpack('f', data)[0]
         else:
             return False
 
     
-    def read_heights(self, initial_x, initial_y, end_x, end_y):
+    def read_points(self, initial_x, initial_y, end_x, end_y):
         ''' Read an area of the raster, with top left corner coordinates
             (initial_x, initial_y) and bottom right corner coordinates
-            (end_x, end_y) for heights. Return False if request invalid. '''
+            (end_x, end_y) for values. Return False if request invalid. '''
         
-        if not self.check_access_window(id(self._height_map), initial_x, initial_y):
+        if not self.check_access_window(id(self._raster), initial_x, initial_y):
             return False
         
-        if not self.check_access_window(id(self._height_map), end_x, end_y):
+        if not self.check_access_window(id(self._raster), end_x, end_y):
             return False
         
         # Calculate the indices for the two corners, and validate them.
-        x1, y1 = self.coordinate_to_index(id(self._height_map), initial_x, initial_y)
-        xn, yn = self.coordinate_to_index(id(self._height_map), end_x, end_y)
+        x1, y1 = self.coordinate_to_index(id(self._raster), initial_x, initial_y)
+        xn, yn = self.coordinate_to_index(id(self._raster), end_x, end_y)
         
         if (not yn >= y1) or (not xn >= x1):
             return False
@@ -119,71 +89,9 @@ class RasterReader:
         if (Nx > 9999) or (Ny > 9999):
             return []
         
-        heights = self._height_map.ReadAsArray(x1, y1, Nx, Ny)
+        data = self._raster.ReadAsArray(x1, y1, Nx, Ny)
         
-        return heights # Two-dimensional array, rows of data.
-
-    
-    def read_aspects(self, initial_x, initial_y, end_x, end_y):
-        ''' Read an area of the raster, with top left corner coordinates
-            (initial_x, initial_y) and bottom right corner coordinates
-            (end_x, end_y) for aspects. Return False if request invalid. '''
-        
-        if not self.check_access_window(id(self._aspect_map), initial_x, initial_y):
-            return False
-        
-        if not self.check_access_window(id(self._aspect_map), end_x, end_y):
-            return False
-
-        # Calculate the indices for the two corners, and validate them.
-        x1, y1 = self.coordinate_to_index(id(self._aspect_map), initial_x, initial_y)
-        xn, yn = self.coordinate_to_index(id(self._aspect_map), end_x, end_y)
-
-        if (not yn >= y1) or (not xn >= x1):
-            return False
-        
-        # Calculate the number of data points to fetch.
-        Nx = xn - x1 + 1
-        Ny = yn - y1 + 1
-
-        # If request too large, return empty.
-        if (Nx > 9999) or (Ny > 9999):
-            return []
-        
-        aspects = self._aspect_map.ReadAsArray(x1, y1, Nx, Ny)
-        
-        return aspects # Two-dimensional array, rows of data.
-
-
-    def read_contours(self, initial_x, initial_y, end_x, end_y):
-        ''' Read an area of the raster, with top left corner coordinates
-            (initial_x, initial_y) and bottom right corner coordinates
-            (end_x, end_y) for contours. Return False if request invalid. '''
-        
-        if not self.check_access_window(id(self._contour_map), initial_x, initial_y):
-            return False
-        
-        if not self.check_access_window(id(self._contour_map), end_x, end_y):
-            return False
-
-        # Calculate the indices for the two corners, and validate them.
-        x1, y1 = self.coordinate_to_index(id(self._contour_map), initial_x, initial_y)
-        xn, yn = self.coordinate_to_index(id(self._contour_map), end_x, end_y)
-
-        if (not yn >= y1) or (not xn >= x1):
-            return False
-        
-        # Calculate the number of data points to fetch.
-        Nx = xn - x1 + 1
-        Ny = yn - y1 + 1
-
-        # If request too large, return empty.
-        if (Nx > 9999) or (Ny > 9999):
-            return []
-        
-        contours = self._contour_map.ReadAsArray(x1, y1, Nx, Ny)
-        
-        return contours # Two-dimensional array, rows of data.
+        return data # Two-dimensional array, rows of data.
 
 
     def coordinate_to_index(self, raster_id, coord_x, coord_y):
@@ -217,9 +125,9 @@ class RasterReader:
     
     def get_limits(self, raster_id):
         ''' Return the limits ([x1, y1], [xn, yn]) for the given
-            raster ('heights' or 'aspects'), in coordinates. '''
+            raster, in coordinates. '''
 
-        return ((self.__corners[raster_id]['upper_left_corner'],\
+        return ((self.__corners[raster_id]['upper_left_corner'],
         self.__corners[raster_id]['lower_right_corner']))
 
 
@@ -249,15 +157,12 @@ class RasterReader:
     
 
 if __name__ == "__main__":
-    if 2 < len(sys.argv) < 4:
-        print("Usage: python raster_reader.py {{HEIGHT_MAP_RASTER} {ASPECT_MAP_RASTER} {CONTOUR_MAP_RASTER}}") 
-    elif len(sys.argv) == 4:
-        reader = RasterReader(height_map=sys.argv[1], aspect_map=sys.argv[2], contour_map=sys.argv[3])
+    if len(sys.argv) != 2:
+        print("Usage: python raster_reader.py RASTER_FILE")
+        print("Loading default raster...")
+        reader = RasterReader(DEFAULT_RASTER)
     else:
-        reader = RasterReader()
-    # Simple tests.
-    print(reader.read_height(-4.0385629, 57.1513943))
-    print(reader.read_aspect(-4.0385629, 57.1513943))
-    print(reader.read_heights(-4.0385629, 57.1513943, -3.9985629, 57.1213943))
-    print(reader.read_aspects(-4.0385629, 57.1513943, -3.9985629, 57.1213943))
-    print(reader.read_contours(-4.0385629, 57.1513943, -3.9985629, 57.1213943))
+        reader = RasterReader(sys.argv[1])
+        # Simple tests.
+    print(reader.read_point(-4.0385629, 57.1513943))
+    print(reader.read_points(-4.0385629, 57.1513943, -3.9985629, 57.1213943))

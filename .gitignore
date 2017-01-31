@@ -80,3 +80,6 @@ slprj/
 
 # Session info
 octave-workspace
+
+# Stupid PyCharm
+.idea/
