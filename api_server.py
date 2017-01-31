@@ -10,7 +10,7 @@ import utils
 import geocoordinate_to_location
 from SAISCrawler.script import db_manager as forecast_db
 from SAISCrawler.script import utils as forecast_utils
-from GeoData import raster_reader, raster_reader_bng
+from GeoData import raster_reader, rasters
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
@@ -22,7 +22,9 @@ app = Flask(__name__)
 # Initialise forecast database and raster reader within application context.
 with app.app_context():
     forecast_dbm = forecast_db.CrawlerDB(forecast_utils.get_project_full_path() + forecast_utils.read_config('dbFile'))
-    raster = SPATIAL_READER.RasterReader()
+    height_raster = SPATIAL_READER.RasterReader(rasters.HEIGHT_RASTER)
+    aspect_raster = SPATIAL_READER.RasterReader(rasters.ASPECT_RASTER)
+    contour_raster = SPATIAL_READER.RasterReader(rasters.CONTOUR_RASTER)
 
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final):
@@ -54,8 +56,8 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
             abort(404)
         
         # Request heights and aspects from the raster.
-        heights_matrix = raster.read_heights(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
-        aspects_matrix = raster.read_aspects(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        heights_matrix = height_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        aspects_matrix = aspect_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         # If no data returned.
         if (heights_matrix is False) or (aspects_matrix is False): 
             not_found_message = "Heights or aspects out of range."
@@ -154,7 +156,7 @@ def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_fi
             abort(404)
         
         # Request aspects from the raster.
-        aspects_matrix = raster.read_aspects(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        aspects_matrix = aspect_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         # If no data returned.
         if (aspects_matrix is False) or (len(aspects_matrix) <= 0): 
             not_found_message = "Heights or aspects out of range or too large to request."
@@ -222,7 +224,7 @@ def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_f
             abort(404)
         
         # Request contours from the raster.
-        contour_matrix = raster.read_contours(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
+        contour_matrix = contour_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         # If no data returned.
         if (contour_matrix is False) or (len(contour_matrix) <= 0): 
             not_found_message = "Contours out of range or too large to request."

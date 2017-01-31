@@ -1,0 +1,4 @@
+HEIGHT_RASTER = "/mnt/Shared/OS5/Full/WGS.tif"
+ASPECT_RASTER = "/mnt/Shared/OS5/Full/WGSAspects.tif"
+CONTOUR_RASTER = "/mnt/Shared/OS5/Full/WGS_Map.tif"
+RISK_RASTER = "/mnt/Shared/OS5/Full/WGSStaticRisk.tif"
