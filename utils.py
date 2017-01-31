@@ -79,7 +79,7 @@ def risk_code_to_colour(risk_code):
     risks = [(192,192,192), (153,255,153), (255,255,153), (255,178,102), (255,102,102), (102,0,0)]
     
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
-        return (255,255,255,0)
+        return (255, 255, 255, 0)
     else:
         # Add a 50% transparency channel (255/2)
         risks[risk_code] = risks[risk_code] + (127,)
@@ -90,7 +90,7 @@ def aspect_to_grayscale(aspect):
     ''' Convert 0-360 degrees aspect to 0-255 grayscale. '''
 
     if (aspect < 0) or (aspect > 360): #Invalid data.
-        return (255,255,255,0)
+        return (255, 255, 255, 0)
     else:
         converted_capacity = int(round(aspect / 360 * 255))
         return (255, 102, 102) + (converted_capacity, ) 
@@ -100,7 +100,7 @@ def aspect_to_rbg(aspect):
     ''' Convert aspect value to a spectrum of RGB colours. '''
 
     if (aspect < 0) or (aspect > 360): #Invalid data.
-        return (255,255,255,0)
+        return (255, 255, 255, 0)
     elif (aspect == 0) or (aspect == 360): # Special case
         return (255, 0, 0)
     else:
@@ -122,3 +122,17 @@ def aspect_to_rbg(aspect):
         colours = tuple(colours)
 
         return colours
+
+
+def contour_to_rbg(pixel_grayscale):
+    ''' Return contour values as 50% capacity and transparency grey. '''
+    try:
+
+        grayscale_int = int(pixel_grayscale)
+        if not (0 <= pixel_grayscale <= 255):
+            return (255, 255, 255, 0)
+        inversed_int = 255 - grayscale_int  
+        return (inversed_int, inversed_int, inversed_int, 127)
+
+    except ValueError:
+        return (255, 255, 255, 0)

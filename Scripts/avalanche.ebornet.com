@@ -37,4 +37,9 @@ server {
         proxy_buffering off;
         proxy_pass https://avalanche_testing.ebornet.com/api;
     }
+    location ~* \.(?:gif|jpe?g|png)$ {
+        expires 6h;
+        add_header Pragma public;
+        add_header Cache-Control "public";
+    }
 }

@@ -116,8 +116,16 @@ var aspect_map_experimental = new Cesium.UrlTemplateImageryProvider({
     maximumLevel : 14,
     credit: OSCredit
 });
+var contour_map = new Cesium.UrlTemplateImageryProvider({
+    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/contours/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    hasAlphaChannel : true,
+    maximumLevel : 14,
+    credit: OSCredit
+});
+
 var layers = viewer.scene.imageryLayers;
 var avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+var contour_layer = layers.addImageryProvider(contour_map);
 var aspect_layer = null;
 
 Sandcastle.addToolbarMenu([{
