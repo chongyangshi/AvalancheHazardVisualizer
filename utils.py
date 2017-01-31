@@ -86,7 +86,7 @@ def risk_code_to_colour(risk_code, static_risk):
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
-        saturation = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
+        saturation = 1 - static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN) # Inverted saturation-risk relation.
         rgb_colour = list(map(lambda x: int(round(x * 255)), hsv_to_rgb(risks[risk_code][0], saturation, risks[risk_code][1])))
         return tuple(rgb_colour)
 
