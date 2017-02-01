@@ -4,7 +4,7 @@ import os
 import json
 from collections import OrderedDict
 from math import copysign
-from colorsys import hsv_to_rgb
+from colorsys import hls_to_rgb
 
 from GeoData import rasters
 
@@ -79,17 +79,17 @@ def risk_code_to_colour(risk_code, static_risk):
     ''' Return an RGB 3-tuple for the colour represented by the risk_code
         and static risk (represented by capacity). '''
     
-    # HSV (Hue, Value)
+    # HLS (Hue, Lightness)
     # [None: Gray, Low: Faint Yellow, Moderate: Dark Yellow, Considerable: Orange, High: Red, Very High: Dark Red]
-    risks = [(0, 0.753), (0.167, 1), (0.115, 0.996), (0.070, 0.992), (0.022, 0.941), (0.966, 0.741)]
+    risks = [(0.0, 1.0), (0.167, 0.720), (0.125, 0.450), (0.083, 0.500), (0.0, 0.500), (0.0, 0.250)]
     
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
         risk_level = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
-        saturation = 1 - min(risk_level, 1) # Inverted saturation-risk relation.
-        rgb_colour = list(map(lambda x: int(round(x * 255)), hsv_to_rgb(risks[risk_code][0], saturation, risks[risk_code][1])))
-        return tuple(rgb_colour)
+        saturation = min(risk_level, 1) 
+        rgb_colour = list(map(lambda x: int(round(x * 255)), hls_to_rgb(risks[risk_code][0], risks[risk_code][1], saturation)))
+        return tuple(rgb_colour) + (127,)
 
 
 def aspect_to_grayscale(aspect):
@@ -133,13 +133,14 @@ def aspect_to_rbg(aspect):
 def contour_to_rbg(pixel_grayscale):
     ''' Return contour values as 50% capacity and transparency grey. '''
 
-    # Experimental choice of feature (lines).
     try:
-        pixel_value = int(round(pixel_grayscale))
-        if pixel_value > 150:
-            return (70, 70, 70, 175)
-        else:
+ 
+        grayscale_int = int(round(pixel_grayscale))
+        if not (0 <= pixel_grayscale <= 255):
             return (255, 255, 255, 0)
+        #inversed_int = 255 - grayscale_int  
+        #return (inversed_int, inversed_int, inversed_int, 51)
+        return (grayscale_int, grayscale_int, grayscale_int, 70)
 
     except ValueError:
         return (255, 255, 255, 0)
