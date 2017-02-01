@@ -1,7 +1,12 @@
-SLOPE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSSlope.tif';
-ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSAspects.tif';
-CURVATURE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSCurvature.tif';
-RISK_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSStaticRisk.tif';
+% SLOPE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSSlope.tif';
+% ASPECT_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSAspects.tif';
+% CURVATURE_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSCurvature.tif';
+% RISK_RASTER = '/media/icydoge/Shared/OS5/MATLAB/WGSStaticRisk.tif';
+
+SLOPE_RASTER = '~/Downloads/WGSSlope.tif';
+ASPECT_RASTER = '~/Downloads/WGSAspects.tif';
+CURVATURE_RASTER = '~/Downloads/WGSCurvature.tif';
+RISK_RASTER = '~/Downloads/WGSStaticRisk.tif';
 
 % Start timer.
 disp('Reading rasters...');
@@ -26,20 +31,23 @@ tic;
 % Calculate static risk.
 current_max = 0;
 current_min = 1;
-slope_neighbours = zeros(9, 1);
-aspect_neighbours = zeros(9, 1);
+neighbours = zeros(x_min_size, 9);
+slope_neighbours = zeros(9, x_min_size);
+aspect_neighbours = zeros(9, x_min_size);
 work_done = 0;
 total_work = y_min_size * x_min_size;
 for y = 1:y_min_size
+        
+    % Slope risk with pre-defined function.
+    current_slope_risks = slope_risk(slope_r(y, :));
+    
+    % Curvature risk with pre-defined function.
+    curvatures = curvature_r(y, :);
+    curvatures(isnan(curvatures)) = 0;
+    current_curvature_risks = curvature_risk(curvatures);
+    
+    % Repeat sides when getting neighbours.
     for x = 1:x_min_size
-        
-        % Slope risk with pre-defined function.
-        [current_slope_risk, slope_nmz] = slope_risk(slope_r(y, x));
-        
-        % Curvature risk with pre-defined function.
-        [current_curvature_risk, curvature_nmz] = curvature_risk(curvature_r(y, x));
-        
-        % Repeat sides when getting neighbours.
         current_position = 1;
         for i = (x-1):(x+1)
             for j = (y-1):(y+1)
@@ -47,28 +55,29 @@ for y = 1:y_min_size
                 ix = min(x_min_size, ix);
                 iy = max(1, j);
                 iy = min(y_min_size, iy);
-                slope_neighbours(current_position) = slope_r(iy, ix);
-                aspect_neighbours(current_position) = aspect_r(iy, ix);
-                current_position = current_position + 1;
+                slope_neighbours(current_position, x) = slope_r(iy, ix);
+                aspect_neighbours(current_position, x) = aspect_r(iy, ix);
             end
         end
-        
-        % Now we can get the roughness risk.
-        [current_roughness_risk, roughness_nmz] = roughness_risk(slope_neighbours, aspect_neighbours);
-    
-        % Tally them together, currently just a mean (multiply made it too
-        % small).
-        total_risk = (current_slope_risk / slope_nmz) * (current_curvature_risk / curvature_nmz) * (current_roughness_risk / roughness_nmz);
-        static_risk_r(y, x) = total_risk;
-        if total_risk > current_max
-            current_max = total_risk;
-        end
-        if total_risk < current_min
-            current_min = total_risk;
-        end
     end
+    
+    % Now we can get the roughness risk.
+    current_roughness_risks = roughness_risk(slope_neighbours, aspect_neighbours);
+    
+    % Tally them together, currently just a mean (multiply made it too
+    % small).
+    total_risks = current_slope_risks .* current_curvature_risks .* current_roughness_risks;
+    static_risk_r(y, :) = total_risks;
+    if max(total_risks) > current_max
+        current_max = max(total_risks);
+    end
+    if min(total_risks) < current_min
+        current_min = min(total_risks);
+    end
+    
     work_done = work_done + x_min_size;
     waitbar(work_done / total_work);
+    
 end
 
 % Stop timer and report performance.
