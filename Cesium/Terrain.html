@@ -119,7 +119,7 @@ var contour_map = new Cesium.UrlTemplateImageryProvider({
 
 var layers = viewer.scene.imageryLayers;
 var avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
-// var contour_layer = layers.addImageryProvider(contour_map);
+var contour_layer = layers.addImageryProvider(contour_map);
 var aspect_layer = null;
 
 Sandcastle.addToolbarMenu([{
