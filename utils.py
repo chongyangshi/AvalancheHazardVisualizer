@@ -89,7 +89,7 @@ def risk_code_to_colour(risk_code, static_risk):
         risk_level = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
         saturation = min(risk_level, 1) 
         rgb_colour = list(map(lambda x: int(round(x * 255)), hls_to_rgb(risks[risk_code][0], risks[risk_code][1], saturation)))
-        return tuple(rgb_colour) + (127,)
+        return tuple(rgb_colour) + (175,)
 
 
 def aspect_to_grayscale(aspect):
@@ -138,9 +138,9 @@ def contour_to_rbg(pixel_grayscale):
         grayscale_int = int(round(pixel_grayscale))
         if not (0 <= pixel_grayscale <= 255):
             return (255, 255, 255, 0)
-        #inversed_int = 255 - grayscale_int  
-        #return (inversed_int, inversed_int, inversed_int, 51)
-        return (grayscale_int, grayscale_int, grayscale_int, 70)
+        inversed_int = 255 - grayscale_int  
+        return (inversed_int, inversed_int, inversed_int, 65)
+        #return (grayscale_int, grayscale_int, grayscale_int, 65)
 
     except ValueError:
         return (255, 255, 255, 0)
