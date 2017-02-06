@@ -14,6 +14,12 @@
         waitSeconds : 60
     });
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    document.addEventListener('gesturestart', function (e) {
+        e.preventDefault();
+    });
+    </script>
 </head>
 <body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html">
 <style>
@@ -40,10 +46,10 @@ function startup(Cesium) {
 //Sandcastle_Begin
 Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
 
-var west = -5.06515;
-var south = 56.766861;
-var east = -5.00515;
-var north = 56.826861;
+var west = -5.008055;
+var south = 56.792807;
+var east = -4.988427;
+var north = 56.798914;
 
 var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
 
