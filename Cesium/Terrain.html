@@ -64,6 +64,7 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     baseLayerPicker : false
 });
 
+// Add all our layers.
 var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
     requestWaterMask : true,
@@ -76,7 +77,7 @@ var OS5LTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://terrain.ebornet.com/tilesets/L',
     credit : OSCredit,
 });
-OS5LTerrainProviderMeshes.cameraPos = [56.76, -4.999];
+OS5LTerrainProviderMeshes.cameraPos = [56.80, -5.01];
 var OS5GTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://terrain.ebornet.com/tilesets/G',
     credit : OSCredit,
