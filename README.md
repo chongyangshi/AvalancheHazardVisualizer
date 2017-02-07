@@ -6,7 +6,11 @@ An app to visualise avalanche hazards in Scottish mountains, using data from Ord
 #Installation#
 This system is to be deployed on an Ubuntu 14.04 LTS or 16.04 LTS system. Currently, the GDAL package in pip does not have gdal_array, so it cannot be used. Instead, the easy_install GDAL package works fine.
 
-Locations of the height map and aspect raster files are defined in `GeoData/raster_reader_bng.py`, change them as necessary before proceeding.
+Locations of the height map and aspect raster files are defined in `GeoData/raster.py`, change them as necessary before proceeding. The system requires the following rasters computed in QGIS:
+* `HEIGHT_RASTER`: height map DTM raster.
+* `ASPECT_RASTER`: terrain aspect map raster, computed by gdaldem.
+* `CONTOUR_RASTER`: a useful overlay map from an OS 1:25000 map raster.
+* `RISK_RASTER`: static risk raster computed by `Computations/static_risk.m`, which in addition to `ASPECT_RASTER` requires a raster of terrain slope (by gdaldem) and a raster of curvature (by r.slope.aspect from GRASS).
 
 Install system-level dependencies:
 
