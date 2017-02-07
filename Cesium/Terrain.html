@@ -108,19 +108,19 @@ var SAISCredit = new Cesium.Credit("Scottish Avalanche Information Service");
 var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
     url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
     hasAlphaChannel : true,
-    maximumLevel : 14,
+    maximumLevel : 15,
     credit: SAISCredit
 });
 var aspect_map = new Cesium.UrlTemplateImageryProvider({
     url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/terrain_aspects/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
     hasAlphaChannel : true,
-    maximumLevel : 14,
+    maximumLevel : 15,
     credit: OSCredit
 });
 var contour_map = new Cesium.UrlTemplateImageryProvider({
     url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/contours/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
     hasAlphaChannel : true,
-    maximumLevel : 14,
+    maximumLevel : 15,
     credit: OSCredit
 });
 
