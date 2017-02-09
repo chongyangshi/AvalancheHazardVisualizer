@@ -246,31 +246,40 @@ function switchRiskMap(date) {
     avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
 }
 
-var positions = getCameraCenterPosition();
-var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/forecast_dates/' + positions[0].toString() + '/' + positions[1].toString();
-var switch_functions = [];
-var xmlhttp = new XMLHttpRequest();
-xmlhttp.onreadystatechange = function() {
-    if (xmlhttp.readyState === XMLHttpRequest.DONE ) {
-       if (xmlhttp.status === 200) {
-           var dates = JSON.parse(xmlhttp.responseText);
-            Sandcastle.addToolbarMenu([{
-                text : 'Current SAIS Avalanche Risk (' + dates[0] + ')',
-                value: dates[0]
-            }], 'datesMenu');
+function loadRiskDates() {
+    var positions = getCameraCenterPosition();
+    var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/forecast_dates/' + positions[0].toString() + '/' + positions[1].toString();
+    var switch_functions = [];
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE ) {
+           if (xmlhttp.status === 200) {
+                var dates = JSON.parse(xmlhttp.responseText);
+                document.getElementById("datesMenu").innerHTML = "";
+                Sandcastle.addToolbarMenu([{
+                    text : 'Current SAIS Avalanche Risk (' + dates[0] + ')',
+                    value: dates[0]
+                }], 'datesMenu');
 
-            document.getElementById("datesMenu").firstChild.addEventListener('change', function(){switchRiskMap(this.value);}, false);
-            for (var i = 1; i < dates.length; i++) {
-                var option = document.createElement('option');
-                option.textContent = 'Outdated Forecast on ' + dates[i];
-                option.value = dates[i];
-                document.getElementById("datesMenu").firstChild.appendChild(option);
-            }
-       }
-    }
-};
-xmlhttp.open("GET", req_url, true);
-xmlhttp.send();
+                var select_menu = document.getElementById("datesMenu").firstChild;
+                for (var i = 1; i < select_menu.length; i++) {
+                    select_menu.options[i] = null;
+                }
+                select_menu.addEventListener('change', function(){switchRiskMap(this.value);}, false);
+                for (var i = 1; i < dates.length; i++) {
+                    var option = document.createElement('option');
+                    option.textContent = 'Outdated Forecast on ' + dates[i];
+                    option.value = dates[i];
+                    document.getElementById("datesMenu").firstChild.appendChild(option);
+                }
+           }
+        }
+    };
+    xmlhttp.open("GET", req_url, true);
+    xmlhttp.send();
+}
+loadRiskDates();
+document.getElementById("terrainMenu").firstChild.addEventListener('change', loadRiskDates, false);
 
 var toolbar = document.getElementById('toolbar');
 Cesium.knockout.applyBindings(viewModel, toolbar);
