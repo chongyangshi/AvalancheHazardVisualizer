@@ -140,6 +140,7 @@ class CrawlerDB:
 
         return forecast
 
+
     def lookup_newest_forecasts_by_location_id(self, locationID):
         ''' Lookup the most recent forecasts for all directions for a given
             location_id, returns None if none exist. '''
@@ -174,6 +175,43 @@ class CrawlerDB:
         forecasts = self.__CrawlerDBCursor.fetchall()
 
         return forecasts
+
+
+    def lookup_forecasts_by_location_id_and_date(self, locationID, forecastDate):
+        ''' Lookup the day's forecasts of a given location by location_id. Returns
+            empty set if location_id invalid or no forecasts available. '''
+
+        if locationID <= 0:
+            return []
+
+        if self.select_location_by_id(locationID) == None:
+            return []
+
+        if not utils.check_date_string(forecastDate):
+            return False
+
+        self.__CrawlerDBCursor.execute("SELECT * FROM forecasts WHERE\
+            location_id = ? AND forecast_date = ?", (locationID, forecastDate,))
+        forecasts = self.__CrawlerDBCursor.fetchall()
+
+        return forecasts
+
+
+    def lookup_forecast_dates(self, locationID):
+        ''' Given a location ID, lookup the dates for the last (up to) 
+            50 forecasts. '''
+
+        if locationID <= 0:
+            return False
+
+        if self.select_location_by_id(locationID) == None:
+            return False
+
+        self.__CrawlerDBCursor.execute("SELECT DISTINCT(forecast_date) FROM forecasts\
+            WHERE location_id = ? ORDER BY forecast_date DESC LIMIT 50", (locationID,))
+        dates = self.__CrawlerDBCursor.fetchall()
+
+        return dates
 
 
     def add_forecast(self, locationID, forecastDate, boundaries, dataset):

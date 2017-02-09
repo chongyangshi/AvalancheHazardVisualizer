@@ -3,7 +3,7 @@ import os
 import sys
 import StringIO
 from time import gmtime, strftime
-from flask import Flask, send_file, abort
+from flask import Flask, send_file, abort, jsonify
 from PIL import Image
 
 import utils
@@ -28,8 +28,11 @@ with app.app_context():
     static_risk_raster = SPATIAL_READER.RasterReader(rasters.RISK_RASTER)
 
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
-def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final):
-    ''' Return a color-code image containing the risk of the requested coordinate and altitude area. '''
+@app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:forecast_date>', methods=['GET'])
+def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final, forecast_date=None):
+    ''' Return a color-code image containing the risk of the requested coordinate and altitude area.
+        Optionally lookup forecast from a defined date instead of the lastet if forecast_date is
+        set. '''
 
     not_found_message = ""
  
@@ -86,7 +89,12 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         location_id = int(location_id_list[0][0])
         
         # Look up the most recent forecasts for the location.
-        location_forecasts = forecast_dbm.lookup_newest_forecasts_by_location_id(location_id)
+        defined_date_valid = False
+        if (forecast_date is not None) and forecast_utils.check_date_string(forecast_date):
+            location_forecasts = forecast_dbm.lookup_forecasts_by_location_id_and_date(location_id, forecast_date)
+        else:
+            location_forecasts = forecast_dbm.lookup_newest_forecasts_by_location_id(location_id)
+
         if location_forecasts == None:
             not_found_message = "Forecast for location not found."
             abort(400)
@@ -263,6 +271,42 @@ def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_f
         image_object.seek(0)
         
         return send_file(image_object, mimetype='image/png')
+
+
+@app.route('/data/api/v1.0/forecast_dates/<string:longitude>/<string:latitude>', methods=['GET'])
+def get_recent_forecast_dates(longitude, latitude):
+    ''' Return up to 50 most recent forecast dates to allow the client to request them later.'''
+    
+    try:
+        longitude = float(longitude)
+        latitude = float(latitude)
+        not_found_message = ""
+
+        if longitude < -180 or longitude > 180 or latitude < -90 or latitude > 90:
+            not_found_message = "Request out of geographical bounds."
+            abort(400)
+
+        location_name = geocoordinate_to_location.get_location_name(longitude, latitude)
+        if location_name == "":
+            not_found_message = "Location referenced by name unavailable."
+            abort(404)
+        else:
+            not_found_message = "Location referenced by id unavailable." # if int() fails.
+            location_id = int(forecast_dbm.select_location_by_name(location_name)[0][0])
+
+        forecast_dates = forecast_dbm.lookup_forecast_dates(location_id)
+        date_list = [date[0] for date in forecast_dates]
+
+        return jsonify(date_list)
+
+
+    except Exception as e:
+
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
+            with open(API_LOG, "a") as log_file:
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, last 50 dates not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
+
+        return jsonify({})
 
 if __name__ == '__main__':
     app.run(debug=True)

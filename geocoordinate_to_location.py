@@ -20,7 +20,7 @@ locations = {
         "start" : [-3.78318124708, 56.6893284359],
         "end" : [-2.97874558556, 57.1474411178]
     },
-    "Northen Cairngorms" : {
+    "Northern Cairngorms" : {
         "start" : [-4.06469864678, 56.9024363754],
         "end" : [-3.25917673638, 57.3623462403]
     }
@@ -30,12 +30,11 @@ def get_location_name(longitude, latitude):
     ''' Given a geodetic coordinate, return the name of location.
         Nondeterministic when a coordinate fits in more than one 
         location. Returns empty string if not found. '''
-    
+
     found = False
     for l in locations:
         if (longitude > locations[l]["start"][0]) and ((longitude < locations[l]["end"][0])):
             if (latitude > locations[l]["start"][1]) and ((latitude < locations[l]["end"][1])):
-                #print(str(locations[l]["start"][0]) + "<" + str(longitude) + "<" + str(locations[l]["end"][0]) + " " + str(locations[l]["start"][1]) + "<" + str(latitude) + "<" + str(locations[l]["end"][1]))
                 found = True
                 return l
     
