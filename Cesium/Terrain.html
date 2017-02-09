@@ -30,15 +30,10 @@
 <div id="toolbar">
 <div id="terrainMenu"></div>
 <div id="aspectMenu"></div>
+<div id="datesMenu"></div>
 <div id="zoomButtons"></div>
 <div id="toggleLighting"></div>
 <div id="sampleButtons"></div>
-<table><tbody>
-    <tr>
-        <td>Enable fog</td>
-        <td><input type="checkbox" data-bind="checked: fogEnabled"></td>
-    </tr>
-</tbody></table>
 </div>
 <script id="cesium_sandcastle_script">
 function startup(Cesium) {
@@ -226,12 +221,64 @@ safetyWarning.description = {
 };
 viewer.selectedEntity = safetyWarning;
 
+// Load past forecast dates.
+
+function getCameraCenterPosition(){
+
+    var centerOfScreen = new Cesium.Cartesian2(viewer.canvas.clientWidth / 2, viewer.canvas.clientHeight / 2);
+    var ellipsoid = viewer.scene.globe.ellipsoid;
+    var cartesian = viewer.camera.pickEllipsoid(centerOfScreen, ellipsoid);
+    var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+    var longitudeString = Cesium.Math.toDegrees(cartographic.longitude);
+    var latitudeString = Cesium.Math.toDegrees(cartographic.latitude);
+
+    return [longitudeString, latitudeString];
+}
+
+function switchRiskMap(date) {
+    avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
+        url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}/' + date,
+        hasAlphaChannel : true,
+        maximumLevel : 15,
+        credit: SAISCredit
+    });
+    layers.remove(avalanche_layer, true);
+    avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+}
+
+var positions = getCameraCenterPosition();
+var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/forecast_dates/' + positions[0].toString() + '/' + positions[1].toString();
+var switch_functions = [];
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState === XMLHttpRequest.DONE ) {
+       if (xmlhttp.status === 200) {
+           var dates = JSON.parse(xmlhttp.responseText);
+            Sandcastle.addToolbarMenu([{
+                text : 'Current SAIS Avalanche Risk (' + dates[0] + ')',
+                value: dates[0]
+            }], 'datesMenu');
+
+            document.getElementById("datesMenu").firstChild.addEventListener('change', function(){switchRiskMap(this.value);}, false);
+            for (var i = 1; i < dates.length; i++) {
+                var option = document.createElement('option');
+                option.textContent = 'Outdated Forecast on ' + dates[i];
+                option.value = dates[i];
+                document.getElementById("datesMenu").firstChild.appendChild(option);
+            }
+       }
+    }
+};
+xmlhttp.open("GET", req_url, true);
+xmlhttp.send();
+
 var toolbar = document.getElementById('toolbar');
 Cesium.knockout.applyBindings(viewModel, toolbar);
 Cesium.knockout.getObservable(viewModel, 'fogEnabled').subscribe(function(newValue) {
     viewer.scene.fog.enabled = newValue;
 });
-viewModel.enabled = viewer.scene.fog.enabled; 
+viewModel.enabled = viewer.scene.fog.enabled;
+
 //Sandcastle_End
     Sandcastle.finishedLoading();
 }
