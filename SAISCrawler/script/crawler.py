@@ -15,7 +15,7 @@ import utils
 
 
 class Crawler:
-    ''' The main class generating crawler instances to crawl the SAIS website. '''
+    """ The main class generating crawler instances to crawl the SAIS website. """
 
     def __init__(self):
 
@@ -41,12 +41,12 @@ class Crawler:
 
 
     def quit(self):
-        ''' Exit the crawler webview driver. '''
+        """ Exit the crawler webview driver. """
         self._crawlerViewDriver.quit()
 
 
     def crawl(self, locations):
-        ''' Crawl data of locations in the list. '''
+        """ Crawl data of locations in the list. """
 
         if len(locations) <= 0:
             return False
@@ -144,7 +144,7 @@ class Crawler:
 
 
     def crawl_all(self):
-        ''' Crawl data for all locations in the database. '''
+        """ Crawl data for all locations in the database. """
         self.crawl(self._DBManager.select_all_location_id())
 
 

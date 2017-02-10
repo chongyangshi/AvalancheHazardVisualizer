@@ -7,8 +7,8 @@ import sqlite3
 import utils
 
 class CrawlerDB:
-    ''' The class generating a database management interface object for the
-        crawler to use.'''
+    """ The class generating a database management interface object for the
+        crawler to use."""
 
     def __init__(self, dbFileName):
         self.__CrawlerDBConnection = sqlite3.connect(dbFileName, check_same_thread=False)
@@ -16,8 +16,8 @@ class CrawlerDB:
 
 
     def select_location_by_id(self, locationID):
-        ''' Returns a single tuple containing the information for a location
-            of the given ID: (ID, Name, ForecastURL).'''
+        """ Returns a single tuple containing the information for a location
+            of the given ID: (ID, Name, ForecastURL)."""
 
         self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE\
             location_id == ?", (locationID,))
@@ -27,8 +27,8 @@ class CrawlerDB:
 
 
     def select_location_by_name(self, locationName):
-        ''' Returns a list of tuples containing the information for locations
-            with name partially matching locationName, possibly empty. '''
+        """ Returns a list of tuples containing the information for locations
+            with name partially matching locationName, possibly empty. """
 
         self.__CrawlerDBCursor.execute("SELECT * FROM locations WHERE\
             location_name LIKE '%' || ? || '%'", (locationName,))
@@ -38,7 +38,7 @@ class CrawlerDB:
 
 
     def select_all_location_id(self):
-        ''' Returns a list of all locations' location_id. '''
+        """ Returns a list of all locations' location_id. """
 
         self.__CrawlerDBCursor.execute("SELECT location_id FROM locations")
         locations = self.__CrawlerDBCursor.fetchall()
@@ -47,8 +47,8 @@ class CrawlerDB:
 
 
     def add_location(self, locationName, locationURL):
-        ''' Add a new location, returning the new location ID. If parameter
-            invalid, return 0.'''
+        """ Add a new location, returning the new location ID. If parameter
+            invalid, return 0."""
 
         if len(locationName) == 0:
             return 0
@@ -66,8 +66,8 @@ class CrawlerDB:
 
 
     def delete_location(self, locationID):
-        ''' Delete a location with the given ID, returns false if param invalid,
-            true otherwise.'''
+        """ Delete a location with the given ID, returns false if param invalid,
+            true otherwise."""
 
         if locationID <= 0:
             return False
@@ -83,7 +83,7 @@ class CrawlerDB:
 
 
     def lookup_forecast_by_forecast_id(self, forecastID):
-        ''' Lookup one forecast by its ID, returns None if not exist. '''
+        """ Lookup one forecast by its ID, returns None if not exist. """
 
         if forecastID <= 0:
             return None
@@ -96,9 +96,9 @@ class CrawlerDB:
 
 
     def lookup_forecast_by_precise_search(self, locationID, forecastDate, direction):
-        ''' Perform a precise lookup which returns one record on the given
+        """ Perform a precise lookup which returns one record on the given
             locationID, date and direction of forecast. Returns None if no such
-            forecast record found.'''
+            forecast record found."""
 
         if locationID <= 0:
             return None
@@ -121,8 +121,8 @@ class CrawlerDB:
 
 
     def lookup_newest_forecast_by_location_id(self, locationID, direction):
-        ''' Lookup the most recent forecast for a given location_id and
-            direction, returns None if none exist. '''
+        """ Lookup the most recent forecast for a given location_id and
+            direction, returns None if none exist. """
 
         if locationID <= 0:
             return None
@@ -142,8 +142,8 @@ class CrawlerDB:
 
 
     def lookup_newest_forecasts_by_location_id(self, locationID):
-        ''' Lookup the most recent forecasts for all directions for a given
-            location_id, returns None if none exist. '''
+        """ Lookup the most recent forecasts for all directions for a given
+            location_id, returns None if none exist. """
 
         if locationID <= 0:
             return None
@@ -161,8 +161,8 @@ class CrawlerDB:
 
 
     def lookup_forecasts_by_location_id(self, locationID):
-        ''' Lookup all forecasts of a given location by location_id. Returns
-            empty set if location_id invalid or no forecasts available. '''
+        """ Lookup all forecasts of a given location by location_id. Returns
+            empty set if location_id invalid or no forecasts available. """
 
         if locationID <= 0:
             return []
@@ -178,8 +178,8 @@ class CrawlerDB:
 
 
     def lookup_forecasts_by_location_id_and_date(self, locationID, forecastDate):
-        ''' Lookup the day's forecasts of a given location by location_id. Returns
-            empty set if location_id invalid or no forecasts available. '''
+        """ Lookup the day's forecasts of a given location by location_id. Returns
+            empty set if location_id invalid or no forecasts available. """
 
         if locationID <= 0:
             return []
@@ -198,8 +198,8 @@ class CrawlerDB:
 
 
     def lookup_forecast_dates(self, locationID):
-        ''' Given a location ID, lookup the dates for the last (up to) 
-            50 forecasts. '''
+        """ Given a location ID, lookup the dates for the last (up to)
+            50 forecasts. """
 
         if locationID <= 0:
             return False
@@ -215,13 +215,13 @@ class CrawlerDB:
 
 
     def add_forecast(self, locationID, forecastDate, boundaries, dataset):
-        ''' Add a forecast data set into the database, locationID must match an
+        """ Add a forecast data set into the database, locationID must match an
             existing location, boundaries must be a three-value tuple containing
             the three levels in the graph, with the lower boundary being smaller
             than the upper boundary, dataset must be a list of tuples in the form
             of [((lowerPrimary, lowerSecondary), (upperPrimary, upperSecondary))].
             It is worth noting that for each direction (N, NE, E, SE, S, SW,
-             W, NW), a record is to be created on the same date's data. '''
+             W, NW), a record is to be created on the same date's data. """
 
         if locationID <= 0:
             return False
@@ -269,8 +269,8 @@ class CrawlerDB:
 
 
     def delete_forecast(self, forecastID):
-        ''' Delete a forecast by ID from the database, return False if ID
-            invalid. '''
+        """ Delete a forecast by ID from the database, return False if ID
+            invalid. """
 
         if forecastID <= 0:
             return False
@@ -286,7 +286,7 @@ class CrawlerDB:
 
 
     def delete_forecasts_for_location_id(self, locationID):
-        ''' Delete all forecasts for a given location_id. '''
+        """ Delete all forecasts for a given location_id. """
 
         if locationID <= 0:
             return False
@@ -303,7 +303,7 @@ class CrawlerDB:
 
         return True
 
-'''
+"""
 a = CrawlerDB(utils.get_project_full_path() + "/data/forecast.db")
 print a.select_location_by_id("2")
 print a.select_location_by_name("cairn")
@@ -313,4 +313,4 @@ print a.add_forecast("6", '2016-04-04', ('750', '900', '1055'), [(('1', '0'), ('
 print a.add_forecast("6", '2016-04-05', ('750', '800', '1055'), [(('1', '0'), ('1', '2')), (('1', '0'), ('2', '0')), (('1', '0'), ('2', '0')), (('1', '0'), ('1', '2')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0'))])
 print a.lookup_forecasts_by_location_id("6")
 print a.lookup_forecast_by_precise_search("6", "2016-04-05", "S")
-print a.lookup_forecast_by_forecast_id("10")'''
+print a.lookup_forecast_by_forecast_id("10")"""

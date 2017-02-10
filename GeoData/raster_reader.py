@@ -7,9 +7,9 @@ from osgeo import gdal
 DEFAULT_RASTER = "/mnt/Shared/OS5/Full/WGS.tif"
 
 class RasterReader:
-    ''' Interface for GDAL access of external
+    """ Interface for GDAL access of external
         raster files, in order to read raster without 
-        loading them in full in memory. '''
+        loading them in full in memory. """
 
     def __init__(self, raster_file=DEFAULT_RASTER):
         
@@ -48,8 +48,8 @@ class RasterReader:
 
 
     def read_point(self, coord_x, coord_y):
-        ''' Get data of a single point from the raster,
-            return False if invalid coordinate read.'''
+        """ Get data of a single point from the raster,
+            return False if invalid coordinate read."""
         
         if not self.check_access_window(id(self._raster), coord_x, coord_y):
             return False
@@ -64,9 +64,9 @@ class RasterReader:
 
     
     def read_points(self, initial_x, initial_y, end_x, end_y):
-        ''' Read an area of the raster, with top left corner coordinates
+        """ Read an area of the raster, with top left corner coordinates
             (initial_x, initial_y) and bottom right corner coordinates
-            (end_x, end_y) for values. Return False if request invalid. '''
+            (end_x, end_y) for values. Return False if request invalid. """
         
         if not self.check_access_window(id(self._raster), initial_x, initial_y):
             return False
@@ -95,7 +95,7 @@ class RasterReader:
 
 
     def coordinate_to_index(self, raster_id, coord_x, coord_y):
-        ''' Convert WGS84 coordinates into raster indices. '''
+        """ Convert WGS84 coordinates into raster indices. """
         
         transform_info = self.__corners[raster_id]['corner_info']
         x = int(round((coord_x - transform_info[0]) / transform_info[1]))
@@ -105,9 +105,9 @@ class RasterReader:
 
     
     def check_access_window(self, raster_id, coord_x, coord_y):
-        ''' Check whether a coordinate is within the acceptable
+        """ Check whether a coordinate is within the acceptable
             access window, if not, return False; else, return 
-            True. '''
+            True. """
         
         try:
             # If coordinate outside boundary, return False.
@@ -124,8 +124,8 @@ class RasterReader:
     
     
     def get_limits(self, raster_id):
-        ''' Return the limits ([x1, y1], [xn, yn]) for the given
-            raster, in coordinates. '''
+        """ Return the limits ([x1, y1], [xn, yn]) for the given
+            raster, in coordinates. """
 
         return ((self.__corners[raster_id]['upper_left_corner'],
         self.__corners[raster_id]['lower_right_corner']))
@@ -133,8 +133,8 @@ class RasterReader:
 
     @classmethod
     def validate_read(self, data):
-        ''' Check if a returned data (type str) is valid, as GDAL does 
-            not implement Python exceptions.'''
+        """ Check if a returned data (type str) is valid, as GDAL does
+            not implement Python exceptions."""
         if type(data) is not str:
             return False
         else:
@@ -143,7 +143,7 @@ class RasterReader:
 
     @classmethod
     def log_error(self, error_message):
-        ''' Utilities function for logging error messages. '''
+        """ Utilities function for logging error messages. """
         caller_name = str(sys._getframe(1).f_code.co_name)
 
         try:

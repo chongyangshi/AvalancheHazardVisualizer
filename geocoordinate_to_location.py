@@ -27,9 +27,9 @@ locations = {
 }
 
 def get_location_name(longitude, latitude):
-    ''' Given a geodetic coordinate, return the name of location.
+    """ Given a geodetic coordinate, return the name of location.
         Nondeterministic when a coordinate fits in more than one 
-        location. Returns empty string if not found. '''
+        location. Returns empty string if not found. """
 
     found = False
     for l in locations:

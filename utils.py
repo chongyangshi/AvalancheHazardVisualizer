@@ -18,7 +18,7 @@ CHANNEL_COLOURINGS = {
 
 
 def get_facing_from_aspect(aspect):
-    ''' Convert an aspect value (0-360.0) to a direction, clockwise by ArcGIS definition. '''
+    """ Convert an aspect value (0-360.0) to a direction, clockwise by ArcGIS definition. """
 
     x = float(aspect)
 
@@ -39,9 +39,9 @@ def get_facing_from_aspect(aspect):
 
 
 def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
-    ''' Operate on one list of SAIS forecasts in the same day
+    """ Operate on one list of SAIS forecasts in the same day
         to see which risk altitude range does the altitude fit 
-        in. '''
+        in. """
     
     # If forecasts not available.
     if len(forecasts) <= 0:
@@ -76,8 +76,8 @@ def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
 
 
 def risk_code_to_colour(risk_code, static_risk):
-    ''' Return an RGB 3-tuple for the colour represented by the risk_code
-        and static risk (represented by capacity). '''
+    """ Return an RGB 3-tuple for the colour represented by the risk_code
+        and static risk (represented by capacity). """
     
     # HLS (Hue, Lightness)
     # [None: Gray, Low: Faint Yellow, Moderate: Dark Yellow, Considerable: Orange, High: Red, Very High: Dark Red]
@@ -93,7 +93,7 @@ def risk_code_to_colour(risk_code, static_risk):
 
 
 def aspect_to_grayscale(aspect):
-    ''' Convert 0-360 degrees aspect to 0-255 grayscale. '''
+    """ Convert 0-360 degrees aspect to 0-255 grayscale. """
 
     if (aspect < 0) or (aspect > 360): #Invalid data.
         return (255, 255, 255, 0)
@@ -103,7 +103,7 @@ def aspect_to_grayscale(aspect):
 
 
 def aspect_to_rbg(aspect):
-    ''' Convert aspect value to a spectrum of RGB colours. '''
+    """ Convert aspect value to a spectrum of RGB colours. """
 
     if (aspect < 0) or (aspect > 360): #Invalid data.
         return (255, 255, 255, 0)
@@ -131,7 +131,7 @@ def aspect_to_rbg(aspect):
 
 
 def contour_to_rbg(pixel_grayscale):
-    ''' Return contour values as 50% capacity and transparency grey. '''
+    """ Return contour values as 50% capacity and transparency grey. """
 
     try:
  

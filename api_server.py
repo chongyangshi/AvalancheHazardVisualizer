@@ -30,9 +30,9 @@ with app.app_context():
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:forecast_date>', methods=['GET'])
 def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_final, forecast_date=None):
-    ''' Return a color-code image containing the risk of the requested coordinate and altitude area.
+    """ Return a color-code image containing the risk of the requested coordinate and altitude area.
         Optionally lookup forecast from a defined date instead of the lastet if forecast_date is
-        set. '''
+        set. """
 
     not_found_message = ""
  
@@ -139,7 +139,7 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
 
 @app.route('/imagery/api/v1.0/terrain_aspects/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_final):
-    ''' Return a grayscale map of terrain aspects, with 0-360 degrees mapped to 0-255 color levels. '''
+    """ Return a grayscale map of terrain aspects, with 0-360 degrees mapped to 0-255 color levels. """
 
     not_found_message = ""
  
@@ -207,7 +207,7 @@ def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_fi
 
 @app.route('/imagery/api/v1.0/contours/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_final):
-    ''' Return an image of terrain contours, with 50% capacity grey lines. '''
+    """ Return an image of terrain contours, with 50% capacity grey lines. """
 
     not_found_message = ""
  
@@ -275,7 +275,7 @@ def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_f
 
 @app.route('/data/api/v1.0/forecast_dates/<string:longitude>/<string:latitude>', methods=['GET'])
 def get_recent_forecast_dates(longitude, latitude):
-    ''' Return up to 50 most recent forecast dates to allow the client to request them later.'''
+    """ Return up to 50 most recent forecast dates to allow the client to request them later."""
     
     try:
         longitude = float(longitude)

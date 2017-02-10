@@ -7,7 +7,7 @@ import json
 import datetime
 
 def get_project_full_path():
-    ''' Return the full path of the project, for navigating directories.'''
+    """ Return the full path of the project, for navigating directories."""
 
     projectDirectory = os.path.dirname(os.path.abspath(os.path.join(__file__, os.pardir)))
 
@@ -15,8 +15,8 @@ def get_project_full_path():
 
 
 def check_date_string(date):
-    ''' Return True if the input string is a valid YYYY-MM-DD date, False
-        otherwise. '''
+    """ Return True if the input string is a valid YYYY-MM-DD date, False
+        otherwise. """
 
     try:
         datetime.datetime.strptime(date, '%Y-%m-%d')
@@ -27,8 +27,8 @@ def check_date_string(date):
 
 
 def check_direction(direction):
-    ''' Return True if the input string is a valid direction of forecast (N, NE,
-        E, SE, S, SW, W, NW). Return False otherwise. '''
+    """ Return True if the input string is a valid direction of forecast (N, NE,
+        E, SE, S, SW, W, NW). Return False otherwise. """
 
     if direction in ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]:
         return True
@@ -37,7 +37,7 @@ def check_direction(direction):
 
 
 def read_config(requestedKey):
-    ''' Return the configuration value of requestedKey. '''
+    """ Return the configuration value of requestedKey. """
 
     configFile = get_project_full_path() + "/script/config.json"
 

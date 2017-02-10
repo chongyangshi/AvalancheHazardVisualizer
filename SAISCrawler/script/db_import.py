@@ -29,14 +29,14 @@ with open(sys.argv[1], 'r') as csvfile:
         dbImportDataset.append((line[0].strip(), line[1].strip()[1:-1]))
 
 # Create tables.
-dbImportConnectionCursor.execute('''
+dbImportConnectionCursor.execute("""
         CREATE TABLE locations
         (location_id INTEGER PRIMARY KEY,
         location_name TEXT,
         location_forecast_url TEXT
-        )'''
+        )"""
     )
-dbImportConnectionCursor.execute('''
+dbImportConnectionCursor.execute("""
         CREATE TABLE forecasts
         (forecast_id INTEGER PRIMARY KEY,
         location_id INTEGER REFERENCES locations(location_id) ON DELETE CASCADE,
@@ -49,7 +49,7 @@ dbImportConnectionCursor.execute('''
         lower_secondary_colour INTEGER,
         upper_primary_colour INTEGER,
         upper_secondary_colour INTEGER
-        )'''
+        )"""
     )
 
 # Insert set of locations from the file.
