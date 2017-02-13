@@ -1,6 +1,8 @@
 from GeoData import rasters
 from GeoData.raster_reader import RasterReader
 from SAISCrawler.script import db_manager, utils
+import geocoordinate_to_location
+import utils as baseutils
 
 from sys import maxsize
 from math import sqrt
@@ -13,11 +15,13 @@ PIXEL_RES_DIAG = sqrt(PIXEL_RES ^ 2 * 2)
 
 class PathFinder:
     """ Class for pathfinding based on Naismith's distance,
-        static risk and dynamic risk. """
+        static risk and dynamic risk. Aspect map required
+        for dynamic risk. """
 
-    def __init__(self, height_map_reader, static_risk_reader, dynamic_risk_cursor):
+    def __init__(self, height_map_reader, aspect_map_reader, static_risk_reader, dynamic_risk_cursor):
 
         self._height_map_reader = height_map_reader
+        self._aspect_map_reader = aspect_map_reader
         self._static_risk_reader = static_risk_reader
         self._dynamic_risk_cursor = dynamic_risk_cursor
 
@@ -51,8 +55,26 @@ class PathFinder:
             latitude_final = temp
             y_side = 1
 
+        # Static properties.
         height_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
+        aspect_grid = self._aspect_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
+
+        # Dynamic properties.
+        location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
+        location_ids = self._dynamic_risk_cursor.select_location_by_name(location_name)
+        if not location_ids:
+            return False
+        location_id = int(location_ids[0][0])
+        location_forecasts = self._dynamic_risk_cursor.lookup_newest_forecasts_by_location_id(location_id)
+        if location_forecasts is None:
+            return False
+        location_forecast_list = list(location_forecasts)
+
+        for y in range(0, len(risk_grid)):
+            for x in range(0, len(risk_grid[0])):
+                risk_grid[y, x] = risk_grid[y, x] * baseutils.match_aspect_altitude_to_forecast(location_forecast_list, aspect_grid[y, x], height_grid[y, x])
+
 
         if (not isinstance(height_grid, ndarray)) or (not isinstance(risk_grid, ndarray)):
             return False
@@ -209,5 +231,5 @@ class PathFinder:
 if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
-    finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
+    finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
     print(finder.find_path(-5.029765624999997, 56.79884524518923, -5.031738281250013, 56.800878312330426, 0.5))
