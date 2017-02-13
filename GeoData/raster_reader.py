@@ -131,6 +131,19 @@ class RasterReader:
         self.__corners[raster_id]['lower_right_corner']))
 
 
+    def convert_displacement_to_coordinate(self, x_init, y_init, x, y):
+        """ Given a displacement of x and y number of points in the two directions,
+            return a calculated coordinate. """
+
+        corner_info = self.__corners[id(self._raster)]['corner_info']
+        if isinstance(x, int) and isinstance(y, int):
+            if (0 <= x < self._raster.RasterXSize) and (0 <= y < self._raster.RasterYSize):
+                return ((float(x_init + x * corner_info[1]),
+                        float(y_init + y * corner_info[5])))
+
+        return (-1, -1)
+
+
     @classmethod
     def validate_read(self, data):
         """ Check if a returned data (type str) is valid, as GDAL does
