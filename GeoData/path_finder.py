@@ -2,8 +2,10 @@ from GeoData import rasters
 from GeoData.raster_reader import RasterReader
 from SAISCrawler.script import db_manager, utils
 
+from sys import maxsize
 from math import sqrt
 from numpy import amax, amin, ndarray
+from copy import deepcopy
 
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
@@ -57,7 +59,7 @@ class PathFinder:
 
         # Build the grid and a list of vertices.
         naismith_max = -1
-        naismith_min = 99999 # Higher than the highest mountain, reasonable.
+        naismith_min = maxsize
         risk_grid_max = amax(risk_grid)
         risk_grid_min = amin(risk_grid)
 
@@ -115,13 +117,22 @@ class PathFinder:
             initial[1] = y_max
             final[1] = 0
 
+        # Make copies for reverse lookup.
+        nodes_backwards = deepcopy(nodes)
+        distance_grid_backwards = deepcopy(distance_grid)
+        prev_grid_backwards = deepcopy(prev_grid)
+        initial_backwards = deepcopy(final)
+        final_backwards = deepcopy(initial)
+
         # Initialise source.
         distance_grid[initial] = 0
+        distance_grid_backwards[initial_backwards] = 0
+        meeting_point = None
 
         while len(nodes) > 0:
 
-            # Find the min distance node.
-            min_distance = 9999
+            # Find the min distance node in forward.
+            min_distance = maxsize
             min_node = None
             for n in nodes:
                 if min_distance > distance_grid[n]:
@@ -131,12 +142,22 @@ class PathFinder:
             if min_node is None:
                 return False
 
+            min_distance_backwards = maxsize
+            min_node_backwards = None
+            for n in nodes_backwards:
+                if min_distance_backwards > distance_grid_backwards[n]:
+                    min_node_backwards = n
+                    min_distance_backwards = distance_grid_backwards[n]
+
+            if min_node is None or min_node_backwards is None:
+                return False
+
             # Found target.
-            if min_node == final:
+            if min_node == min_node_backwards:
+                meeting_point = deepcopy(min_node)
                 break
 
             nodes.remove(min_node)
-
             neighbours = [n for n in path_grid[min_node][2:] if (n is not None) and ((n[0], n[1]) in nodes)]
             for neighbour in neighbours:
                 scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
@@ -146,14 +167,34 @@ class PathFinder:
                     distance_grid[(neighbour[0], neighbour[1])] = potential_cost
                     prev_grid[(neighbour[0], neighbour[1])] = min_node
 
+            nodes_backwards.remove(min_node_backwards)
+            neighbours = [n for n in path_grid[min_node_backwards][2:] if (n is not None) and ((n[0], n[1]) in nodes_backwards)]
+            for neighbour in neighbours:
+                scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
+                edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[(neighbour[1], neighbour[0])] * risk_weighing
+                potential_cost = min_distance_backwards + edge_cost
+                if potential_cost < distance_grid_backwards[(neighbour[0], neighbour[1])]:
+                    distance_grid_backwards[(neighbour[0], neighbour[1])] = potential_cost
+                    prev_grid_backwards[(neighbour[0], neighbour[1])] = min_node_backwards
+
+        if meeting_point is None:
+            return False
 
         path = []
-        current_node = final
+        current_node = meeting_point
         while prev_grid[current_node] is not None:
             path = [current_node] + path
             current_node = prev_grid[current_node]
         path = [current_node] + path
 
+        path_backwards = []
+        current_node = meeting_point
+        while prev_grid_backwards[current_node] is not None:
+            path_backwards = path_backwards + [current_node]
+            current_node = prev_grid_backwards[current_node]
+        path_backwards = path_backwards + [current_node]
+
+        path = path[:-1] + path_backwards
         # Convert indices back into coordinates.
         for p in path:
             p = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, p[0], p[1])
