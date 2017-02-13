@@ -111,11 +111,11 @@ class PathFinder:
         initial = (0, 0)
         final = (x_max, y_max)
         if x_side == 1:
-            initial[0] = x_max
-            final[0] = 0
+            initial = (x_max, initial[1])
+            final = (0, final[1])
         if y_side == 1:
-            initial[1] = y_max
-            final[1] = 0
+            initial = (initial[0], y_max)
+            final = (final[0], 0)
 
         # Make copies for reverse lookup.
         nodes_backwards = deepcopy(nodes)
@@ -199,12 +199,15 @@ class PathFinder:
         for p in path:
             p = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, p[0], p[1])
 
-        return path
+        # Reverse list if it has been the other way.
+        if path[-1] == (0, 0):
+            path = list(reversed(path))
 
+        return path
 
 
 if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
-    print(finder.find_path(-5.031738281250013, 56.800878312330426, -5.009765624999997, 56.78884524518923, 0.5))
+    print(finder.find_path(-5.029765624999997, 56.79884524518923, -5.031738281250013, 56.800878312330426, 0.5))
