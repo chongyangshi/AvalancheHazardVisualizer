@@ -99,9 +99,10 @@ var OS5CMTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
 });
 OS5CMTerrainProviderMeshes.cameraPos = [56.95, -4.60];
 
+var showStaticRisk = '1';
 var SAISCredit = new Cesium.Credit("Scottish Avalanche Information Service");
 var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
-    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}?showStaticRisk=' + showStaticRisk,
     hasAlphaChannel : true,
     maximumLevel : 15,
     credit: SAISCredit
@@ -196,6 +197,7 @@ Sandcastle.addToolbarMenu([{
 Sandcastle.addToolbarMenu([{
     text : 'View Avalanche Risk Map',
     onselect : function() {
+        layers.remove(avalanche_layer, true);
         avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
         layers.remove(aspect_layer, true);
     }
@@ -237,7 +239,7 @@ function getCameraCenterPosition(){
 
 function switchRiskMap(date) {
     avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
-        url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}/' + date,
+        url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}/' + date + '?showStaticRisk=' + showStaticRisk,
         hasAlphaChannel : true,
         maximumLevel : 15,
         credit: SAISCredit
@@ -282,6 +284,19 @@ loadRiskDates();
 document.getElementById("terrainMenu").firstChild.addEventListener('change', loadRiskDates, false);
 
 var toolbar = document.getElementById('toolbar');
+Sandcastle.addToolbarButton('Show Static Risk', function(checked) {
+    var aurl_split = avalanche_risk_map.url.split('?showStaticRisk=');
+    var aurl = aurl_split[0];
+    layers.remove(avalanche_layer, true);
+    if (checked) {
+        showStaticRisk = '1';
+    } else {
+        showStaticRisk = '0';
+    }
+    aurl = aurl + '?showStaticRisk=' + showStaticRisk;
+    avalanche_risk_map.url = aurl;
+    avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+});
 Cesium.knockout.applyBindings(viewModel, toolbar);
 Cesium.knockout.getObservable(viewModel, 'fogEnabled').subscribe(function(newValue) {
     viewer.scene.fog.enabled = newValue;

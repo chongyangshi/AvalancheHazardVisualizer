@@ -75,7 +75,7 @@ def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
         return 0
 
 
-def risk_code_to_colour(risk_code, static_risk):
+def risk_code_to_colour(risk_code, static_risk, show_static_risk):
     """ Return an RGB 3-tuple for the colour represented by the risk_code
         and static risk (represented by capacity). """
     
@@ -86,8 +86,11 @@ def risk_code_to_colour(risk_code, static_risk):
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
-        risk_level = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
-        saturation = min(risk_level, 1) 
+        if show_static_risk:
+            risk_level = static_risk / (rasters.RISK_RASTER_MAX - rasters.RISK_RASTER_MIN)
+            saturation = min(risk_level, 1)
+        else: # Show dynamic risk only.
+            saturation = 1.0
         rgb_colour = list(map(lambda x: int(round(x * 255)), hls_to_rgb(risks[risk_code][0], risks[risk_code][1], saturation)))
         return tuple(rgb_colour) + (175,)
 
