@@ -33,7 +33,7 @@
 <div id="datesMenu"></div>
 <div id="zoomButtons"></div>
 <div id="toggleLighting"></div>
-<div id="sampleButtons"></div>
+<div id="staticRiskButton"></div>
 </div>
 <script id="cesium_sandcastle_script">
 function startup(Cesium) {
@@ -200,6 +200,7 @@ Sandcastle.addToolbarMenu([{
         layers.remove(avalanche_layer, true);
         avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
         layers.remove(aspect_layer, true);
+        contour_layer = layers.addImageryProvider(contour_map);
     }
 }, {
     text : 'View Terrain Aspect Map',
@@ -207,6 +208,7 @@ Sandcastle.addToolbarMenu([{
         layers.remove(aspect_layer);
         aspect_layer = layers.addImageryProvider(aspect_map);
         layers.remove(avalanche_layer, true);
+        contour_layer = layers.addImageryProvider(contour_map);
    }
 }], 'aspectMenu');
 
@@ -246,6 +248,7 @@ function switchRiskMap(date) {
     });
     layers.remove(avalanche_layer, true);
     avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
+    contour_layer = layers.addImageryProvider(contour_map);
 }
 
 function loadRiskDates() {
@@ -284,19 +287,29 @@ loadRiskDates();
 document.getElementById("terrainMenu").firstChild.addEventListener('change', loadRiskDates, false);
 
 var toolbar = document.getElementById('toolbar');
-Sandcastle.addToolbarButton('Show Static Risk', function(checked) {
+Sandcastle.addToolbarButton('Show Static Risk', function() {
     var aurl_split = avalanche_risk_map.url.split('?showStaticRisk=');
     var aurl = aurl_split[0];
+
     layers.remove(avalanche_layer, true);
-    if (checked) {
+    if (showStaticRisk === '0') {
         showStaticRisk = '1';
+        document.getElementById("staticRiskButton").firstChild.innerHTML = 'Hide Static Risk';
     } else {
         showStaticRisk = '0';
+        document.getElementById("staticRiskButton").firstChild.innerHTML = 'Show Static Risk';
     }
     aurl = aurl + '?showStaticRisk=' + showStaticRisk;
-    avalanche_risk_map.url = aurl;
+
+    avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
+        url: aurl,
+        hasAlphaChannel : true,
+        maximumLevel : 15,
+        credit: SAISCredit
+    });
     avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
-});
+    contour_layer = layers.addImageryProvider(contour_map);
+}, 'staticRiskButton');
 Cesium.knockout.applyBindings(viewModel, toolbar);
 Cesium.knockout.getObservable(viewModel, 'fogEnabled').subscribe(function(newValue) {
     viewer.scene.fog.enabled = newValue;
