@@ -218,8 +218,8 @@ class PathFinder:
 
         path = path[:-1] + path_backwards
         # Convert indices back into coordinates.
-        for p in path:
-            p = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, p[0], p[1])
+        for p in range(len(path)):
+            path[p] = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0], path[p][1])
 
         # Reverse list if it has been the other way.
         if path[-1] == (0, 0):
