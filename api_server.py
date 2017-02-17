@@ -3,7 +3,7 @@ import os
 import sys
 import StringIO
 from time import gmtime, strftime
-from flask import Flask, send_file, abort, jsonify
+from flask import Flask, send_file, abort, jsonify, request
 from PIL import Image
 
 import utils
@@ -53,6 +53,18 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if (lower_right_corner[1] < -90.0) or (lower_right_corner[1] > 90.0):
             abort(400)
         not_found_message = ""
+
+        # Process static risk show param.
+
+        if len(request.args) < 1:
+            show_static_risk = '0'
+        else:
+            show_static_risk = request.args.get('showStaticRisk')
+
+        if int(show_static_risk) == 1:
+            show_static_risk = True
+        else:
+            show_static_risk = False
 
         # Preclude requests that are too large.
         if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
@@ -114,7 +126,7 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         return_image_pixels = return_image.load()
         for i in range(return_image.size[0]):   
             for j in range(return_image.size[1]):
-                return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i], static_risk_matrix[j][i]) # 2D array is in inversed order of axis.
+                return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i], static_risk_matrix[j][i], show_static_risk) # 2D array is in inversed order of axis.
         image_object = StringIO.StringIO() 
         return_image.save(image_object, format="png") 
         image_object.seek(0)
