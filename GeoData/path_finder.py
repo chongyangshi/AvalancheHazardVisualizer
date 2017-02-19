@@ -8,7 +8,8 @@ import utils as base_utils
 import heapq
 from sys import maxsize
 from math import sqrt
-from numpy import amax, amin, ndarray
+from numpy import amax, amin, ndarray, percentile, clip
+from time import time
 
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
@@ -29,6 +30,9 @@ class PathFinder:
 
     def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
         """ Given initial and final coordinates and a risk-to-distance weighing, find a path. """
+
+        # Time the execution.
+        start_time = time()
 
         # Sanity checks.
         if not all(isinstance(item, float) for item in [longitude_initial, latitude_initial, longitude_final, latitude_final]):
@@ -98,10 +102,28 @@ class PathFinder:
         y_max = len(height_grid) - 1
         path_grid = {}
 
+        # Special case: all zero grid, immediately return the most direct path.
+        non_zeros = risk_grid[risk_grid > 0]
+
+        if len(non_zeros) <= 0:
+            zero_path = []
+            min_xy = min(x_max, y_max)
+            max_xy = max(x_max, y_max)
+            for n in range(0, min_xy + 1):
+                zero_path.append((n, n))
+
+            for n in range(min_xy + 1, max_xy + 1):
+                if x_max < y_max:
+                    zero_path.append((min_xy, n))
+                else:
+                    zero_path.append((n, min_xy))
+
+            return zero_path
+
         for y in range(0, y_max + 1):
             for x in range(0, x_max + 1):
                 # The grid dictionary is indexed by (displacement indices from top left), and contains a height, a 0-1
-                # scaled risk, and the coordinates-indices of its neighbours, arranged in list index as followed:
+                # scaled risk, and the coordinates-indices of its neighbours, arranged with list index as followed:
                 # 2 3 4
                 # 5 * 6
                 # 7 8 9
@@ -129,6 +151,11 @@ class PathFinder:
                             path_grid[(x, y)].append((i, j, naismith_distance))
                         else:
                             path_grid[(x, y)].append(None)
+
+        # To prevent A* from getting stuck, all risk values below 5 percentile
+        # will be changed to the 5 percentile value.
+        risk_5_percentile = percentile(non_zeros, 5)
+        clip(risk_grid, risk_5_percentile, risk_grid_max, out=risk_grid)
 
         self.debug_print("Successfully built search grid, starting A* Search...")
         # path_grid is not yet scaled here, but risk_grid is.
@@ -179,7 +206,7 @@ class PathFinder:
         for p in range(len(path)):
             path[p] = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0], path[p][1])
 
-        self.debug_print("Finished.")
+        self.debug_print("Finished in " + str(time() - start_time) + " seconds.")
 
         return path
 
@@ -232,5 +259,6 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
-    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
+    print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5))
+    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
     #print(finder.find_path(-5.03173828125, 56.8008783123, -5.016765625, 56.7868452452, 0.5))
