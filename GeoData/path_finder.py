@@ -1,13 +1,14 @@
+from __future__ import division, print_function
 from GeoData import rasters
 from GeoData.raster_reader import RasterReader
 from SAISCrawler.script import db_manager, utils
 import geocoordinate_to_location
-import utils as baseutils
+import utils as base_utils
 
+import heapq
 from sys import maxsize
 from math import sqrt
 from numpy import amax, amin, ndarray
-from copy import deepcopy
 
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
@@ -24,7 +25,7 @@ class PathFinder:
         self._aspect_map_reader = aspect_map_reader
         self._static_risk_reader = static_risk_reader
         self._dynamic_risk_cursor = dynamic_risk_cursor
-
+        self.__priority_queue = []
 
     def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
         """ Given initial and final coordinates and a risk-to-distance weighing, find a path. """
@@ -41,6 +42,8 @@ class PathFinder:
         if not valid_ratio:
             return False
 
+        self.debug_print("Sanity check completed.")
+
         # Swap if directions of two points not what we want (top left, bottom right)
         x_side = 0
         y_side = 0
@@ -55,10 +58,16 @@ class PathFinder:
             latitude_final = temp
             y_side = 1
 
+        self.debug_print("Reoriented grid: " + str(longitude_initial) + "/" + str(latitude_initial) + "/"
+            + str(longitude_final) + "/" + str(latitude_final))
+
         # Static properties.
         height_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         aspect_grid = self._aspect_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
+
+        if (not isinstance(height_grid, ndarray)) or (not isinstance(risk_grid, ndarray)) or (not isinstance(aspect_grid, ndarray)):
+            return False
 
         # Dynamic properties.
         location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
@@ -73,24 +82,21 @@ class PathFinder:
 
         for y in range(0, len(risk_grid)):
             for x in range(0, len(risk_grid[0])):
-                risk_grid[y, x] = risk_grid[y, x] * baseutils.match_aspect_altitude_to_forecast(location_forecast_list, aspect_grid[y, x], height_grid[y, x])
+                risk_grid[y, x] = risk_grid[y, x] * base_utils.match_aspect_altitude_to_forecast(location_forecast_list, aspect_grid[y, x], height_grid[y, x])
 
-
-        if (not isinstance(height_grid, ndarray)) or (not isinstance(risk_grid, ndarray)):
-            return False
+        self.debug_print("Successfully loaded all data grids.")
 
         # Build the grid and a list of vertices.
         naismith_max = -1
         naismith_min = maxsize
         risk_grid_max = amax(risk_grid)
         risk_grid_min = amin(risk_grid)
+        height_grid_max = amax(height_grid)
+        height_grid_min = amin(height_grid)
 
         x_max = len(height_grid[0]) - 1
         y_max = len(height_grid) - 1
         path_grid = {}
-        nodes = [] # List of vertices.
-        distance_grid = {} # Distance from source for Dijkstra's.
-        prev_grid = {} # Previous node for Dijkstra's.
 
         for y in range(0, y_max + 1):
             for x in range(0, x_max + 1):
@@ -102,6 +108,7 @@ class PathFinder:
                 # a Naismith distance is attached to each neighbour.
                 height = height_grid[y, x]
                 scaled_risk = (risk_grid[y, x] - risk_grid_min) / (risk_grid_max - risk_grid_min)
+                risk_grid[y, x] = scaled_risk
                 path_grid[(x, y)] = [height, scaled_risk]
 
                 for j in range(y - 1, y + 2):
@@ -123,113 +130,107 @@ class PathFinder:
                         else:
                             path_grid[(x, y)].append(None)
 
-                        # Index, distance from source (since normalised, smaller than max read_points size 9999 * 0-1),
-                        # previous node in path.
-                        nodes.append((x, y))
-                        distance_grid[(x, y)] = 9999
-                        prev_grid[(x, y)] = None
+        self.debug_print("Successfully built search grid, starting A* Search...")
+        # path_grid is not yet scaled here, but risk_grid is.
 
-        # Determine the coordinates of initial and final by the sides recorded.
-        initial = (0, 0)
-        final = (x_max, y_max)
-        if x_side == 1:
-            initial = (x_max, initial[1])
-            final = (0, final[1])
-        if y_side == 1:
-            initial = (initial[0], y_max)
-            final = (final[0], 0)
+        # A* Search
+        self.add_to_queue(0, (0, 0))
+        source_index = {}
+        cost_index = {}
+        source_index[(0, 0)] = None
+        cost_index[(0, 0)] = 0
+        goal_node = (x_max, y_max)
 
-        # Make copies for reverse lookup.
-        nodes_backwards = deepcopy(nodes)
-        distance_grid_backwards = deepcopy(distance_grid)
-        prev_grid_backwards = deepcopy(prev_grid)
-        initial_backwards = deepcopy(final)
-        final_backwards = deepcopy(initial)
+        self.debug_print("State space size: " + str(goal_node) + ".")
 
-        # Initialise source.
-        distance_grid[initial] = 0
-        distance_grid_backwards[initial_backwards] = 0
-        meeting_point = None
+        while not self.is_queue_empty():
+            current = self.pop_from_queue()
+            current_node = current[1]
 
-        while len(nodes) > 0:
-
-            # Find the min distance node in forward.
-            min_distance = maxsize
-            min_node = None
-            for n in nodes:
-                if min_distance > distance_grid[n]:
-                    min_node = n
-                    min_distance = distance_grid[n]
-
-            if min_node is None:
-                return False
-
-            min_distance_backwards = maxsize
-            min_node_backwards = None
-            for n in nodes_backwards:
-                if min_distance_backwards > distance_grid_backwards[n]:
-                    min_node_backwards = n
-                    min_distance_backwards = distance_grid_backwards[n]
-
-            if min_node is None or min_node_backwards is None:
-                return False
-
-            # Found target.
-            if min_node == min_node_backwards:
-                meeting_point = deepcopy(min_node)
+            if current_node == goal_node:
                 break
 
-            nodes.remove(min_node)
-            neighbours = [n for n in path_grid[min_node][2:] if (n is not None) and ((n[0], n[1]) in nodes)]
+            neighbours = [n for n in path_grid[current_node][2:] if (n is not None)]
             for neighbour in neighbours:
+                neighbour_node = (neighbour[0], neighbour[1])
+                # Scaling height distance values from path_grid now.
                 scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
                 edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[(neighbour[1], neighbour[0])] * risk_weighing
-                potential_cost = min_distance + edge_cost
-                if potential_cost < distance_grid[(neighbour[0], neighbour[1])]:
-                    distance_grid[(neighbour[0], neighbour[1])] = potential_cost
-                    prev_grid[(neighbour[0], neighbour[1])] = min_node
+                new_cost = cost_index[current_node] + edge_cost
+                if (neighbour_node not in cost_index) or (new_cost < cost_index[neighbour_node]):
+                    cost_index[neighbour_node] = new_cost
+                    prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid_max, height_grid_min, naismith_max, naismith_min)
+                    self.add_to_queue(prio, neighbour_node)
+                    source_index[neighbour_node] = current_node
 
-            nodes_backwards.remove(min_node_backwards)
-            neighbours = [n for n in path_grid[min_node_backwards][2:] if (n is not None) and ((n[0], n[1]) in nodes_backwards)]
-            for neighbour in neighbours:
-                scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
-                edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[(neighbour[1], neighbour[0])] * risk_weighing
-                potential_cost = min_distance_backwards + edge_cost
-                if potential_cost < distance_grid_backwards[(neighbour[0], neighbour[1])]:
-                    distance_grid_backwards[(neighbour[0], neighbour[1])] = potential_cost
-                    prev_grid_backwards[(neighbour[0], neighbour[1])] = min_node_backwards
+        self.debug_print("Search completed, rebuiling path...")
 
-        if meeting_point is None:
-            return False
-
+        # Reconstruct the path by back-tracing.
         path = []
-        current_node = meeting_point
-        while prev_grid[current_node] is not None:
+        current_node = goal_node
+        while source_index[current_node] is not None:
             path = [current_node] + path
-            current_node = prev_grid[current_node]
+            current_node = source_index[current_node]
         path = [current_node] + path
 
-        path_backwards = []
-        current_node = meeting_point
-        while prev_grid_backwards[current_node] is not None:
-            path_backwards = path_backwards + [current_node]
-            current_node = prev_grid_backwards[current_node]
-        path_backwards = path_backwards + [current_node]
+        self.debug_print("Coordinate path: " + str(path) + ".")
 
-        path = path[:-1] + path_backwards
         # Convert indices back into coordinates.
         for p in range(len(path)):
             path[p] = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0], path[p][1])
 
-        # Reverse list if it has been the other way.
-        if path[-1] == (0, 0):
-            path = list(reversed(path))
+        self.debug_print("Finished.")
 
         return path
 
+
+    def add_to_queue(self, priority, coordinates):
+        """ Push a coordinate and its priority onto the priority queue. """
+
+        heapq.heappush(self.__priority_queue, (priority, coordinates))
+
+        return True
+
+
+    def pop_from_queue(self):
+        """ Pop the highest priority item from the priority queue, return a tuple
+            (priority, coordinates) if heap is not empty, False otherwise."""
+
+        if len(self.__priority_queue) <= 0:
+            return False
+
+        return heapq.heappop(self.__priority_queue)
+
+
+    def is_queue_empty(self):
+        """ Returns True if the priority queue is empty, False otherwise. """
+
+        if len(self.__priority_queue) <= 0:
+            return True
+        else:
+            return False
+
+    def heuristic(self, current, goal, height_max, height_min, naismith_max, naismith_min):
+        """ A diagonal heuristics function for A* search. """
+
+        dx = abs(current[0] - goal[0])
+        dy = abs(current[1] - goal[1])
+
+        # Consider both 2D and 3D distance, using half the max height difference for vertical Naismith distance.
+        heuristic_distance = PIXEL_RES * (dx + dy) + (PIXEL_RES - 2 * PIXEL_RES_DIAG) * min(dx, dy) \
+            + NAISMITH_CONSTANT * (height_max - height_min) / 2
+        scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
+
+        return scaled_heuristic
+
+    @staticmethod
+    def debug_print(message):
+        if __name__ == '__main__':
+            print(message)
 
 if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
-    print(finder.find_path(-5.029765624999997, 56.79884524518923, -5.031738281250013, 56.800878312330426, 0.5))
+    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
+    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.016765625, 56.7868452452, 0.5))
