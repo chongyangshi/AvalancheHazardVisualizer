@@ -190,7 +190,7 @@ class PathFinder:
                     self.add_to_queue(prio, neighbour_node)
                     source_index[neighbour_node] = current_node
 
-        self.debug_print("Search completed, rebuiling path...")
+        self.debug_print("Search completed, rebuilding path...")
 
         # Reconstruct the path by back-tracing.
         path = []
