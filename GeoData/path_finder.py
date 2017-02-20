@@ -28,7 +28,8 @@ class PathFinder:
         self._dynamic_risk_cursor = dynamic_risk_cursor
         self.__priority_queue = []
 
-    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
+
+    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing, time_restriction):
         """ Given initial and final coordinates and a risk-to-distance weighing, find a path. """
 
         # Time the execution.
@@ -44,6 +45,9 @@ class PathFinder:
                 valid_ratio = True
 
         if not valid_ratio:
+            return False
+
+        if (not isinstance(time_restriction, int)) or (time_restriction <= 1):
             return False
 
         self.debug_print("Sanity check completed.")
@@ -190,6 +194,10 @@ class PathFinder:
                     prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min)
                     self.add_to_queue(prio, neighbour_node)
                     source_index[neighbour_node] = current_node
+
+            if (time() - start_time) > time_restriction:
+                self.debug_print("Execution time exceeded, exiting...")
+                return False
 
         self.debug_print("Search completed, rebuilding path...")
 
