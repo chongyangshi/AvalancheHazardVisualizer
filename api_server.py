@@ -26,6 +26,7 @@ with app.app_context():
     aspect_raster = SPATIAL_READER.RasterReader(rasters.ASPECT_RASTER)
     contour_raster = SPATIAL_READER.RasterReader(rasters.CONTOUR_RASTER)
     static_risk_raster = SPATIAL_READER.RasterReader(rasters.RISK_RASTER)
+    path_reader = path_finder.PathFinder(height_raster, aspect_raster, static_risk_raster, forecast_dbm)
 
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>', methods=['GET'])
 @app.route('/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:forecast_date>', methods=['GET'])
@@ -349,7 +350,6 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
             abort(400)
         not_found_message = ""
 
-        path_reader = path_finder.PathFinder(height_raster, aspect_raster, static_risk_raster, forecast_dbm)
         path = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 10)
 
         if not path:
@@ -363,7 +363,6 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
             numbering += 1
 
         return jsonify(json_path)
-
 
     except Exception as e:
 

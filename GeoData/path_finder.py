@@ -71,6 +71,16 @@ class PathFinder:
 
         # Static properties.
         height_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
+
+        # Immediately check how large the data was to prevent overloading.
+        x_max = len(height_grid[0]) - 1
+        y_max = len(height_grid) - 1
+
+        if max(x_max, y_max) > 500:
+            self.debug_print("Execution size exceeded, exiting...")
+            return False
+
+        # More static properties
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         aspect_grid = self._aspect_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
 
@@ -102,8 +112,6 @@ class PathFinder:
         height_grid_max = amax(height_grid)
         height_grid_min = amin(height_grid)
 
-        x_max = len(height_grid[0]) - 1
-        y_max = len(height_grid) - 1
         path_grid = {}
 
         # Special case: all zero grid, immediately return the most direct path.
@@ -215,6 +223,7 @@ class PathFinder:
         for p in range(len(path)):
             path[p] = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0], path[p][1])
 
+        self.clean_up_queue()
         self.debug_print("Finished in " + str(time() - start_time) + " seconds.")
 
         return path
@@ -246,6 +255,15 @@ class PathFinder:
         else:
             return False
 
+
+    def clean_up_queue(self):
+        """ Clear the priority queue to prepare for the next lookup. """
+
+        self.__priority_queue = []
+
+        return True
+
+
     def heuristic(self, current, goal, node_height, goal_height, naismith_max, naismith_min):
         """ A diagonal heuristics function for A* search. """
 
@@ -268,6 +286,6 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
-    #print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5))
-    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
-    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.016765625, 56.7868452452, 0.5))
+    #print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5, 60))
+    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
+    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.016765625, 56.7868452452, 0.5, 10))
