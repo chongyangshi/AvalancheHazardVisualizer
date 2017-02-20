@@ -10,7 +10,7 @@ import utils
 import geocoordinate_to_location
 from SAISCrawler.script import db_manager as forecast_db
 from SAISCrawler.script import utils as forecast_utils
-from GeoData import raster_reader, rasters
+from GeoData import raster_reader, rasters, path_finder
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
 LOG_REQUESTS = False
@@ -319,6 +319,60 @@ def get_recent_forecast_dates(longitude, latitude):
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, last 50 dates not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
 
         return jsonify({})
+
+
+@app.route('/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>', methods=['GET'])
+def get_path(longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
+    """ Return a path (series of coordinates) found by A* search based on a weighing of risk against distance. """
+
+    not_found_message = ""
+
+    try:
+
+        risk_weighing = float(risk_weighing)
+        if (risk_weighing < 0) or (risk_weighing > 1):
+            not_found_message = "Invalid risk weighing."
+            abort(400)
+
+        initial = map(float, [longitude_initial, latitude_initial])
+        final = map(float, [longitude_final, latitude_final])
+
+        # Impossible geodetic coordinates.
+        not_found_message = "Invalid input data."
+        if (initial[0] < -180.0) or (initial[0] > 180.0):
+            abort(400)
+        if (initial[1] < -90.0) or (initial[1] > 90.0):
+            abort(400)
+        if (final[0] < -180.0) or (final[0] > 180.0):
+            abort(400)
+        if (final[1] < -90.0) or (final[1] > 90.0):
+            abort(400)
+        not_found_message = ""
+
+        path_reader = path_finder.PathFinder(height_raster, aspect_raster, static_risk_raster, forecast_dbm)
+        path = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 10)
+
+        if not path:
+            not_found_message = "Path finding failed, probably due to excessive data size."
+            abort(404)
+
+        numbering = 0
+        json_path = {}
+        for p in path:
+            json_path[numbering] = p
+            numbering += 1
+
+        return jsonify(json_path)
+
+
+    except Exception as e:
+
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
+            with open(API_LOG, "a") as log_file:
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, last 50 dates not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
+
+        return jsonify({})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
