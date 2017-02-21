@@ -13,7 +13,7 @@ from SAISCrawler.script import utils as forecast_utils
 from GeoData import raster_reader, rasters, path_finder
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
-LOG_REQUESTS = True
+LOG_REQUESTS = False
 SPATIAL_READER = raster_reader
 
 # Main API app.

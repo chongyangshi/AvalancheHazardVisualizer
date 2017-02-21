@@ -347,7 +347,7 @@ Sandcastle.addToolbarButton('Pick start', function() {
             var start_point = viewer.entities.add({
                 position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString), height),
                 point : {
-                    pixelSize : 10,
+                    pixelSize : 20,
                     color : Cesium.Color.GREEN
                 }
             });
@@ -373,7 +373,7 @@ Sandcastle.addToolbarButton('Pick end', function() {
             var end_point = viewer.entities.add({
                 position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString), height),
                 point : {
-                    pixelSize : 10,
+                    pixelSize : 20,
                     color : Cesium.Color.MAGENTA
                 }
             });
@@ -444,7 +444,11 @@ Sandcastle.addToolbarButton('Clear', function() {
     for (var i = 0; i < entities.length; i++) {
         viewer.entities.remove(entities[i]);
     }
+    start_location = null;
+    end_location = null;
+    click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     route_points.removeAll();
+    document.getElementById("routeText").innerHTML = 'Suggest a route?';
 }, 'routeSelector');
 
 Cesium.knockout.applyBindings(viewModel, toolbar);
