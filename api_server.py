@@ -350,10 +350,10 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
             abort(400)
         not_found_message = ""
 
-        path = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 10)
+        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 15)
 
         if not path:
-            not_found_message = "Path finding failed, probably due to excessive data size."
+            not_found_message = "Path finding failed, probably due to excessive data size. Module message: " + message
             abort(404)
 
         numbering = 0

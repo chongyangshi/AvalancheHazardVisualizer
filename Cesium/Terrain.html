@@ -315,8 +315,8 @@ Sandcastle.addToolbarButton('Show Static Risk', function() {
     contour_layer = layers.addImageryProvider(contour_map);
 }, 'staticRiskButton');
 
-var start_location = NULL;
-var end_location = NULL;
+var start_location = null;
+var end_location = null;
 var click_handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 var route_points = new Cesium.EntityCollection();
 
@@ -333,7 +333,7 @@ Sandcastle.addToolbarButton('Pick start', function() {
                 position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString)),
                 point : {
                     pixelSize : 10,
-                    color : Cesium.Color.MAGENTA;
+                    color : Cesium.Color.MAGENTA
                 }
             });
             document.getElementById("routeText").innerHTML = 'Start location set.';
@@ -356,7 +356,7 @@ Sandcastle.addToolbarButton('Pick end', function() {
                 position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString)),
                 point : {
                     pixelSize : 10,
-                    color : Cesium.Color.GREEN;
+                    color : Cesium.Color.GREEN
                 }
             });
             document.getElementById("routeText").innerHTML = 'End location set.';
@@ -369,7 +369,7 @@ Sandcastle.addToolbarButton('Pick end', function() {
 Sandcastle.addToolbarButton('Find a route', function() {
     if (!start_location || !end_location) {
         document.getElementById("routeText").innerHTML = 'Please select a start and end location first.';
-        return False;
+        return false;
     }
     var risk_weighing = document.getElementById("riskSlider").value;
     var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/find_path/' + start_location[0].toString() + '/' + start_location[1].toString() + '/' + end_location[0].toString() + '/' + end_location[1].toString() + '/' + risk_weighing.toString();
@@ -382,11 +382,11 @@ Sandcastle.addToolbarButton('Find a route', function() {
                   var coordinates = JSON.parse(xmlhttp.responseText);
                   if (Object.keys(coordinates).length === 0) {
                       document.getElementById("routeText").innerHTML = 'Path-finding failed, it may be that the distance is too large.';
-                      return False;
+                      return false;
                   }
 
                   route_points.removeAll();
-                  var coordinates_size = Object.keys(coordinates_size).length;
+                  var coordinates_size = Object.keys(coordinates).length;
                   var point_colour = Cesium.Color.AQUA;
 
                   for (var i = 0; i < coordinates_size; i++) {
@@ -402,7 +402,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
 
                       }
                       var point = viewer.entities.add({
-                          position : Cesium.Cartesian3.fromDegrees(coordinates[0], coordinates[1]),
+                          position : Cesium.Cartesian3.fromDegrees(coordinates[i][0], coordinates[i][1]),
                           point : {
                               pixelSize : 10,
                               color : point_colour
@@ -410,7 +410,8 @@ Sandcastle.addToolbarButton('Find a route', function() {
                       });
                       route_points.add(point);
                   }
-                  return True;
+                  document.getElementById("routeText").innerHTML = 'A route has been found.';
+                  return true;
 
               }
         }

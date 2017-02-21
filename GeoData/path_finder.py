@@ -37,7 +37,7 @@ class PathFinder:
 
         # Sanity checks.
         if not all(isinstance(item, float) for item in [longitude_initial, latitude_initial, longitude_final, latitude_final]):
-            return False
+            return False, "Input not float."
 
         valid_ratio = False
         if isinstance(risk_weighing, float):
@@ -45,10 +45,10 @@ class PathFinder:
                 valid_ratio = True
 
         if not valid_ratio:
-            return False
+            return False, "Invalid risk weighing."
 
         if (not isinstance(time_restriction, int)) or (time_restriction <= 1):
-            return False
+            return False, "Invalid time restriction."
 
         self.debug_print("Sanity check completed.")
 
@@ -75,27 +75,28 @@ class PathFinder:
         # Immediately check how large the data was to prevent overloading.
         x_max = len(height_grid[0]) - 1
         y_max = len(height_grid) - 1
-
+        
+        self.debug_print("State space size: " + str(x_max) + "," + str(y_max) + ".")
         if max(x_max, y_max) > 500:
             self.debug_print("Execution size exceeded, exiting...")
-            return False
+            return False, "Input too large."
 
         # More static properties
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         aspect_grid = self._aspect_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
 
         if (not isinstance(height_grid, ndarray)) or (not isinstance(risk_grid, ndarray)) or (not isinstance(aspect_grid, ndarray)):
-            return False
+            return False, "Failure reading grid."
 
         # Dynamic properties.
         location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
         location_ids = self._dynamic_risk_cursor.select_location_by_name(location_name)
         if not location_ids:
-            return False
+            return False, "Invalid location ID."
         location_id = int(location_ids[0][0])
         location_forecasts = self._dynamic_risk_cursor.lookup_newest_forecasts_by_location_id(location_id)
         if location_forecasts is None:
-            return False
+            return False, "No forecast found."
         location_forecast_list = list(location_forecasts)
 
         for y in range(0, len(risk_grid)):
@@ -130,7 +131,7 @@ class PathFinder:
                 else:
                     zero_path.append((n, min_xy))
 
-            return zero_path
+            return zero_path, "Success."
 
         for y in range(0, y_max + 1):
             for x in range(0, x_max + 1):
@@ -172,16 +173,23 @@ class PathFinder:
         self.debug_print("Successfully built search grid, starting A* Search...")
         # path_grid is not yet scaled here, but risk_grid is.
 
+        # Set initial and final points based on orientation.
+        initial_node = (0, 0)
+        goal_node = (x_max, y_max)
+        if x_side == 1:
+            initial_node = (x_max, initial_node[1])
+            goal_node = (0, goal_node[1])
+        if y_side == 1:
+            initial_node = (initial_node[0], y_max)
+            goal_node = (goal_node[0], 0)
+
         # A* Search
-        self.add_to_queue(0, (0, 0))
+        self.add_to_queue(0, initial_node)
         source_index = {}
         cost_index = {}
-        source_index[(0, 0)] = None
-        cost_index[(0, 0)] = 0
-        goal_node = (x_max, y_max)
+        source_index[initial_node] = None
+        cost_index[initial_node] = 0
         goal_height = height_grid[y_max, x_max]
-
-        self.debug_print("State space size: " + str(goal_node) + ".")
 
         while not self.is_queue_empty():
             current = self.pop_from_queue()
@@ -205,7 +213,7 @@ class PathFinder:
 
             if (time() - start_time) > time_restriction:
                 self.debug_print("Execution time exceeded, exiting...")
-                return False
+                return False, "Taking too long."
 
         self.debug_print("Search completed, rebuilding path...")
 
@@ -226,7 +234,7 @@ class PathFinder:
         self.clean_up_queue()
         self.debug_print("Finished in " + str(time() - start_time) + " seconds.")
 
-        return path
+        return path, "Success."
 
 
     def add_to_queue(self, priority, coordinates):
@@ -285,7 +293,8 @@ class PathFinder:
 if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
-    finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.ASPECT_RASTER), risk_cursor)
+    finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
     #print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5, 60))
-    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
-    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.016765625, 56.7868452452, 0.5, 10))
+    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
+    print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5, 10))
+    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5, 20))
