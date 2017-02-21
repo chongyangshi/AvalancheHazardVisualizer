@@ -335,13 +335,14 @@ Sandcastle.addToolbarButton('Pick start', function() {
             var longitudeString = Cesium.Math.toDegrees(WGSCart.longitude);
             var latitudeString = Cesium.Math.toDegrees(WGSCart.latitude);
             start_location = [longitudeString, latitudeString];
-            var end_point = viewer.entities.add({
+            var start_point = viewer.entities.add({
                 position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString), height),
                 point : {
                     pixelSize : 10,
                     color : Cesium.Color.GREEN
                 }
             });
+            route_points.add(start_point);
             document.getElementById("routeText").innerHTML = 'Start location set.';
         }
         click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
@@ -367,6 +368,7 @@ Sandcastle.addToolbarButton('Pick end', function() {
                     color : Cesium.Color.MAGENTA
                 }
             });
+            route_points.add(end_point);
             document.getElementById("routeText").innerHTML = 'End location set.';
         }
         click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
@@ -393,7 +395,6 @@ Sandcastle.addToolbarButton('Find a route', function() {
                       return false;
                   }
 
-                  route_points.removeAll();
                   var coordinates_size = Object.keys(coordinates).length;
                   var point_colour = Cesium.Color.AQUA;
 
@@ -426,6 +427,14 @@ Sandcastle.addToolbarButton('Find a route', function() {
     };
     xmlhttp.open("GET", req_url, true);
     xmlhttp.send();
+}, 'routeSelector');
+
+Sandcastle.addToolbarButton('Clear', function() {
+    var entities = route_points.values;
+    for (var i = 0; i < entities.length; i++) {
+        viewer.entities.remove(entities[i]);
+    }
+    route_points.removeAll();
 }, 'routeSelector');
 
 Cesium.knockout.applyBindings(viewModel, toolbar);
