@@ -13,7 +13,7 @@ from SAISCrawler.script import utils as forecast_utils
 from GeoData import raster_reader, rasters, path_finder
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
-LOG_REQUESTS = False
+LOG_REQUESTS = True
 SPATIAL_READER = raster_reader
 
 # Main API app.
@@ -355,14 +355,8 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if not path:
             not_found_message = "Path finding failed, probably due to excessive data size. Module message: " + message
             abort(404)
-
-        numbering = 0
-        json_path = {}
-        for p in path:
-            json_path[numbering] = p
-            numbering += 1
-
-        return jsonify(json_path)
+        
+        return jsonify(path)
 
     except Exception as e:
 
