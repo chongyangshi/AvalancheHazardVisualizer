@@ -15,8 +15,8 @@ from skimage.measure import block_reduce
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
 PIXEL_RES_DIAG = sqrt(PIXEL_RES ^ 2 * 2)
-MAX_BEFORE_DOWNSAMPLING = 3000
-DOWNSAMPLING_TARGET = 150
+MAX_BEFORE_DOWNSAMPLING = 100000
+DOWNSAMPLING_TARGET = 100
 MINIMUM_SIZE = 10
 
 class PathFinder:
