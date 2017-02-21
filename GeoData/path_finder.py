@@ -77,7 +77,7 @@ class PathFinder:
         y_max = len(height_grid) - 1
 
         self.debug_print("State space size: " + str(x_max) + "," + str(y_max) + ".")
-        if max(x_max, y_max) > 500:
+        if (x_max + y_max) / 2 > 500:
             self.debug_print("Execution size exceeded, exiting...")
             return False, "Input too large."
 
@@ -305,4 +305,3 @@ if __name__ == '__main__':
     #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
     print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5, 10))
     #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5, 20))
-
