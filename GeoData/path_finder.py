@@ -6,14 +6,18 @@ import geocoordinate_to_location
 import utils as base_utils
 
 import heapq
+import numpy as np
 from sys import maxsize
 from math import sqrt
-from numpy import amax, amin, ndarray, percentile, clip
 from time import time
+from skimage.measure import block_reduce
 
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
 PIXEL_RES_DIAG = sqrt(PIXEL_RES ^ 2 * 2)
+MAX_BEFORE_DOWNSAMPLING = 3000
+DOWNSAMPLING_TARGET = 150
+MINIMUM_SIZE = 10
 
 class PathFinder:
     """ Class for pathfinding based on Naismith's distance,
@@ -72,21 +76,45 @@ class PathFinder:
         # Static properties.
         height_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
 
-        # Immediately check how large the data was to prevent overloading.
+        # Immediately check how large the data is.
         x_max = len(height_grid[0]) - 1
         y_max = len(height_grid) - 1
 
+        # Process size check and downsampling calculations.
         self.debug_print("State space size: " + str(x_max) + "," + str(y_max) + ".")
-        if (x_max + y_max) / 2 > 500:
+        if (x_max + y_max) / 2 > MAX_BEFORE_DOWNSAMPLING:
             self.debug_print("Execution size exceeded, exiting...")
             return False, "Input too large."
+
+        if min(x_max, y_max) < 10:
+            self.debug_print("Execution size too small, exiting...")
+            return False, "Input too small."
+
+        if x_max > DOWNSAMPLING_TARGET:
+            downsample_x_factor = x_max // DOWNSAMPLING_TARGET + 1
+        else:
+            downsample_x_factor = 1
+        if y_max > DOWNSAMPLING_TARGET:
+            downsample_y_factor = y_max // DOWNSAMPLING_TARGET + 1
+        else:
+            downsample_y_factor = 1
 
         # More static properties
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
         aspect_grid = self._aspect_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
 
-        if (not isinstance(height_grid, ndarray)) or (not isinstance(risk_grid, ndarray)) or (not isinstance(aspect_grid, ndarray)):
+        if (not isinstance(height_grid, np.ndarray)) or (not isinstance(risk_grid, np.ndarray)) or (not isinstance(aspect_grid, np.ndarray)):
             return False, "Failure reading grid."
+
+        # Downsamplings
+        height_grid = block_reduce(height_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.mean)
+        risk_grid = block_reduce(risk_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.max)
+        aspect_grid = block_reduce(aspect_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.mean)
+
+        # Find maximum sizes again.
+        x_max = len(height_grid[0]) - 1
+        y_max = len(height_grid) - 1
+        self.debug_print("Size after downsampling: " + str(x_max) + "," + str(y_max) + ".")
 
         # Dynamic properties.
         location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
@@ -108,10 +136,10 @@ class PathFinder:
         # Build the grid and a list of vertices.
         naismith_max = -1
         naismith_min = maxsize
-        risk_grid_max = amax(risk_grid)
-        risk_grid_min = amin(risk_grid)
-        height_grid_max = amax(height_grid)
-        height_grid_min = amin(height_grid)
+        risk_grid_max = np.amax(risk_grid)
+        risk_grid_min = np.amin(risk_grid)
+        height_grid_max = np.amax(height_grid)
+        height_grid_min = np.amin(height_grid)
 
         path_grid = {}
 
@@ -165,10 +193,10 @@ class PathFinder:
                             else:
                                 path_grid[(x, y)].append(None)
 
-            # To prevent A* from getting stuck, all risk values below 5 percentile
-            # will be changed to the 5 percentile value.
-            risk_5_percentile = percentile(non_zeros, 5)
-            clip(risk_grid, risk_5_percentile, risk_grid_max, out=risk_grid)
+            # To prevent A* from getting stuck, all risk values below 5 np.percentile
+            # will be changed to the 5 np.percentile value.
+            risk_5_percentile = np.percentile(non_zeros, 5)
+            np.clip(risk_grid, risk_5_percentile, risk_grid_max, out=risk_grid)
 
             self.debug_print("Successfully built search grid, starting A* Search...")
             # path_grid is not yet scaled here, but risk_grid is.
@@ -230,7 +258,7 @@ class PathFinder:
         # Convert indices back into coordinates with height attached.
         return_path = {}
         for p in range(len(path)):
-            coords = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0], path[p][1])
+            coords = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0] * downsample_x_factor, path[p][1] * downsample_y_factor)
             way_point = {}
             way_point['long'] = str(coords[0])
             way_point['lat'] = str(coords[1])
@@ -301,7 +329,7 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
-    #print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5, 60))
+    print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5, 60))
     #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
-    print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5, 10))
+    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5, 10))
     #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5, 20))

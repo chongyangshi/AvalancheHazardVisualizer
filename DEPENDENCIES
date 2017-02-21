@@ -3,3 +3,4 @@ selenium
 convertbng
 flask
 Pillow
+scikit-image
