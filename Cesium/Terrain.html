@@ -26,7 +26,16 @@
     @import url(../templates/bucket.css);
     #routeSelector {
         background-color: #000000;
-        opacity: 0.5;
+        opacity: 0.8;
+        text-align: center;
+        padding: 10px;
+    }
+    #routeSelector > h3 {
+        text-color: #ffffff;
+        margin: auto;
+    }
+    #routeSelector > div {
+        margin: auto;
     }
 </style>
 <div id="cesiumContainer" class="fullSize"></div>
@@ -40,7 +49,7 @@
 <div id="staticRiskButton"></div>
 <div id="routeSelector">
   <h3 id="routeText">Suggest a route?</h3>
-  <div>Shortest Path<input id="riskSlider" type="range" min="0" max="1" step="0.1" />Least Risky</div>
+  <div><b>Minimise Path</b><input id="riskSlider" type="range" min="0" max="1" step="0.1" /><b>Minimise Risk</b></div>
 </div>
 </div>
 <script id="cesium_sandcastle_script">
@@ -427,6 +436,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
     };
     xmlhttp.open("GET", req_url, true);
     xmlhttp.send();
+    document.getElementById("routeText").innerHTML = 'Looking for a route...';
 }, 'routeSelector');
 
 Sandcastle.addToolbarButton('Clear', function() {
