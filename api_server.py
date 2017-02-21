@@ -349,8 +349,13 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if (final[1] < -90.0) or (final[1] > 90.0):
             abort(400)
         not_found_message = ""
+   
+        # Check request size.
+        if (abs(initial[0] - final[0]) + abs(initial[1] - final[1])) > 0.5:
+            not_found_message = "Request too large at API."
+            abort(400)
 
-        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 15)
+        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 25)
 
         if not path:
             not_found_message = "Path finding failed, probably due to excessive data size. Module message: " + message
