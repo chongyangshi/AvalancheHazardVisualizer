@@ -24,6 +24,10 @@
 <body class="sandcastle-loading" data-sandcastle-bucket="bucket-requirejs.html">
 <style>
     @import url(../templates/bucket.css);
+    #routeSelector {
+        background-color: #000000;
+        opacity: 0.5;
+    }
 </style>
 <div id="cesiumContainer" class="fullSize"></div>
 <div id="loadingOverlay"><h1>Loading...</h1></div>
@@ -324,21 +328,23 @@ Sandcastle.addToolbarButton('Pick start', function() {
     click_handler.setInputAction(function(click){
         var cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
         if (cartesian) {
-            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(8);
-            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(8);
+            var ray = viewer.camera.getPickRay(click.position);
+            var position = viewer.scene.globe.pick(ray, viewer.scene);
+            var WGSCart = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+            var height = WGSCart.height;
+            var longitudeString = Cesium.Math.toDegrees(WGSCart.longitude);
+            var latitudeString = Cesium.Math.toDegrees(WGSCart.latitude);
             start_location = [longitudeString, latitudeString];
-            console.log(start_location);
-            var start_point = viewer.entities.add({
-                position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString)),
+            var end_point = viewer.entities.add({
+                position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString), height),
                 point : {
                     pixelSize : 10,
-                    color : Cesium.Color.MAGENTA
+                    color : Cesium.Color.GREEN
                 }
             });
             document.getElementById("routeText").innerHTML = 'Start location set.';
-            click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
         }
+        click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     document.getElementById("routeText").innerHTML = 'Double click on map to set start location.';
 }, 'routeSelector');
@@ -347,21 +353,23 @@ Sandcastle.addToolbarButton('Pick end', function() {
     click_handler.setInputAction(function(click){
         var cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
         if (cartesian) {
-            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-            var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(8);
-            var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(8);
+            var ray = viewer.camera.getPickRay(click.position);
+            var position = viewer.scene.globe.pick(ray, viewer.scene);
+            var WGSCart = Cesium.Ellipsoid.WGS84.cartesianToCartographic(position);
+            var height = WGSCart.height;
+            var longitudeString = Cesium.Math.toDegrees(WGSCart.longitude);
+            var latitudeString = Cesium.Math.toDegrees(WGSCart.latitude);
             end_location = [longitudeString, latitudeString];
-            console.log(end_location);
             var end_point = viewer.entities.add({
-                position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString)),
+                position : Cesium.Cartesian3.fromDegrees(parseFloat(longitudeString), parseFloat(latitudeString), height),
                 point : {
                     pixelSize : 10,
-                    color : Cesium.Color.GREEN
+                    color : Cesium.Color.MAGENTA
                 }
             });
             document.getElementById("routeText").innerHTML = 'End location set.';
-            click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
         }
+        click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
     document.getElementById("routeText").innerHTML = 'Double click on map to set end location.';
 }, 'routeSelector');
@@ -402,7 +410,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
 
                       }
                       var point = viewer.entities.add({
-                          position : Cesium.Cartesian3.fromDegrees(coordinates[i][0], coordinates[i][1]),
+                          position : Cesium.Cartesian3.fromDegrees(parseFloat(coordinates[i]['long']), parseFloat(coordinates[i]['lat']), parseFloat(coordinates[i]['height'])),
                           point : {
                               pixelSize : 10,
                               color : point_colour
