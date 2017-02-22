@@ -33,7 +33,7 @@ class PathFinder:
         self.__priority_queue = []
 
 
-    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing, time_restriction):
+    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
         """ Given initial and final coordinates and a risk-to-distance weighing, find a path. """
 
         # Time the execution.
@@ -50,9 +50,6 @@ class PathFinder:
 
         if not valid_ratio:
             return False, "Invalid risk weighing."
-
-        if (not isinstance(time_restriction, int)) or (time_restriction <= 1):
-            return False, "Invalid time restriction."
 
         self.debug_print("Sanity check completed.")
 
@@ -86,7 +83,7 @@ class PathFinder:
             self.debug_print("Execution size exceeded, exiting...")
             return False, "Input too large."
 
-        if min(x_max, y_max) < 10:
+        if min(x_max, y_max) < 5:
             self.debug_print("Execution size too small, exiting...")
             return False, "Input too small."
 
@@ -239,10 +236,6 @@ class PathFinder:
                         self.add_to_queue(prio, neighbour_node)
                         source_index[neighbour_node] = current_node
 
-                if (time() - start_time) > time_restriction:
-                    self.debug_print("Execution time exceeded, exiting...")
-                    return False, "Taking too long."
-
             self.debug_print("Search completed, rebuilding path...")
 
             # Reconstruct the path by back-tracing.
@@ -329,7 +322,7 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
-    print(finder.find_path(-5.03173828125, 56.8129075187, -4.959765625, 56.7408783123, 0.5, 60))
-    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5, 10))
-    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5, 10))
-    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5, 20))
+    #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
+    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
+    print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5))
+    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))

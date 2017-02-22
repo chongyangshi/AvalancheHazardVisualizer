@@ -36,13 +36,13 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         set. """
 
     not_found_message = ""
- 
+
     try:
-        
+
         upper_left_corner = map(float, [longitude_initial, latitude_initial])
         lower_right_corner = map(float, [longitude_final, latitude_final])
         center_coordinates = [sum(e)/len(e) for e in zip(*[upper_left_corner, lower_right_corner])]
-        
+
         # Impossible geodetic coordinates.
         not_found_message = "Invalid input data."
         if (upper_left_corner[0] < -180.0) or (upper_left_corner[0] > 180.0):
@@ -71,7 +71,7 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
             not_found_message = "Request too large."
             abort(404)
-        
+
         # Request heights and aspects from the raster, as well as static risk value from the static risk raster.
         heights_matrix = height_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         aspects_matrix = aspect_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
@@ -84,23 +84,23 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if (len(heights_matrix) <= 0) or (len(aspects_matrix) <= 0) or (len(static_risk_matrix) <= 0):
             not_found_message = "Heights or aspects too large to request."
             abort(404)
-        
+
         matrix_height = len(heights_matrix)
         matrix_width = len(heights_matrix[0])
-        
+
         # Request forecast from SAIS.
         location_name = geocoordinate_to_location.get_location_name(center_coordinates[0], center_coordinates[1]).strip()
         if location_name == "":
             not_found_message = "Location name unavailable."
             abort(404)
-            
+
         # Just in case multiple location ids are returned, take first one.
         location_id_list = forecast_dbm.select_location_by_name(location_name)
         if not location_id_list:
             not_found_message = "Location list empty."
             abort(404)
         location_id = int(location_id_list[0][0])
-        
+
         # Look up the most recent forecasts for the location.
         defined_date_valid = False
         if (forecast_date is not None) and forecast_utils.check_date_string(forecast_date):
@@ -112,7 +112,7 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
             not_found_message = "Forecast for location not found."
             abort(400)
         location_forecast_list = list(location_forecasts)
-        
+
         # Return forecast colours.
         location_colours = []
         for i in range(0, len(heights_matrix)):
@@ -120,33 +120,33 @@ def get_risk(longitude_initial, latitude_initial, longitude_final, latitude_fina
             for j in range(0, len(heights_matrix[i])):
                 colour_row.append(utils.match_aspect_altitude_to_forecast(location_forecast_list, aspects_matrix[i][j], heights_matrix[i][j]))
             location_colours.append(colour_row)
-        
+
         # Build the image according to colours.
         # Create an empty image with one pixel for each point.
         return_image = Image.new("RGBA", (matrix_width, matrix_height), None)
         return_image_pixels = return_image.load()
-        for i in range(return_image.size[0]):   
+        for i in range(return_image.size[0]):
             for j in range(return_image.size[1]):
                 return_image_pixels[i,j] = utils.risk_code_to_colour(location_colours[j][i], static_risk_matrix[j][i], show_static_risk) # 2D array is in inversed order of axis.
-        image_object = StringIO.StringIO() 
-        return_image.save(image_object, format="png") 
+        image_object = StringIO.StringIO()
+        return_image.save(image_object, format="png")
         image_object.seek(0)
 
         return send_file(image_object, mimetype='image/png')
-       
+
     except Exception as e:
-        
+
         # Always return a result and not get held up by exception.
         if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
-        
+
         # Return an empty image.
         return_image = Image.new("RGBA", (1, 1), None)
-        image_object = StringIO.StringIO() 
+        image_object = StringIO.StringIO()
         return_image.save(image_object, format="png")
         image_object.seek(0)
-        
+
         return send_file(image_object, mimetype='image/png')
 
 
@@ -155,13 +155,13 @@ def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_fi
     """ Return a grayscale map of terrain aspects, with 0-360 degrees mapped to 0-255 color levels. """
 
     not_found_message = ""
- 
+
     try:
-        
+
         upper_left_corner = map(float, [longitude_initial, latitude_initial])
         lower_right_corner = map(float, [longitude_final, latitude_final])
         center_coordinates = [sum(e)/len(e) for e in zip(*[upper_left_corner, lower_right_corner])]
-        
+
         # Impossible geodetic coordinates.
         not_found_message = "Invalid input data."
         if (upper_left_corner[0] < -180.0) or (upper_left_corner[0] > 180.0):
@@ -178,43 +178,43 @@ def get_aspect(longitude_initial, latitude_initial, longitude_final, latitude_fi
         if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
             not_found_message = "Request too large."
             abort(404)
-        
+
         # Request aspects from the raster.
         aspects_matrix = aspect_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         # If no data returned.
-        if (aspects_matrix is False) or (len(aspects_matrix) <= 0): 
+        if (aspects_matrix is False) or (len(aspects_matrix) <= 0):
             not_found_message = "Heights or aspects out of range or too large to request."
             abort(400)
 
         matrix_height = len(aspects_matrix)
         matrix_width = len(aspects_matrix[0])
-        
+
         # Build the image according to colours.
         # Create an empty image with one pixel for each point.
         return_image = Image.new("RGBA", (matrix_width, matrix_height), None)
         return_image_pixels = return_image.load()
-        for i in range(return_image.size[0]):   
+        for i in range(return_image.size[0]):
             for j in range(return_image.size[1]):
                 return_image_pixels[i,j] = utils.aspect_to_rbg(aspects_matrix[j][i]) # 2D array is in inversed order of axis.
-        image_object = StringIO.StringIO() 
-        return_image.save(image_object, format="png") 
+        image_object = StringIO.StringIO()
+        return_image.save(image_object, format="png")
         image_object.seek(0)
 
         return send_file(image_object, mimetype='image/png')
-       
+
     except Exception as e:
-        
+
         # Always return a result and not get held up by exception.
         if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
-        
+
         # Return an empty image.
         return_image = Image.new("RGBA", (1, 1), None)
-        image_object = StringIO.StringIO() 
+        image_object = StringIO.StringIO()
         return_image.save(image_object, format="png")
         image_object.seek(0)
-        
+
         return send_file(image_object, mimetype='image/png')
 
 
@@ -223,13 +223,13 @@ def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_f
     """ Return an image of terrain contours, with 50% capacity grey lines. """
 
     not_found_message = ""
- 
+
     try:
-        
+
         upper_left_corner = map(float, [longitude_initial, latitude_initial])
         lower_right_corner = map(float, [longitude_final, latitude_final])
         center_coordinates = [sum(e)/len(e) for e in zip(*[upper_left_corner, lower_right_corner])]
-        
+
         # Impossible geodetic coordinates.
         not_found_message = "Invalid input data."
         if (upper_left_corner[0] < -180.0) or (upper_left_corner[0] > 180.0):
@@ -246,50 +246,50 @@ def get_contour(longitude_initial, latitude_initial, longitude_final, latitude_f
         if (abs(lower_right_corner[0] - upper_left_corner[0]) > 0.03) or (abs(lower_right_corner[1] - upper_left_corner[1]) > 0.02):
             not_found_message = "Request too large."
             abort(404)
-        
+
         # Request contours from the raster.
         contour_matrix = contour_raster.read_points(upper_left_corner[0], upper_left_corner[1], lower_right_corner[0], lower_right_corner[1])
         # If no data returned.
-        if (contour_matrix is False) or (len(contour_matrix) <= 0): 
+        if (contour_matrix is False) or (len(contour_matrix) <= 0):
             not_found_message = "Contours out of range or too large to request."
             abort(400)
 
         matrix_height = len(contour_matrix)
         matrix_width = len(contour_matrix[0])
-        
+
         # Build the image according to colours.
         # Create an empty image with one pixel for each point.
         return_image = Image.new("RGBA", (matrix_width, matrix_height), None)
         return_image_pixels = return_image.load()
-        for i in range(return_image.size[0]):   
+        for i in range(return_image.size[0]):
             for j in range(return_image.size[1]):
                 return_image_pixels[i,j] = utils.contour_to_rbg(contour_matrix[j][i]) # 2D array is in inversed order of axis.
-        image_object = StringIO.StringIO() 
-        return_image.save(image_object, format="png") 
+        image_object = StringIO.StringIO()
+        return_image.save(image_object, format="png")
         image_object.seek(0)
 
         return send_file(image_object, mimetype='image/png')
-       
+
     except Exception as e:
-        
+
         # Always return a result and not get held up by exception.
         if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
                 log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, no-data image returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
-        
+
         # Return an empty image.
         return_image = Image.new("RGBA", (1, 1), None)
-        image_object = StringIO.StringIO() 
+        image_object = StringIO.StringIO()
         return_image.save(image_object, format="png")
         image_object.seek(0)
-        
+
         return send_file(image_object, mimetype='image/png')
 
 
 @app.route('/data/api/v1.0/forecast_dates/<string:longitude>/<string:latitude>', methods=['GET'])
 def get_recent_forecast_dates(longitude, latitude):
     """ Return up to 50 most recent forecast dates to allow the client to request them later."""
-    
+
     try:
         longitude = float(longitude)
         latitude = float(latitude)
@@ -349,18 +349,18 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
         if (final[1] < -90.0) or (final[1] > 90.0):
             abort(400)
         not_found_message = ""
-   
+
         # Check request size.
         if (abs(initial[0] - final[0]) + abs(initial[1] - final[1])) > 0.5:
             not_found_message = "Request too large at API."
             abort(400)
 
-        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, 25)
+        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing)
 
         if not path:
             not_found_message = "Path finding failed, probably due to excessive data size. Module message: " + message
             abort(404)
-        
+
         return jsonify(path)
 
     except Exception as e:
