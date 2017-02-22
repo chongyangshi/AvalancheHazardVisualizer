@@ -18,6 +18,8 @@ PIXEL_RES_DIAG = sqrt(PIXEL_RES ^ 2 * 2)
 MAX_BEFORE_DOWNSAMPLING = 100000
 DOWNSAMPLING_TARGET = 100
 MINIMUM_SIZE = 10
+MINIMUM_SEARCH_LONG = 0.004
+MINIMUM_SEARCH_LAT = 0.0035
 
 class PathFinder:
     """ Class for pathfinding based on Naismith's distance,
@@ -67,6 +69,23 @@ class PathFinder:
             latitude_final = temp
             y_side = 1
 
+        # Enlarge search window if coordinate size below minimum.
+        x_goal = None
+        y_goal = None
+        if (abs(longitude_final - longitude_initial) < MINIMUM_SEARCH_LONG) or (abs(latitude_final - latitude_initial) < MINIMUM_SEARCH_LAT):
+            temp_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
+
+            if abs(longitude_final - longitude_initial) < MINIMUM_SEARCH_LONG:
+                x_goal = len(temp_grid[0]) - 1
+                longitude_final = longitude_initial + MINIMUM_SEARCH_LONG
+                self.debug_print("Grid enlarged in x direction.")
+
+            if abs(latitude_final - latitude_initial) < MINIMUM_SEARCH_LAT:
+                y_goal = len(temp_grid) - 1
+                latitude_final = latitude_initial - MINIMUM_SEARCH_LAT
+                self.debug_print("Grid enlarged in y direction.")
+
+
         self.debug_print("Reoriented grid: " + str(longitude_initial) + "/" + str(latitude_initial) + "/"
             + str(longitude_final) + "/" + str(latitude_final))
 
@@ -82,10 +101,6 @@ class PathFinder:
         if (x_max + y_max) / 2 > MAX_BEFORE_DOWNSAMPLING:
             self.debug_print("Execution size exceeded, exiting...")
             return False, "Input too large."
-
-        if min(x_max, y_max) < 5:
-            self.debug_print("Execution size too small, exiting...")
-            return False, "Input too small."
 
         if x_max > DOWNSAMPLING_TARGET:
             downsample_x_factor = x_max // DOWNSAMPLING_TARGET + 1
@@ -139,13 +154,21 @@ class PathFinder:
         height_grid_min = np.amin(height_grid)
 
         path_grid = {}
+        if x_goal is not None:
+            x_goal = min(x_goal, x_max)
+        else:
+            x_goal = x_max
+        if y_goal is not None:
+            y_goal = min(y_goal, y_max)
+        else:
+            y_goal = y_max
 
         # Special case: all zero grid, immediately return the most direct path.
         non_zeros = risk_grid[risk_grid > 0]
         if len(non_zeros) <= 0:
             zero_path = []
-            min_xy = min(x_max, y_max)
-            max_xy = max(x_max, y_max)
+            min_xy = min(x_goal, y_goal)
+            max_xy = max(x_goal, y_goal)
             for n in range(0, min_xy + 1):
                 zero_path.append((n, n))
 
@@ -200,12 +223,12 @@ class PathFinder:
 
             # Set initial and final points based on orientation.
             initial_node = (0, 0)
-            goal_node = (x_max, y_max)
+            goal_node = (x_goal, y_goal)
             if x_side == 1:
-                initial_node = (x_max, initial_node[1])
+                initial_node = (x_goal, initial_node[1])
                 goal_node = (0, goal_node[1])
             if y_side == 1:
-                initial_node = (initial_node[0], y_max)
+                initial_node = (initial_node[0], y_goal)
                 goal_node = (goal_node[0], 0)
 
             # A* Search
@@ -214,7 +237,7 @@ class PathFinder:
             cost_index = {}
             source_index[initial_node] = None
             cost_index[initial_node] = 0
-            goal_height = height_grid[y_max, x_max]
+            goal_height = height_grid[y_goal, x_goal]
 
             while not self.is_queue_empty():
                 current = self.pop_from_queue()
@@ -324,5 +347,5 @@ if __name__ == '__main__':
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
     #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
     #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
-    print(finder.find_path(-5.03173828125, 56.8008783123, -5.020765625, 56.7808452452, 0.5))
+    print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
     #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
