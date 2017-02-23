@@ -451,6 +451,12 @@ Sandcastle.addToolbarButton('Clear', function() {
     document.getElementById("routeText").innerHTML = 'Suggest a route?';
 }, 'routeSelector');
 
+
+// Disable double click focus.
+click_handler.setInputAction(function(movement) {
+    viewer.trackedEntity = undefined;
+}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
 Cesium.knockout.applyBindings(viewModel, toolbar);
 Cesium.knockout.getObservable(viewModel, 'fogEnabled').subscribe(function(newValue) {
     viewer.scene.fog.enabled = newValue;
