@@ -14,7 +14,7 @@ from skimage.measure import block_reduce
 
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
-PIXEL_RES_DIAG = sqrt(PIXEL_RES ^ 2 * 2)
+PIXEL_RES_DIAG = sqrt(PIXEL_RES ** 2 * 2)
 MAX_BEFORE_DOWNSAMPLING = 100000
 DOWNSAMPLING_TARGET = 100
 MINIMUM_SIZE = 10
@@ -96,6 +96,10 @@ class PathFinder:
         x_max = len(height_grid[0]) - 1
         y_max = len(height_grid) - 1
 
+        # Prepare the pixel resolution, since this will change if downsampling happens.
+        pixel_res_x = PIXEL_RES
+        pixel_res_y = PIXEL_RES
+
         # Process size check and downsampling calculations.
         self.debug_print("State space size: " + str(x_max) + "," + str(y_max) + ".")
         if (x_max + y_max) / 2 > MAX_BEFORE_DOWNSAMPLING:
@@ -104,12 +108,17 @@ class PathFinder:
 
         if x_max > DOWNSAMPLING_TARGET:
             downsample_x_factor = x_max // DOWNSAMPLING_TARGET + 1
+            pixel_res_x = pixel_res_x * downsample_x_factor
         else:
             downsample_x_factor = 1
+
         if y_max > DOWNSAMPLING_TARGET:
             downsample_y_factor = y_max // DOWNSAMPLING_TARGET + 1
+            pixel_res_y = pixel_res_y * downsample_y_factor
         else:
             downsample_y_factor = 1
+
+        pixel_res_d = sqrt(pixel_res_x ** 2 + pixel_res_y ** 2)
 
         # More static properties
         risk_grid = self._static_risk_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
@@ -201,9 +210,12 @@ class PathFinder:
                                 continue
                             elif (0 <= i <= x_max) and (0 <= j <= y_max):
                                 if (abs(i - x) + abs(j - y)) <= 1:
-                                    naismith_distance = PIXEL_RES + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                    if (j - y) == 0:
+                                        naismith_distance = pixel_res_x + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                    else:
+                                        naismith_distance = pixel_res_y + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
                                 else:
-                                    naismith_distance = PIXEL_RES_DIAG + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                    naismith_distance = pixel_res_d + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
 
                                 if naismith_distance > naismith_max:
                                     naismith_max = naismith_distance
@@ -255,7 +267,7 @@ class PathFinder:
                     new_cost = cost_index[current_node] + edge_cost
                     if (neighbour_node not in cost_index) or (new_cost < cost_index[neighbour_node]):
                         cost_index[neighbour_node] = new_cost
-                        prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min)
+                        prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d)
                         self.add_to_queue(prio, neighbour_node)
                         source_index[neighbour_node] = current_node
 
@@ -322,15 +334,20 @@ class PathFinder:
         return True
 
 
-    def heuristic(self, current, goal, node_height, goal_height, naismith_max, naismith_min):
+    def heuristic(self, current, goal, node_height, goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d):
         """ A diagonal heuristics function for A* search. """
 
         dx = abs(current[0] - goal[0])
         dy = abs(current[1] - goal[1])
 
         # Consider both 2D and 3D distance, using half the max height difference for vertical Naismith distance.
-        heuristic_distance = PIXEL_RES * (dx + dy) + (PIXEL_RES - 2 * PIXEL_RES_DIAG) * min(dx, dy) \
-            + NAISMITH_CONSTANT * abs(node_height - goal_height)
+        if dx < dy:
+            min_res = pixel_res_x
+        else:
+            min_res = pixel_res_y
+        heuristic_distance = pixel_res_x * dx + pixel_res_y * dy + (min_res - 2
+         * pixel_res_d) * min(dx, dy) + NAISMITH_CONSTANT * abs(node_height
+         - goal_height)
         scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
 
         return scaled_heuristic
@@ -340,6 +357,7 @@ class PathFinder:
     def debug_print(message):
         if __name__ == '__main__':
             print(message)
+
 
 if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
