@@ -15,8 +15,8 @@ from skimage.measure import block_reduce
 NAISMITH_CONSTANT = 7.92
 PIXEL_RES = 5 # 5 meters each direction per pixel
 PIXEL_RES_DIAG = sqrt(PIXEL_RES ** 2 * 2)
-MAX_BEFORE_DOWNSAMPLING = 100000
-DOWNSAMPLING_TARGET = 100
+MAX_BEFORE_DOWNSAMPLING = 99975
+DOWNSAMPLING_TARGET = 75
 MINIMUM_SIZE = 10
 MINIMUM_SEARCH_LONG = 0.004
 MINIMUM_SEARCH_LAT = 0.0035
@@ -365,5 +365,6 @@ if __name__ == '__main__':
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
     #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
     #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
-    print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
+    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
     #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
+    print(finder.find_path(-5.013863373924629, 56.79772084606183, -5.001121380694481, 56.80334932759566, 0.5))
