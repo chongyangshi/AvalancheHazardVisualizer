@@ -17,9 +17,8 @@ PIXEL_RES = 5 # 5 meters each direction per pixel
 PIXEL_RES_DIAG = sqrt(PIXEL_RES ** 2 * 2)
 MAX_BEFORE_DOWNSAMPLING = 100000
 DOWNSAMPLING_TARGET = 50
-MINIMUM_SIZE = 10
-MINIMUM_SEARCH_LONG = 0.004
-MINIMUM_SEARCH_LAT = 0.0035
+MINIMUM_SEARCH_LONG = 0.008
+MINIMUM_SEARCH_LAT = 0.007
 
 class PathFinder:
     """ Class for pathfinding based on Naismith's distance,
