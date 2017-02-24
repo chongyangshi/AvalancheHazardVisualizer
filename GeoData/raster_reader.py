@@ -206,6 +206,7 @@ if __name__ == "__main__":
         reader = RasterReader(sys.argv[1])
         # Simple tests.
     print(reader.read_point(-4.0385629, 57.1513943))
+    print(reader.read_point(-5.0135939038, 56.7982407347))
     print(reader.read_points(-4.0385629, 57.1513943, -3.9985629, 57.1213943))
     print(reader.read_points(-3.9985629, 57.1213943, -4.0385629, 57.1513943))
     print(reader.locate_index((-3.9985629, 57.1213943), (-4.0385629, 57.1513943), (-4.01, 57.13)))

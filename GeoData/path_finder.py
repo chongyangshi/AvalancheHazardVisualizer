@@ -112,7 +112,7 @@ class PathFinder:
             return False, "Failure reading grid."
 
         # Downsamplings
-        height_grid = block_reduce(height_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.mean)
+        height_grid = block_reduce(height_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.max)
         risk_grid = block_reduce(risk_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.max)
         aspect_grid = block_reduce(aspect_grid, block_size=(downsample_y_factor, downsample_x_factor), func=np.mean)
 
@@ -323,8 +323,9 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
-    print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
-    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.008765624999997, 56.79190751870019, 0.5))
-    print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
-    print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
-    print(finder.find_path(-5.0142724850797435, 56.7887604182850, -5.002987990273577, 56.80017695374134, 0.5))
+    #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
+    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.008765624999997, 56.79190751870019, 0.5))
+    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
+    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
+    #print(finder.find_path(-5.0142724850797435, 56.7887604182850, -5.002987990273577, 56.80017695374134, 0.5))
+    print(finder.find_path(-5.013593903803267, 56.798210951611466, -5.005228728936321, 56.80385733528229, 0.5))
