@@ -305,9 +305,9 @@ class PathFinder:
             min_res = pixel_res_x
         else:
             min_res = pixel_res_y
-        heuristic_distance = pixel_res_x * dx + pixel_res_y * dy + (min_res - 2
+        heuristic_distance = (pixel_res_x * dx + pixel_res_y * dy + (min_res - 2
          * pixel_res_d) * min(dx, dy) + NAISMITH_CONSTANT * abs(node_height
-         - goal_height) * node_risk
+         - goal_height)) * node_risk
         scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
 
         return scaled_heuristic
