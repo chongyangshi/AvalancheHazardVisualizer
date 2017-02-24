@@ -8,7 +8,7 @@ import utils as base_utils
 import heapq
 import numpy as np
 from sys import maxsize
-from math import sqrt
+from math import sqrt, floor
 from time import time
 from skimage.measure import block_reduce
 
@@ -55,39 +55,23 @@ class PathFinder:
 
         self.debug_print("Sanity check completed.")
 
-        # Swap if directions of two points not what we want (top left, bottom right)
-        x_side = 0
-        y_side = 0
-        if longitude_initial > longitude_final:
-            temp = longitude_initial
-            longitude_initial = longitude_final
-            longitude_final = temp
-            x_side = 1
-        if latitude_initial < latitude_final:
-            temp = latitude_initial
-            latitude_initial = latitude_final
-            latitude_final = temp
-            y_side = 1
+        original_initial = (longitude_initial, latitude_initial)
+        original_final = (longitude_final, latitude_final)
 
         # Enlarge search window if coordinate size below minimum.
-        x_goal = None
-        y_goal = None
         if (abs(longitude_final - longitude_initial) < MINIMUM_SEARCH_LONG) or (abs(latitude_final - latitude_initial) < MINIMUM_SEARCH_LAT):
-            temp_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
 
             if abs(longitude_final - longitude_initial) < MINIMUM_SEARCH_LONG:
-                x_goal = len(temp_grid[0]) - 1
+                if longitude_final < longitude_initial:
+                    longitude_initial, longitude_final = longitude_final, longitude_initial
                 longitude_final = longitude_initial + MINIMUM_SEARCH_LONG
                 self.debug_print("Grid enlarged in x direction.")
 
             if abs(latitude_final - latitude_initial) < MINIMUM_SEARCH_LAT:
-                y_goal = len(temp_grid) - 1
+                if latitude_final > latitude_initial:
+                    latitude_initial, latitude_final = latitude_final, latitude_initial
                 latitude_final = latitude_initial - MINIMUM_SEARCH_LAT
                 self.debug_print("Grid enlarged in y direction.")
-
-
-        self.debug_print("Reoriented grid: " + str(longitude_initial) + "/" + str(latitude_initial) + "/"
-            + str(longitude_final) + "/" + str(latitude_final))
 
         # Static properties.
         height_grid = self._height_map_reader.read_points(longitude_initial, latitude_initial, longitude_final, latitude_final)
@@ -137,6 +121,18 @@ class PathFinder:
         y_max = len(height_grid) - 1
         self.debug_print("Size after downsampling: " + str(x_max) + "," + str(y_max) + ".")
 
+        # Find where the original coordinates are.
+        initial_node = self._height_map_reader.locate_index((longitude_initial, latitude_initial), (longitude_final, latitude_final), original_initial)
+        goal_node = self._height_map_reader.locate_index((longitude_initial, latitude_initial), (longitude_final, latitude_final), original_final)
+        initial_node = (int(floor(initial_node[0] // downsample_x_factor)), int(floor(initial_node[1] // downsample_y_factor)))
+        goal_node = (int(floor(goal_node[0] // downsample_x_factor)), int(floor(goal_node[1] // downsample_y_factor)))
+
+        self.debug_print("Initial node: " + str(initial_node) + ", final node: " + str(goal_node))
+
+        # Just a quick check in case we get a off-by-N in downsampling...
+        initial_node = (min(initial_node[0], x_max), min(initial_node[1], y_max))
+        goal_node = (min(goal_node[0], x_max), min(goal_node[1], y_max))
+
         # Dynamic properties.
         location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
         location_ids = self._dynamic_risk_cursor.select_location_by_name(location_name)
@@ -161,132 +157,96 @@ class PathFinder:
         risk_grid_min = np.amin(risk_grid)
         height_grid_max = np.amax(height_grid)
         height_grid_min = np.amin(height_grid)
-
         path_grid = {}
-        if x_goal is not None:
-            x_goal = min(x_goal, x_max)
-        else:
-            x_goal = x_max
-        if y_goal is not None:
-            y_goal = min(y_goal, y_max)
-        else:
-            y_goal = y_max
 
-        # Special case: all zero grid, immediately return the most direct path.
-        non_zeros = risk_grid[risk_grid > 0]
-        if len(non_zeros) <= 0:
-            zero_path = []
-            min_xy = min(x_goal, y_goal)
-            max_xy = max(x_goal, y_goal)
-            for n in range(0, min_xy + 1):
-                zero_path.append((n, n))
+        for y in range(0, y_max + 1):
+            for x in range(0, x_max + 1):
+                # The grid dictionary is indexed by (displacement indices from top left), and contains a height, a 0-1
+                # scaled risk, and the coordinates-indices of its neighbours, arranged with list index as followed:
+                # 2 3 4
+                # 5 * 6
+                # 7 8 9
+                # a Naismith distance is attached to each neighbour.
+                height = height_grid[y, x]
+                scaled_risk = (risk_grid[y, x] - risk_grid_min) / (risk_grid_max - risk_grid_min)
+                risk_grid[y, x] = scaled_risk
+                path_grid[(x, y)] = [height, scaled_risk]
 
-            for n in range(min_xy + 1, max_xy + 1):
-                if x_max < y_max:
-                    zero_path.append((min_xy, n))
-                else:
-                    zero_path.append((n, min_xy))
+                for j in range(y - 1, y + 2):
+                    for i in range(x - 1, x + 2):
 
-            path = zero_path
-
-        else:
-            for y in range(0, y_max + 1):
-                for x in range(0, x_max + 1):
-                    # The grid dictionary is indexed by (displacement indices from top left), and contains a height, a 0-1
-                    # scaled risk, and the coordinates-indices of its neighbours, arranged with list index as followed:
-                    # 2 3 4
-                    # 5 * 6
-                    # 7 8 9
-                    # a Naismith distance is attached to each neighbour.
-                    height = height_grid[y, x]
-                    scaled_risk = (risk_grid[y, x] - risk_grid_min) / (risk_grid_max - risk_grid_min)
-                    risk_grid[y, x] = scaled_risk
-                    path_grid[(x, y)] = [height, scaled_risk]
-
-                    for j in range(y - 1, y + 2):
-                        for i in range(x - 1, x + 2):
-
-                            if ((i, j) == (x, y)):
-                                continue
-                            elif (0 <= i <= x_max) and (0 <= j <= y_max):
-                                if (abs(i - x) + abs(j - y)) <= 1:
-                                    if (j - y) == 0:
-                                        naismith_distance = pixel_res_x + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
-                                    else:
-                                        naismith_distance = pixel_res_y + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                        if ((i, j) == (x, y)):
+                            continue
+                        elif (0 <= i <= x_max) and (0 <= j <= y_max):
+                            if (abs(i - x) + abs(j - y)) <= 1:
+                                if (j - y) == 0:
+                                    naismith_distance = pixel_res_x + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
                                 else:
-                                    naismith_distance = pixel_res_d + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
-
-                                if naismith_distance > naismith_max:
-                                    naismith_max = naismith_distance
-                                if naismith_distance < naismith_min:
-                                    naismith_min = naismith_distance
-                                path_grid[(x, y)].append((i, j, naismith_distance))
+                                    naismith_distance = pixel_res_y + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
                             else:
-                                path_grid[(x, y)].append(None)
+                                naismith_distance = pixel_res_d + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
 
-            # To prevent A* from getting stuck, all risk values below 5 np.percentile
-            # will be changed to the 5 np.percentile value.
-            risk_5_percentile = np.percentile(non_zeros, 5)
-            np.clip(risk_grid, risk_5_percentile, risk_grid_max, out=risk_grid)
+                            if naismith_distance > naismith_max:
+                                naismith_max = naismith_distance
+                            if naismith_distance < naismith_min:
+                                naismith_min = naismith_distance
+                            path_grid[(x, y)].append((i, j, naismith_distance))
+                        else:
+                            path_grid[(x, y)].append(None)
 
-            self.debug_print("Successfully built search grid, starting A* Search...")
-            # path_grid is not yet scaled here, but risk_grid is.
+        # To prevent A* from getting stuck, all risk values below 5 np.percentile
+        # will be changed to the 5 np.percentile value.
+        non_zeros = risk_grid[risk_grid > 0]
+        risk_5_percentile = np.percentile(non_zeros, 5)
+        np.clip(risk_grid, risk_5_percentile, risk_grid_max, out=risk_grid)
 
-            # Set initial and final points based on orientation.
-            initial_node = (0, 0)
-            goal_node = (x_goal, y_goal)
-            if x_side == 1:
-                initial_node = (x_goal, initial_node[1])
-                goal_node = (0, goal_node[1])
-            if y_side == 1:
-                initial_node = (initial_node[0], y_goal)
-                goal_node = (goal_node[0], 0)
+        self.debug_print("Successfully built search grid, starting A* Search...")
+        # path_grid is not yet scaled here, but risk_grid is.
 
-            # A* Search
-            self.add_to_queue(0, initial_node)
-            source_index = {}
-            cost_index = {}
-            source_index[initial_node] = None
-            cost_index[initial_node] = 0
-            goal_height = height_grid[y_goal, x_goal]
+        # A* Search
+        self.add_to_queue(0, initial_node)
+        source_index = {}
+        cost_index = {}
+        source_index[initial_node] = None
+        cost_index[initial_node] = 0
+        goal_height = height_grid[goal_node[1], goal_node[0]]
 
-            while not self.is_queue_empty():
-                current = self.pop_from_queue()
-                current_node = current[1]
+        while not self.is_queue_empty():
+            current = self.pop_from_queue()
+            current_node = current[1]
 
-                if current_node == goal_node:
-                    break
+            if current_node == goal_node:
+                break
 
-                neighbours = [n for n in path_grid[current_node][2:] if (n is not None)]
-                for neighbour in neighbours:
-                    neighbour_node = (neighbour[0], neighbour[1])
-                    # Scaling height distance values from path_grid now.
-                    scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
-                    edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[neighbour[1], neighbour[0]] * risk_weighing
-                    new_cost = cost_index[current_node] + edge_cost
-                    if (neighbour_node not in cost_index) or (new_cost < cost_index[neighbour_node]):
-                        cost_index[neighbour_node] = new_cost
-                        prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d)
-                        self.add_to_queue(prio, neighbour_node)
-                        source_index[neighbour_node] = current_node
+            neighbours = [n for n in path_grid[current_node][2:] if (n is not None)]
+            for neighbour in neighbours:
+                neighbour_node = (neighbour[0], neighbour[1])
+                # Scaling height distance values from path_grid now.
+                scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
+                edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[neighbour[1], neighbour[0]] * risk_weighing
+                new_cost = cost_index[current_node] + edge_cost
+                if (neighbour_node not in cost_index) or (new_cost < cost_index[neighbour_node]):
+                    cost_index[neighbour_node] = new_cost
+                    prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d)
+                    self.add_to_queue(prio, neighbour_node)
+                    source_index[neighbour_node] = current_node
 
-            self.debug_print("Search completed, rebuilding path...")
+        self.debug_print("Search completed, rebuilding path...")
 
-            # Reconstruct the path by back-tracing.
-            path = []
-            current_node = goal_node
-            while source_index[current_node] is not None:
-                path = [current_node] + path
-                current_node = source_index[current_node]
+        # Reconstruct the path by back-tracing.
+        path = []
+        current_node = goal_node
+        while source_index[current_node] is not None:
             path = [current_node] + path
+            current_node = source_index[current_node]
+        path = [current_node] + path
 
-            self.debug_print("Coordinate path: " + str(path) + ".")
+        self.debug_print("Coordinate path: " + str(path) + ".")
 
         # Convert indices back into coordinates with height attached.
         return_path = {}
         for p in range(len(path)):
-            coords = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, path[p][0] * downsample_x_factor, path[p][1] * downsample_y_factor)
+            coords = self._height_map_reader.convert_displacement_to_coordinate(longitude_initial, latitude_initial, longitude_final, latitude_final, path[p][0] * downsample_x_factor, path[p][1] * downsample_y_factor)
             way_point = {}
             way_point['long'] = str(coords[0])
             way_point['lat'] = str(coords[1])
@@ -363,8 +323,8 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
-    #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
-    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.031738281250013, 56.80290751870019, 0.5))
-    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
-    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
-    print(finder.find_path(-5.012558113353254, 56.797561429294284, -5.005825353003156, 56.80246832377051, 0.3))
+    print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
+    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.008765624999997, 56.79190751870019, 0.5))
+    print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
+    print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
+    print(finder.find_path(-5.0142724850797435, 56.7887604182850, -5.002987990273577, 56.80017695374134, 0.5))
