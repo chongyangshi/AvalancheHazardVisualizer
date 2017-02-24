@@ -402,9 +402,8 @@ class CrawlerDB:
         except ValueError:
             return False
 
-
-a = CrawlerDB(utils.get_project_full_path() + "/data/forecast.db")
 """
+a = CrawlerDB(utils.get_project_full_path() + "/data/forecast.db")
 print a.select_location_by_id("2")
 print a.select_location_by_name("cairn")
 print a.add_location("Test", "http://Test")
@@ -414,7 +413,7 @@ print a.add_forecast("6", '2016-04-05', ('750', '800', '1055'), [(('1', '0'), ('
 print a.lookup_forecasts_by_location_id("6")
 print a.lookup_forecast_by_precise_search("6", "2016-04-05", "S")
 print a.lookup_forecast_by_forecast_id("10")
-"""
 print a.add_past_avalanches([[4320, 298637, 802844, "23\/02\/2017 13:00", "Exact location (can't use map function) - steep slopes immediately below start of Milky Way. Soft slab avalanche which broke away harmlessly below us - narrow near miss for us."], [4318, 219199, 772963, "23\/02\/2017 11:00", "Debris observed by climbers at 760 metres on West aspect on Aonach Mor from a natural slab avalanche earlier in the day."]])
 print a.select_past_avalanches_by_date_range('22/02/2017', '24/02/2017')
 print a.delete_past_avalanches_by_date_range('22/02/2017', '24/02/2017')
+"""
