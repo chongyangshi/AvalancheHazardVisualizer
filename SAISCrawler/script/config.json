@@ -1,4 +1,6 @@
 {
   "reportAPI": "http://www.sais.gov.uk/_ajax_report/?report_id=",
-  "dbFile": "/data/forecast.db"
+  "dbFile": "/data/forecast.db",
+  "mapURL": "http://www.sais.gov.uk/avalanche_map/",
+  "avalancheURL": "http://www.sais.gov.uk/avalanche_map/?area=-1&type="
 }

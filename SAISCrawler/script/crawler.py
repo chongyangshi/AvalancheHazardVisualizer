@@ -7,6 +7,7 @@ import sys
 import os
 import re
 import urlparse
+import json
 from selenium import webdriver, common
 from time import sleep
 
@@ -21,6 +22,9 @@ class Crawler:
 
         #Configure the source API.
         self.__crawlerReportURL = utils.read_config('reportAPI')
+        self.__crawlerMapURL = utils.read_config('mapURL')
+        self.__crawlerAvalancheURL = utils.read_config('avalancheURL')
+
         if len(self.__crawlerReportURL) == 0:
             raise ValueError("Empty report API URL in the configuration file!")
 
@@ -145,13 +149,92 @@ class Crawler:
 
     def crawl_past_avalanches(self):
         """ Crawl the Avalanche Map for past avalanches."""
-        # TODO: write this.
-        pass
+
+        retry_count = 0
+        load_success = False
+
+        # Attempt to load the page three times, if not working then give up
+        # and throw exception.
+        while not load_success:
+            try:
+                self._crawlerViewDriver.get(self.__crawlerMapURL)
+                load_success = True
+            except common.exceptions.TimeoutException:
+                retry_count += 1
+                if retry_count >= 3:
+                    raise
+
+        # Obtain a list of years of record.
+        map_options = self._crawlerViewDriver.find_element_by_xpath('//*[@id="mapform"]/select')
+        option_values = [i.get_attribute("value") for i in map_options.find_elements_by_tag_name("option")]
+        years = []
+        for val in option_values:
+            if val.isdigit():
+                years.append(int(val))
+
+        # Grab avalanche records of each year.
+        for year in years:
+            year_url = self.__crawlerAvalancheURL + str(year)
+            sleep(1)
+            self._crawlerViewDriver.get(year_url)
+            page_scripts = self._crawlerViewDriver.find_elements_by_tag_name('script')
+
+            # Locate the correct script containing the markers.
+            correct_script = None
+            for script in page_scripts:
+                script_inner = script.get_attribute("innerHTML")
+                if "var markers = " in script_inner:
+                    correct_script = script_inner
+                    break
+
+            if correct_script is None:
+                raise Exception("SAISCrawler has failed to find markers in " + str(year) + ", exiting.")
+
+            # Locate the line with the markers.
+            marker_line = None
+            script_lines = correct_script.split('\n')
+            for line in script_lines:
+                line_str = str(line).strip()
+                if line_str.startswith('var markers = '):
+                    marker_line = line_str
+                    break
+
+            if marker_line is None:
+                raise Exception("SAISCrawler has failed to find the marker line in " + str(year) + ", exiting.")
+
+            line_start = marker_line.find('[')
+            line_end = marker_line.rfind(']')
+            marker_line = marker_line[line_start:line_end+1]
+
+            try:
+                marker_json = json.loads(marker_line)
+            except ValueError:
+                print(marker_line)
+                raise Exception("SAISCrawler has failed to load the marker JSON in " + str(year) + ", exiting.")
+
+            avalanche_records = []
+            try:
+                for avalanche in marker_json:
+                    avalanche_record = [avalanche['ID'], avalanche['Easting'],
+                    avalanche['Northing'], avalanche['Date'],
+                    avalanche['Comments']]
+                    avalanche_records.append(avalanche_record)
+            except KeyError:
+                raise Exception("SAISCrawler has failed to read the marker JSON in " + str(year) + ", exiting.")
+
+            new, amended_count = self._DBManager.add_past_avalanches(avalanche_records)
+
+            print("SAISCrawler: added {} new, amended {} for record year {}.".format(new, amended_count, year))
+
+        return True
 
 
     def crawl_all(self):
         """ Crawl data for all locations in the database. """
-        self.crawl_forecasts(self._DBManager.select_all_location_id())
+
+        #self.crawl_forecasts(self._DBManager.select_all_location_id())
+        self.crawl_past_avalanches()
+        load_success = False
 
 
 if __name__ == "__main__":
