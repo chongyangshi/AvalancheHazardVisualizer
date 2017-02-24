@@ -222,11 +222,12 @@ class PathFinder:
                 neighbour_node = (neighbour[0], neighbour[1])
                 # Scaling height distance values from path_grid now.
                 scaled_naismith = (neighbour[2] - naismith_min) / (naismith_max - naismith_min)
-                edge_cost = scaled_naismith * (1 - risk_weighing) + risk_grid[neighbour[1], neighbour[0]] * risk_weighing
+                node_risk = risk_grid[neighbour[1], neighbour[0]] * risk_weighing
+                edge_cost = scaled_naismith * (1 - risk_weighing) + node_risk
                 new_cost = cost_index[current_node] + edge_cost
                 if (neighbour_node not in cost_index) or (new_cost < cost_index[neighbour_node]):
                     cost_index[neighbour_node] = new_cost
-                    prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d)
+                    prio = new_cost + self.heuristic(neighbour_node, goal_node, height_grid[neighbour[1], neighbour[0]], goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d, node_risk)
                     self.add_to_queue(prio, neighbour_node)
                     source_index[neighbour_node] = current_node
 
@@ -293,7 +294,7 @@ class PathFinder:
         return True
 
 
-    def heuristic(self, current, goal, node_height, goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d):
+    def heuristic(self, current, goal, node_height, goal_height, naismith_max, naismith_min, pixel_res_x, pixel_res_y, pixel_res_d, node_risk):
         """ A diagonal heuristics function for A* search. """
 
         dx = abs(current[0] - goal[0])
@@ -306,7 +307,7 @@ class PathFinder:
             min_res = pixel_res_y
         heuristic_distance = pixel_res_x * dx + pixel_res_y * dy + (min_res - 2
          * pixel_res_d) * min(dx, dy) + NAISMITH_CONSTANT * abs(node_height
-         - goal_height)
+         - goal_height) * node_risk
         scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
 
         return scaled_heuristic
@@ -322,9 +323,9 @@ if __name__ == '__main__':
     dbFile = utils.get_project_full_path() + utils.read_config('dbFile')
     risk_cursor = db_manager.CrawlerDB(dbFile)
     finder = PathFinder(RasterReader(rasters.HEIGHT_RASTER), RasterReader(rasters.ASPECT_RASTER), RasterReader(rasters.RISK_RASTER), risk_cursor)
-    #print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
-    #print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.008765624999997, 56.79190751870019, 0.5))
-    #print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
-    #print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
-    #print(finder.find_path(-5.0142724850797435, 56.7887604182850, -5.002987990273577, 56.80017695374134, 0.5))
-    print(finder.find_path(-5.013593903803267, 56.798210951611466, -5.005228728936321, 56.80385733528229, 0.5))
+    print(finder.find_path(-5.05173828125, 56.8129075187, -4.959765625, 56.7008783123, 0.5))
+    print(finder.find_path(-5.009765624999997, 56.790878312330426, -5.008765624999997, 56.79190751870019, 0.5))
+    print(finder.find_path(-5.03173828125, 56.8008783123, -5.030765625, 56.8008452452, 0.5))
+    print(finder.find_path(-4.99795838, 56.79702667, -4.99198645, 56.8079062, 0.5))
+    print(finder.find_path(-5.0142724850797435, 56.7887604182850, -5.002987990273577, 56.80017695374134, 0.5))
+    print(finder.find_path(-5.01481615318695, 56.79864610013431, -5.013048501000368, 56.80018630991712, 1.0))
