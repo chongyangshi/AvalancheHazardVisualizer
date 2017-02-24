@@ -30,14 +30,14 @@ with open(sys.argv[1], 'r') as csvfile:
 
 # Create tables.
 dbImportConnectionCursor.execute("""
-        CREATE TABLE locations
+        CREATE TABLE IF NOT EXISTS locations
         (location_id INTEGER PRIMARY KEY,
         location_name TEXT,
         location_forecast_url TEXT
         )"""
     )
 dbImportConnectionCursor.execute("""
-        CREATE TABLE forecasts
+        CREATE TABLE IF NOT EXISTS forecasts
         (forecast_id INTEGER PRIMARY KEY,
         location_id INTEGER REFERENCES locations(location_id) ON DELETE CASCADE,
         forecast_date TEXT,
@@ -49,6 +49,16 @@ dbImportConnectionCursor.execute("""
         lower_secondary_colour INTEGER,
         upper_primary_colour INTEGER,
         upper_secondary_colour INTEGER
+        )"""
+    )
+dbImportConnectionCursor.execute("""
+        CREATE TABLE IF NOT EXISTS past_avalanches
+        (avalanche_internal_id INTEGER PRIMARY KEY,
+        avalanche_id INTEGER,
+        easting INTEGER,
+        norting INTEGER,
+        avalanche_time TEXT,
+        avalanche_comment TEXT
         )"""
     )
 

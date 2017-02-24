@@ -3,6 +3,8 @@
 ###############################################################
 
 import sqlite3
+import time
+import datetime
 
 import utils
 
@@ -303,8 +305,106 @@ class CrawlerDB:
 
         return True
 
-"""
+
+    def add_past_avalanches(self, past_avalanches):
+        """ Add a list of past avalanches to the list. Return the number of
+            successfully added/amended avalanche records. """
+
+        new_count = 0
+        amended_count = 0
+
+        for avalanche in past_avalanches:
+
+            # Validation.
+            valid_avalanche = True
+            for i in range(3):
+                if (not isinstance(avalanche[i], int)) or (avalanche[i] < 1):
+                    valid_avalanche = False
+
+            converted_time = self.convert_time_string(avalanche[3].replace('\\', ''))
+            if not converted_time:
+                valid_avalanche = False
+
+            if valid_avalanche:
+                self.__CrawlerDBCursor.execute("SELECT avalanche_internal_id FROM\
+                    past_avalanches WHERE avalanche_id = ?",
+                    (avalanche[0],)) # Check identical avalanches.
+                same_ids = self.__CrawlerDBCursor.fetchall()
+                if len(same_ids) <= 0: # If a new one add it.
+                    self.__CrawlerDBCursor.execute("INSERT INTO past_avalanches\
+                        VALUES (NULL, ?, ?, ?, ?, ?)",
+                        (avalanche[0], avalanche[1], avalanche[2],
+                        converted_time, avalanche[4],))
+                    new_count += 1
+                else: # Amend existing record.
+                    self.__CrawlerDBCursor.execute("UPDATE past_avalanches SET \
+                        avalanche_id = ? , easting = ?, norting = ?, \
+                        avalanche_time = ?, avalanche_comment = ? WHERE\
+                        avalanche_internal_id = ?",
+                        (avalanche[0], avalanche[1], avalanche[2],
+                        converted_time, avalanche[4], same_ids[0][0],))
+                    amended_count += 1
+
+        self.__CrawlerDBConnection.commit()
+
+        return new_count, amended_count
+
+
+    def select_past_avalanches_by_date_range(self, start_date, end_date):
+        """ Retrieve past avalanches that happened between start_date and
+            end_date. """
+
+        start_date = self.convert_time_string(start_date.replace('\\', ''))
+        end_date = self.convert_time_string(end_date.replace('\\', ''))
+
+        if (not start_date) or (not end_date):
+            return False
+
+        self.__CrawlerDBCursor.execute("SELECT * FROM past_avalanches WHERE\
+            avalanche_time >= Datetime(?) AND avalanche_time <= Datetime(?)",
+            (start_date, end_date))
+        avalanches = self.__CrawlerDBCursor.fetchall()
+
+        return avalanches
+
+
+    def delete_past_avalanches_by_date_range(self, start_date, end_date):
+        """ Delete past avalanches that happened between start_date and
+            end_date. """
+
+        start_date = self.convert_time_string(start_date.replace('\\', ''))
+        end_date = self.convert_time_string(end_date.replace('\\', ''))
+
+        if (not start_date) or (not end_date):
+            return False
+
+        self.__CrawlerDBCursor.execute("DELETE FROM past_avalanches WHERE\
+            avalanche_time >= Datetime(?) AND avalanche_time <= Datetime(?)",
+            (start_date, end_date))
+
+        return True
+
+
+    @staticmethod
+    def convert_time_string(time_string):
+        """ Verify and convert an English date/datetime into a universal
+            date/datetime. """
+
+        try:
+            time_string = time_string.strip()
+            if len(time_string) > 10:
+                converted_date = datetime.datetime.strptime(time_string,
+                 '%d/%m/%Y %H:%M').strftime('%Y-%m-%d %H:%M')
+            else:
+                converted_date = datetime.datetime.strptime(time_string,
+                 '%d/%m/%Y').strftime('%Y-%m-%d')
+            return converted_date
+        except ValueError:
+            return False
+
+
 a = CrawlerDB(utils.get_project_full_path() + "/data/forecast.db")
+"""
 print a.select_location_by_id("2")
 print a.select_location_by_name("cairn")
 print a.add_location("Test", "http://Test")
@@ -313,4 +413,8 @@ print a.add_forecast("6", '2016-04-04', ('750', '900', '1055'), [(('1', '0'), ('
 print a.add_forecast("6", '2016-04-05', ('750', '800', '1055'), [(('1', '0'), ('1', '2')), (('1', '0'), ('2', '0')), (('1', '0'), ('2', '0')), (('1', '0'), ('1', '2')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0')), (('1', '0'), ('1', '0'))])
 print a.lookup_forecasts_by_location_id("6")
 print a.lookup_forecast_by_precise_search("6", "2016-04-05", "S")
-print a.lookup_forecast_by_forecast_id("10")"""
+print a.lookup_forecast_by_forecast_id("10")
+"""
+print a.add_past_avalanches([[4320, 298637, 802844, "23\/02\/2017 13:00", "Exact location (can't use map function) - steep slopes immediately below start of Milky Way. Soft slab avalanche which broke away harmlessly below us - narrow near miss for us."], [4318, 219199, 772963, "23\/02\/2017 11:00", "Debris observed by climbers at 760 metres on West aspect on Aonach Mor from a natural slab avalanche earlier in the day."]])
+print a.select_past_avalanches_by_date_range('22/02/2017', '24/02/2017')
+print a.delete_past_avalanches_by_date_range('22/02/2017', '24/02/2017')

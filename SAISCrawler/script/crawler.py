@@ -45,7 +45,7 @@ class Crawler:
         self._crawlerViewDriver.quit()
 
 
-    def crawl(self, locations):
+    def crawl_forecasts(self, locations):
         """ Crawl data of locations in the list. """
 
         if len(locations) <= 0:
@@ -64,7 +64,7 @@ class Crawler:
 
         for location in crawlerLocations:
 
-            retry_count = 0 
+            retry_count = 0
             load_success = False
 
             # Attempt to load the page three times, if not working then give up and throw exception.
@@ -143,9 +143,15 @@ class Crawler:
                 self._DBManager.add_forecast(location[0], data[0], data[1], data[2])
 
 
+    def crawl_past_avalanches(self):
+        """ Crawl the Avalanche Map for past avalanches."""
+        # TODO: write this.
+        pass
+
+
     def crawl_all(self):
         """ Crawl data for all locations in the database. """
-        self.crawl(self._DBManager.select_all_location_id())
+        self.crawl_forecasts(self._DBManager.select_all_location_id())
 
 
 if __name__ == "__main__":
