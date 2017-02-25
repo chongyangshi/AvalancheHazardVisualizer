@@ -58,6 +58,8 @@ function startup(Cesium) {
     'use strict';
 //Sandcastle_Begin
 Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
+var terrain_api_url = "https://terrain.ebornet.com"; // Without trailing backslash.
+var avalanche_api_url = "https://avalanche.ebornet.com/api"; // Without trailing backslash.
 
 var west = -5.008055;
 var south = 56.792807;
@@ -87,32 +89,32 @@ viewer.terrainProvider = cesiumTerrainProviderMeshes;
 
 var OSCredit = new Cesium.Credit("Ordnance Survey (GB) - Provided By EDINA Digimap Ordnance Survey Service");
 var OS5LTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/L',
+    url : terrain_api_url + '/tilesets/L',
     credit : OSCredit,
 });
 OS5LTerrainProviderMeshes.cameraPos = [56.80, -5.01];
 var OS5GTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/G',
+    url : terrain_api_url + '/tilesets/G',
     credit : OSCredit,
 });
 OS5GTerrainProviderMeshes.cameraPos = [56.63, -4.95];
 var OS5NCTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/NC',
+    url : terrain_api_url + '/tilesets/NC',
     credit : OSCredit,
 });
 OS5NCTerrainProviderMeshes.cameraPos = [57.11, -3.65];
 var OS5SCTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/SC',
+    url : terrain_api_url + '/tilesets/SC',
     credit : OSCredit,
 });
 OS5SCTerrainProviderMeshes.cameraPos = [57.06, -3.66];
 var OS5TTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/T',
+    url : terrain_api_url + '/tilesets/T',
     credit : OSCredit,
 });
 OS5TTerrainProviderMeshes.cameraPos = [57.56, -5.49];
 var OS5CMTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
-    url : 'https://terrain.ebornet.com/tilesets/CM',
+    url : terrain_api_url + '/tilesets/CM',
     credit : OSCredit,
 });
 OS5CMTerrainProviderMeshes.cameraPos = [56.95, -4.60];
@@ -120,19 +122,19 @@ OS5CMTerrainProviderMeshes.cameraPos = [56.95, -4.60];
 var showStaticRisk = '1';
 var SAISCredit = new Cesium.Credit("Scottish Avalanche Information Service");
 var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
-    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}?showStaticRisk=' + showStaticRisk,
+    url : avalanche_api_url + '/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}?showStaticRisk=' + showStaticRisk,
     hasAlphaChannel : true,
     maximumLevel : 15,
     credit: SAISCredit
 });
 var aspect_map = new Cesium.UrlTemplateImageryProvider({
-    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/terrain_aspects/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    url : avalanche_api_url + '/imagery/api/v1.0/terrain_aspects/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
     hasAlphaChannel : true,
     maximumLevel : 15,
     credit: OSCredit
 });
 var contour_map = new Cesium.UrlTemplateImageryProvider({
-    url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/contours/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
+    url : avalanche_api_url + '/imagery/api/v1.0/contours/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}',
     hasAlphaChannel : true,
     maximumLevel : 15,
     credit: OSCredit
@@ -259,7 +261,7 @@ function getCameraCenterPosition(){
 
 function switchRiskMap(date) {
     avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
-        url : 'https://avalanche.ebornet.com/api/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}/' + date + '?showStaticRisk=' + showStaticRisk,
+        url : avalanche_api_url + '/imagery/api/v1.0/avalanche_risks/{westDegrees}/{northDegrees}/{eastDegrees}/{southDegrees}/' + date + '?showStaticRisk=' + showStaticRisk,
         hasAlphaChannel : true,
         maximumLevel : 15,
         credit: SAISCredit
@@ -271,7 +273,7 @@ function switchRiskMap(date) {
 
 function loadRiskDates() {
     var positions = getCameraCenterPosition();
-    var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/forecast_dates/' + positions[0].toString() + '/' + positions[1].toString();
+    var req_url = avalanche_api_url + '/data/api/v1.0/forecast_dates/' + positions[0].toString() + '/' + positions[1].toString();
     var switch_functions = [];
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -305,7 +307,7 @@ loadRiskDates();
 document.getElementById("terrainMenu").firstChild.addEventListener('change', loadRiskDates, false);
 
 var toolbar = document.getElementById('toolbar');
-Sandcastle.addToolbarButton('Show Static Risk', function() {
+Sandcastle.addToolbarButton('Hide Static Risk', function() {
     var aurl_split = avalanche_risk_map.url.split('?showStaticRisk=');
     var aurl = aurl_split[0];
 
@@ -392,7 +394,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
         return false;
     }
     var risk_weighing = document.getElementById("riskSlider").value;
-    var req_url = 'https://avalanche.ebornet.com/api/data/api/v1.0/find_path/' + start_location[0].toString() + '/' + start_location[1].toString() + '/' + end_location[0].toString() + '/' + end_location[1].toString() + '/' + risk_weighing.toString();
+    var req_url = avalanche_api_url + '/data/api/v1.0/find_path/' + start_location[0].toString() + '/' + start_location[1].toString() + '/' + end_location[0].toString() + '/' + end_location[1].toString() + '/' + risk_weighing.toString();
     var switch_functions = [];
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
