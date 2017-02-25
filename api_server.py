@@ -13,7 +13,7 @@ from SAISCrawler.script import utils as forecast_utils
 from GeoData import raster_reader, rasters, path_finder
 
 API_LOG = os.path.abspath(os.path.join(__file__, os.pardir)) + "/api.log"
-LOG_REQUESTS = False
+LOG_REQUESTS = True
 SPATIAL_READER = raster_reader
 
 # Main API app.
@@ -388,13 +388,15 @@ def get_past_avalanches(start_date, end_date):
             for avalanche in avalanches:
                 avalanche_item = {}
                 coordinates = utils.bng_to_longlat((avalanche[2], avalanche[3]))
+                if not coordinates: # In case on invalid BNG values.
+                    continue # Skip this.
                 avalanche_item['long'] = coordinates[0]
                 avalanche_item['lat'] = coordinates[1]
                 avalanche_item['time'] = avalanche[4]
                 avalanche_item['comment'] = avalanche[5]
                 avalanche_item['height'] = height_raster.read_point(coordinates[0], coordinates[1])
 
-            avalanches_data.append(avalanche_item)
+                avalanches_data.append(avalanche_item)
 
         else:
             not_found_message = "Invalid date strings."
