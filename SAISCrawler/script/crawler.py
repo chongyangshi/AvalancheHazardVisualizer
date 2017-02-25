@@ -232,7 +232,7 @@ class Crawler:
     def crawl_all(self):
         """ Crawl data for all locations in the database. """
 
-        #self.crawl_forecasts(self._DBManager.select_all_location_id())
+        self.crawl_forecasts(self._DBManager.select_all_location_id())
         self.crawl_past_avalanches()
         load_success = False
 
