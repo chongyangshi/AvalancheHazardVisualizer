@@ -367,7 +367,45 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
 
         if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
             with open(API_LOG, "a") as log_file:
-                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, last 50 dates not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, route not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
+
+        return jsonify({})
+
+
+@app.route('/data/api/v1.0/past_avalanches/<string:start_date>/<string:end_date>', methods=['GET'])
+def get_past_avalanches(start_date, end_date):
+    """ Return a list of past avalanches between start_date and end_date, with
+        their datetime, locations and SAIS comments. """
+
+    not_found_message = ""
+
+    try:
+
+        if forecast_dbm.convert_time_string(start_date) and forecast_dbm.convert_time_string(end_date):
+            avalanches = forecast_dbm.select_past_avalanches_by_date_range(start_date, end_date)
+            avalanches_data = []
+
+            for avalanche in avalanches:
+                avalanche_item = {}
+                coordinates = utils.bng_to_longlat((avalanche[2], avalanche[3]))
+                avalanche_item['long'] = coordinates[0]
+                avalanche_item['lat'] = coordinates[1]
+                avalanche_item['time'] = avalanche[4]
+                avalanche_item['comment'] = avalanche[5]
+
+            avalanches_data.append(avalanche_item)
+
+        else:
+            not_found_message = "Invalid date strings."
+            abort(400)
+
+        return jsonify(avalanches_data)
+
+    except Exception as e:
+
+        if (os.path.isfile(API_LOG)) and LOG_REQUESTS:
+            with open(API_LOG, "a") as log_file:
+                log_file.write(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + ": error serving client, past avalanches not returned. Error: " + str(e) + ". Message: " + not_found_message + "\n")
 
         return jsonify({})
 

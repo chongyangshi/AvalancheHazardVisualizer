@@ -5,6 +5,8 @@ import json
 from collections import OrderedDict
 from math import copysign
 from colorsys import hls_to_rgb
+from convertbng.util import convert_lonlat
+from numpy import isnan
 
 from GeoData import rasters
 
@@ -24,7 +26,7 @@ def get_facing_from_aspect(aspect):
 
     if (x > 360.0) or (x < 0): # Invalid
         return ""
-    
+
     result = ""
     if (x > 337.5) or (x <= 22.5): result = "N"
     elif (x > 22.5) and (x <= 67.5): result = "NE"
@@ -40,13 +42,13 @@ def get_facing_from_aspect(aspect):
 
 def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
     """ Operate on one list of SAIS forecasts in the same day
-        to see which risk altitude range does the altitude fit 
+        to see which risk altitude range does the altitude fit
         in. """
-    
+
     # If forecasts not available.
     if len(forecasts) <= 0:
         return -1
-    
+
     # Validate aspect.
     if not (0 <= aspect <= 360):
         return -1
@@ -78,11 +80,11 @@ def match_aspect_altitude_to_forecast(forecasts, aspect, altitude):
 def risk_code_to_colour(risk_code, static_risk, show_static_risk):
     """ Return an RGB 3-tuple for the colour represented by the risk_code
         and static risk (represented by capacity). """
-    
+
     # HLS (Hue, Lightness)
     # [None: Gray, Low: Faint Yellow, Moderate: Dark Yellow, Considerable: Orange, High: Red, Very High: Dark Red]
     risks = [(0.0, 1.0), (0.167, 0.720), (0.125, 0.450), (0.083, 0.500), (0.0, 0.500), (0.0, 0.250)]
-    
+
     if (risk_code < 0) or (risk_code) > 5: # Invalid data, not filling that pixel.
         return (255, 255, 255, 0)
     else:
@@ -102,7 +104,7 @@ def aspect_to_grayscale(aspect):
         return (255, 255, 255, 0)
     else:
         converted_capacity = int(round(aspect / 360 * 255))
-        return (255, 102, 102) + (converted_capacity, ) 
+        return (255, 102, 102) + (converted_capacity, )
 
 
 def aspect_to_rbg(aspect):
@@ -137,13 +139,32 @@ def contour_to_rbg(pixel_grayscale):
     """ Return contour values as 50% capacity and transparency grey. """
 
     try:
- 
+
         grayscale_int = int(round(pixel_grayscale))
         if not (0 <= pixel_grayscale <= 255):
             return (255, 255, 255, 0)
-        inversed_int = 255 - grayscale_int  
+        inversed_int = 255 - grayscale_int
         return (inversed_int, inversed_int, inversed_int, 65)
         #return (grayscale_int, grayscale_int, grayscale_int, 65)
 
     except ValueError:
         return (255, 255, 255, 0)
+
+
+def bng_to_longlat(bng):
+    """ Given a pair of BNG coordinates return its long and lat coordinates. """
+
+    try:
+        easting = [int(bng[0])]
+        northing = [int(bng[1])]
+        coordinates = convert_lonlat(easting, northing)
+        coordinate_long = coordinates[0][0]
+        coordinate_lat = coordinates[1][0]
+
+        if isnan(coordinate_long) or isnan(coordinate_lat):
+            return False
+
+        return (coordinate_long, coordinate_lat)
+
+    except ValueError:
+        return False
