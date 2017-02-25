@@ -392,13 +392,25 @@ class CrawlerDB:
 
         try:
             time_string = time_string.strip()
-            if len(time_string) > 10:
-                converted_date = datetime.datetime.strptime(time_string,
-                 '%d/%m/%Y %H:%M').strftime('%Y-%m-%d %H:%M')
+
+            if ' ' in time_string: # With time.
+                if '/' in time_string:
+                    format_string = '%d/%m/%Y %H:%M'
+                else:
+                    format_string = '%Y-%m-%d %H:%M'
+                target_string = '%Y-%m-%d %H:%M'
             else:
-                converted_date = datetime.datetime.strptime(time_string,
-                 '%d/%m/%Y').strftime('%Y-%m-%d')
+                if '/' in time_string:
+                    format_string = '%d/%m/%Y'
+                else:
+                    format_string = '%Y-%m-%d'
+                target_string = '%Y-%m-%d'
+
+            converted_date = datetime.datetime.strptime(time_string,
+             format_string).strftime(target_string)
+
             return converted_date
+
         except ValueError:
             return False
 

@@ -44,6 +44,7 @@
 <div id="toolbar">
 <div id="terrainMenu"></div>
 <div id="aspectMenu"></div>
+<div id="pastAvalancheMenu"></div>
 <div id="datesMenu"></div>
 <div id="zoomButtons"></div>
 <div id="toggleLighting"></div>
@@ -231,6 +232,93 @@ Sandcastle.addToolbarMenu([{
         contour_layer = layers.addImageryProvider(contour_map);
    }
 }], 'aspectMenu');
+
+var past_avalanches_collection = new Cesium.EntityCollection();
+
+function getTodayAndOffsetDate(offset) {
+    // Return a list [today_date, offset_date] with offset_date going back
+    // by offset number of days.
+
+    var today = new Date();
+    dates = [];
+
+    for (var i = 0; i < 2; i++) {
+        if (i === 1) {
+            today = new Date().setDate(today.getDate() - offset);
+            today = new Date(today);
+        }
+        var year = today.getFullYear().toString();
+        var month = today.getMonth() + 1;
+        month = month.toString();
+        var day = today.getDate().toString();
+        var full_date = year + '-' + month + '-' + day;
+        dates.push(full_date);
+    }
+
+    return dates;
+}
+
+function loadPastAvalanches(dates) {
+    // Given a list [start_date, end_date], get past avalanche records by AJAX.
+
+    var start_date = dates[1];
+    var end_date = dates[0];
+    var req_url = avalanche_api_url + '/data/api/v1.0/past_avalanches/' + start_date.toString() + '/' + end_date.toString();
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE ) {
+           if (xmlhttp.status === 200) {
+                var avalanches = JSON.parse(xmlhttp.responseText);
+                for (var n = 0; n < avalanches.length; n++) {
+                    var point = viewer.entities.add({
+                        position : Cesium.Cartesian3.fromDegrees(parseFloat(avalanches[n]['long']), parseFloat(avalanches[n]['lat']), parseFloat(avalanches[n]['height'])),
+                        point : {
+                            pixelSize : 10,
+                            color : Cesium.Color.CRIMSON
+                        }
+                    }); // TODO: make points interactive with the actual information.
+                    past_avalanches_collection.add(point);
+                }
+           }
+        }
+    };
+    xmlhttp.open("GET", req_url, true);
+    xmlhttp.send();
+}
+
+function removePastAvalanches() {
+    var entities = past_avalanches_collection.values;
+    for (var i = 0; i < entities.length; i++) {
+        viewer.entities.remove(entities[i]);
+    }
+}
+
+loadPastAvalanches(getTodayAndOffsetDate(30));
+
+Sandcastle.addToolbarMenu([{
+    text : 'Show Past Month Avalanches',
+    onselect : function() {
+        removePastAvalanches();
+        loadPastAvalanches(getTodayAndOffsetDate(30));
+    }
+}, {
+    text : 'Show Past Year Avalanches',
+    onselect : function() {
+        removePastAvalanches();
+        loadPastAvalanches(getTodayAndOffsetDate(365));
+   }
+}, {
+    text : 'Show Past Three Years\' Avalanches',
+    onselect : function() {
+        removePastAvalanches();
+        loadPastAvalanches(getTodayAndOffsetDate(1095));
+   }
+}, {
+    text : 'Hide Past Avalanches',
+    onselect : function() {
+        removePastAvalanches();
+   }
+}], 'pastAvalancheMenu');
 
 
 var viewModel = { fogEnabled : true };

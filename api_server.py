@@ -392,6 +392,7 @@ def get_past_avalanches(start_date, end_date):
                 avalanche_item['lat'] = coordinates[1]
                 avalanche_item['time'] = avalanche[4]
                 avalanche_item['comment'] = avalanche[5]
+                avalanche_item['height'] = height_raster.read_point(coordinates[0], coordinates[1])
 
             avalanches_data.append(avalanche_item)
 
