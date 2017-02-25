@@ -386,10 +386,13 @@ def get_past_avalanches(start_date, end_date):
             avalanches_data = []
 
             for avalanche in avalanches:
+
                 avalanche_item = {}
                 coordinates = utils.bng_to_longlat((avalanche[2], avalanche[3]))
-                if not coordinates: # In case on invalid BNG values.
+
+                if not coordinates: # In case of invalid BNG values.
                     continue # Skip this.
+                
                 avalanche_item['long'] = coordinates[0]
                 avalanche_item['lat'] = coordinates[1]
                 avalanche_item['time'] = avalanche[4]

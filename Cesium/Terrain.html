@@ -58,6 +58,8 @@
 function startup(Cesium) {
     'use strict';
 //Sandcastle_Begin
+
+// Configurations.
 Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
 var terrain_api_url = "https://terrain.ebornet.com"; // Without trailing backslash.
 var avalanche_api_url = "https://avalanche.ebornet.com/api"; // Without trailing backslash.
@@ -80,6 +82,19 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     baseLayerPicker : false
 });
 
+
+// Infobox, initially safety warning.
+var infoBox = new Cesium.Entity();
+infoBox.name = "Caution: Safety Warning";
+infoBox.description = {
+    getValue : function() {
+        return '<b>This experimental application is not suitable for real-life use!</b> While best efforts have been made, the accuracy of avalanche hazard projections and their generation methods have not been peer reviewed or extensively tested. You are advised to receive adequate training before attempting winter mountaineering, and consult official sources such as the <a href="http://sais.gov.uk">Scottish Avalanche Information Service</a> for avalanche forecasts.';
+    }
+};
+viewer.selectedEntity = infoBox;
+
+
+// Terrain switcher.
 // Add all our layers.
 var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : 'https://assets.agi.com/stk-terrain/world',
@@ -233,8 +248,9 @@ Sandcastle.addToolbarMenu([{
    }
 }], 'aspectMenu');
 
-var past_avalanches_collection = new Cesium.EntityCollection();
 
+// Past avalanche layer.
+var past_avalanches_collection = new Cesium.EntityCollection();
 function getTodayAndOffsetDate(offset) {
     // Return a list [today_date, offset_date] with offset_date going back
     // by offset number of days.
@@ -275,8 +291,10 @@ function loadPastAvalanches(dates) {
                         point : {
                             pixelSize : 10,
                             color : Cesium.Color.CRIMSON
-                        }
-                    }); // TODO: make points interactive with the actual information.
+                        },
+                        name : avalanches[n]['time'],
+                        description : avalanches[n]['comment']
+                    });
                     past_avalanches_collection.add(point);
                 }
            }
@@ -320,21 +338,29 @@ Sandcastle.addToolbarMenu([{
    }
 }], 'pastAvalancheMenu');
 
+function pastAvalanchePicker(click) {
+    var pickedObject = scene.pick(click.position);
+    if (Cesium.defined(pickedObject) && (past_avalanches_collection.contains(pickedObject))) {
+        infoBox.name = "Avalanche on " + pickedObject.name.toString();
+        infoBox.description = {
+            getValue : function() {
+                return pickedObject.description.toString();
+            }
+        };
+        viewer.selectedEntity = infoBox;
+    }
+}
 
+click_handler.setInputAction(pastAvalanchePicker, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+
+// Required for UI to work.
 var viewModel = { fogEnabled : true };
 Cesium.knockout.track(viewModel);
 
-var safetyWarning = new Cesium.Entity();
-safetyWarning.name = "Caution: Safety Warning";
-safetyWarning.description = {
-    getValue : function() {
-        return '<b>This experimental application is not suitable for real-life use!</b> While best efforts have been made, the accuracy of avalanche hazard projections and their generation methods have not been peer reviewed or extensively tested. You are advised to receive adequate training before attempting winter mountaineering, and consult official sources such as the <a href="http://sais.gov.uk">Scottish Avalanche Information Service</a> for avalanche forecasts.';
-    }
-};
-viewer.selectedEntity = safetyWarning;
 
 // Load past forecast dates.
-
+// Risk date switcher.
 function getCameraCenterPosition(){
 
     var centerOfScreen = new Cesium.Cartesian2(viewer.canvas.clientWidth / 2, viewer.canvas.clientHeight / 2);
@@ -394,6 +420,8 @@ function loadRiskDates() {
 loadRiskDates();
 document.getElementById("terrainMenu").firstChild.addEventListener('change', loadRiskDates, false);
 
+
+// Static risk button.
 var toolbar = document.getElementById('toolbar');
 Sandcastle.addToolbarButton('Hide Static Risk', function() {
     var aurl_split = avalanche_risk_map.url.split('?showStaticRisk=');
@@ -419,6 +447,8 @@ Sandcastle.addToolbarButton('Hide Static Risk', function() {
     contour_layer = layers.addImageryProvider(contour_map);
 }, 'staticRiskButton');
 
+
+// Path finding stuff.
 var start_location = null;
 var end_location = null;
 var click_handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -446,6 +476,7 @@ Sandcastle.addToolbarButton('Pick start', function() {
             document.getElementById("routeText").innerHTML = 'Start location set.';
         }
         click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        click_handler.setInputAction(pastAvalanchePicker, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     document.getElementById("routeText").innerHTML = 'Click on map to set start location.';
 }, 'routeSelector');
@@ -472,6 +503,7 @@ Sandcastle.addToolbarButton('Pick end', function() {
             document.getElementById("routeText").innerHTML = 'End location set.';
         }
         click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        click_handler.setInputAction(pastAvalanchePicker, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     document.getElementById("routeText").innerHTML = 'Click on map to set end location.';
 }, 'routeSelector');
@@ -538,6 +570,7 @@ Sandcastle.addToolbarButton('Clear', function() {
     start_location = null;
     end_location = null;
     click_handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    click_handler.setInputAction(pastAvalanchePicker, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     route_points.removeAll();
     document.getElementById("routeText").innerHTML = 'Suggest a route?';
 }, 'routeSelector');
