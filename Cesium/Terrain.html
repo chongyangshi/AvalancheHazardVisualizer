@@ -82,6 +82,8 @@ var viewer = new Cesium.Viewer('cesiumContainer', {
     baseLayerPicker : false
 });
 
+var click_handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
 
 // Infobox, initially safety warning.
 var infoBox = new Cesium.Entity();
@@ -292,7 +294,7 @@ function loadPastAvalanches(dates) {
                             pixelSize : 10,
                             color : Cesium.Color.CRIMSON
                         },
-                        name : avalanches[n]['time'],
+                        name : 'Avalanche on ' + avalanches[n]['time'],
                         description : avalanches[n]['comment']
                     });
                     past_avalanches_collection.add(point);
@@ -316,35 +318,44 @@ loadPastAvalanches(getTodayAndOffsetDate(30));
 Sandcastle.addToolbarMenu([{
     text : 'Show Past Month Avalanches',
     onselect : function() {
+        infoBox = new Cesium.Entity();
         removePastAvalanches();
         loadPastAvalanches(getTodayAndOffsetDate(30));
     }
 }, {
     text : 'Show Past Year Avalanches',
     onselect : function() {
+        infoBox = new Cesium.Entity();
         removePastAvalanches();
         loadPastAvalanches(getTodayAndOffsetDate(365));
    }
 }, {
     text : 'Show Past Three Years\' Avalanches',
     onselect : function() {
+        infoBox = new Cesium.Entity();
         removePastAvalanches();
         loadPastAvalanches(getTodayAndOffsetDate(1095));
    }
 }, {
     text : 'Hide Past Avalanches',
     onselect : function() {
+        infoBox = new Cesium.Entity();
         removePastAvalanches();
    }
 }], 'pastAvalancheMenu');
 
 function pastAvalanchePicker(click) {
-    var pickedObject = scene.pick(click.position);
-    if (Cesium.defined(pickedObject) && (past_avalanches_collection.contains(pickedObject))) {
-        infoBox.name = "Avalanche on " + pickedObject.name.toString();
+    var pickedObject = viewer.scene.pick(click.position);
+    if (Cesium.defined(pickedObject) && (past_avalanches_collection.contains(pickedObject.id))) {
+        infoBox.name = "Avalanche on " + pickedObject.id.name.toString();
         infoBox.description = {
             getValue : function() {
-                return pickedObject.description.toString();
+                // Prevent rendering error when hiding avalanches.
+                if ((typeof infoBox.name !== 'undefined') && (Cesium.defined(pickedObject.id.description))) {
+                    return pickedObject.id.description._value.toString() + '<br /><br />' + '<i>Information recorded by the Scottish Avalanche Information Service.</i>';
+                } else {
+                    return "";
+                }
             }
         };
         viewer.selectedEntity = infoBox;
@@ -451,7 +462,6 @@ Sandcastle.addToolbarButton('Hide Static Risk', function() {
 // Path finding stuff.
 var start_location = null;
 var end_location = null;
-var click_handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 var route_points = new Cesium.EntityCollection();
 
 Sandcastle.addToolbarButton('Pick start', function() {
