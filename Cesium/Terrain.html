@@ -43,12 +43,12 @@
 <div id="loadingOverlay"><h1>Loading...</h1></div>
 <div id="toolbar">
 <div id="terrainMenu"></div>
-<div id="aspectMenu"></div>
-<div id="pastAvalancheMenu"></div>
+<div hidden="true" id="aspectMenu"></div>
 <div id="datesMenu"></div>
+<div id="pastAvalancheMenu"></div>
+<div id="staticRiskButton"></div>
 <div id="zoomButtons"></div>
 <div id="toggleLighting"></div>
-<div id="staticRiskButton"></div>
 <div id="routeSelector">
   <h3 id="routeText">Suggest a route?</h3>
   <div><b>Minimise Path</b><input id="riskSlider" type="range" min="0" max="1" step="0.1" /><b>Minimise Risk</b></div>
@@ -330,13 +330,20 @@ Sandcastle.addToolbarMenu([{
         loadPastAvalanches(getTodayAndOffsetDate(365));
    }
 }, {
-    text : 'Show Past Three Years\' Avalanches',
+    text : 'Show Past 3 Years\' Avalanches',
     onselect : function() {
         infoBox = new Cesium.Entity();
         removePastAvalanches();
         loadPastAvalanches(getTodayAndOffsetDate(1095));
    }
 }, {
+    text : 'Show All Recorded Avalanches',
+    onselect : function() {
+        infoBox = new Cesium.Entity();
+        removePastAvalanches();
+        loadPastAvalanches(getTodayAndOffsetDate(11000));
+   }
+},{
     text : 'Hide Past Avalanches',
     onselect : function() {
         infoBox = new Cesium.Entity();
