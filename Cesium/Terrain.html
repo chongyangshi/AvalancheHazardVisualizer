@@ -354,7 +354,7 @@ Sandcastle.addToolbarMenu([{
 function pastAvalanchePicker(click) {
     var pickedObject = viewer.scene.pick(click.position);
     if (Cesium.defined(pickedObject) && (past_avalanches_collection.contains(pickedObject.id))) {
-        infoBox.name = "Avalanche on " + pickedObject.id.name.toString();
+        infoBox.name = pickedObject.id.name.toString();
         infoBox.description = {
             getValue : function() {
                 // Prevent rendering error when hiding avalanches.
