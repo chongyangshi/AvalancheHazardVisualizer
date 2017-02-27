@@ -8,7 +8,7 @@ from colorsys import hls_to_rgb
 from convertbng.util import convert_lonlat
 from numpy import isnan
 
-from GeoData import rasters
+from GeoData import rasters, bng_to_lonlat
 
 # Conversion table for aspect 0-360 degrees to RGB values, represented by linear changes in six segments.
 CHANNEL_RANGE = 255
@@ -155,16 +155,12 @@ def bng_to_longlat(bng):
     """ Given a pair of BNG coordinates return its long and lat coordinates. """
 
     try:
-        easting = [int(bng[0])]
-        northing = [int(bng[1])]
-        coordinates = convert_lonlat(easting, northing)
-        coordinate_long = coordinates[0][0]
-        coordinate_lat = coordinates[1][0]
 
-        if isnan(coordinate_long) or isnan(coordinate_lat):
-            return False
+        easting = int(bng[0])
+        northing = int(bng[1])
+        coordinates = bng_to_lonlat.OSGB36toWGS84(easting, northing)
 
-        return (coordinate_long, coordinate_lat)
+        return coordinates
 
     except ValueError:
         return False
