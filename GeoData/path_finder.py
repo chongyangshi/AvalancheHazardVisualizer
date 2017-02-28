@@ -302,12 +302,18 @@ class PathFinder:
 
         # Consider both 2D and 3D distance, using half the max height difference for vertical Naismith distance.
         if dx < dy:
-            min_res = pixel_res_x
+            longer_side_res = pixel_res_y
+            shorter_side = dx
         else:
-            min_res = pixel_res_y
-        heuristic_distance = (pixel_res_x * dx + pixel_res_y * dy + (min_res - 2
-         * pixel_res_d) * min(dx, dy) + NAISMITH_CONSTANT * abs(node_height
-         - goal_height)) * node_risk
+            longer_side_res = pixel_res_x
+            shorter_side = dy
+
+        # Heuristic = (straight section distance + diagonal section distance + Naismith distance) * immediate risk
+        heuristic_distance = (\
+            longer_side_res * abs(dx - dy) + \
+            shorter_side * pixel_res_d + \
+            NAISMITH_CONSTANT * abs(node_height - goal_height)\
+            ) * node_risk
         scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
 
         return scaled_heuristic
