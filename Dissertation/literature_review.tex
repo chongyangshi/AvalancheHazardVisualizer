@@ -127,7 +127,7 @@ However, human avalanche forecasting can sometimes be impractical or sometimes c
 
 However, attempts to apply SNOWPACK in other regions with different snow conditions have identified weaknesses in the assumptions made by the model, which was originally developed for the Swiss Alps. A notable attempt was made by Hirashima \textit{et al.} \cite{Hirashima2008191} from 2005 to 2006 in Tsunan, Japan. While numerical profiles computed were in reasonable agreement with the observed snow profiles in Tsunan, it was found that the stability index estimators embedded in the model was not suitable for the shear strength of Japanese snow, and an alternative method for calculating the index had to be adopted. This suggested that adaptation of \textit{SNOWPACK} to a new region may require appropriate changes to the model based on local snow conditions.
 
-While SNOWPACK was developed as a specialised method for analysis of snow covers, more generalised models such as the Nearest Neighbours (NN) method have also been developed. The NN model was initially developed by Buser \cite{buser1983avalanche} in 1983, which has since been supplemented by various studies, such as Purves \textit{et al.} \cite{Purves2003343} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004. The NN model constructs a vectorspace consisting of measurements on weather and terrain conditions on different days of observation, and applies a k-nearest-neighbour method to calculate the likelihood of an avalanche based on a new day's measurements. While measurements may be on different units and scales, which make distance measurement difficult, this is partly compensated by applying scaling and weighting \cite[p. 599]{buser1983avalanche}. As the NN method has difficulties with high dimensional data, an alternative method based on Support Vector Machines (SVMs) have been proposed and developed \cite{Lehning2001253} \cite{pozdnoukhov2011spatio}. Another deficiency of the NN method is the increased uncertainty when there is not sufficient data available in the vector space \cite[p. 379]{pozdnoukhov2011spatio}.
+While SNOWPACK was developed as a specialised method for analysis of snow covers, more generalised models such as the Nearest Neighbours (NN) method have also been developed. The NN model was initially developed by Buser \cite{buser1983avalanche} in 1983, which has since been supplemented by various studies, such as Purves \textit{et al.} \cite{Purves2003343} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004. The NN model constructs a vector-space consisting of measurements on weather and terrain conditions on different days of observation, and applies a k-nearest-neighbour method to calculate the likelihood of an avalanche based on a new day's measurements. While measurements may be on different units and scales, which make distance measurement difficult, this is partly compensated by applying scaling and weighting \cite[p. 599]{buser1983avalanche}. As the NN method has difficulties with high dimensional data, an alternative method based on Support Vector Machines (SVMs) have been proposed and developed \cite{Lehning2001253} \cite{pozdnoukhov2011spatio}. Another deficiency of the NN method is the increased uncertainty when there is not sufficient data available in the vector space \cite[p. 379]{pozdnoukhov2011spatio}.
 
 \begin{figure}[h]
 		\centering
@@ -228,7 +228,15 @@ For an application that could be used in the field under time and user attention
  
 \chapter{Background Theory} \label{ch:theory}
 
+This chapter provides the details and applications of theories in avalanche forecasting, spatial analysis, risk representation and search algorithms across different stages of the project. Section \ref{sec:dynamic-factors} has been utilised in the construction of basic functionalities in \textbf{Stage 1}, which was improved in \textbf{Stage 2} with the introduction of Sections \ref{sec:static-factors} and \ref{sec:chosen-colour-coding}. Section \ref{sec:risky-pathfinding} provides the basis of algorithm design and implementation in \textbf{Stage 3}. Finally, Section \ref{sec:stats-eval} provides theoretical basis of statistically evaluating the risk model devised in \textbf{Stage 2} against past efforts.
+
 \section{Dynamic risk factors of avalanche release} \label{sec:dynamic-factors}
+
+Dynamic factors in avalanche forecasting are considered as factors that change over time, including but not limited to snow precipitation, conditions of snow cover (both well-studied by SNOWPACK \cite{Lehning2001253} as described in Section \ref{sec:avalanche-forecasting}), air temperature, wind direction and windspeed (studied by Veitinger \textit{et al.} \cite{veitinger2016potential} as described in Section \ref{sec:modelling-avalanche}). These factors also form the major elements of the Nearest Neighbour (NN) forecasting method (\ref{sec:avalanche-forecasting}), which is used by the project's source of dynamic risk data -- the Scottish Avalanche Information Service (SAIS). 
+
+Purves \textit{et al.} \cite{Purves2003343} described the process utilised by the SAIS to forecast avalanche risk in Scottish mountains. Through an NN modelling software tracking observed past avalanches, forecasters will input measurements on temperature, wind and snow conditions, which are then scaled to the same range, and weighted by an autonomous genetic algorithm in order to avoid overfitting on recent avalanche conditions. This process creates a vector in the NN vector-space. The software then provides the input vector's nearest neighbours, the conditions of which then allows experienced forecasters to make a decision on the level of risk for each segment of aspect and altitude in each region. The resulting compass rose-style diagram can be seen in Figure \ref{fig:mapping}.
+
+Based on the existing evaluations of the accuracy of SAIS avalanche forecasts \cite[p. 351]{Purves2003343} \cite{heierli2004verification}, with an accuracy of above 70\% on clear winter days, we have confidence that the dynamic risk model used by the SAIS provides a relatively reliable overview of dynamic avalanche risk across different aspects and altitudes, through a composition of different dynamic factors available to the SAIS observers. Therefore, SAIS risk data were applied directly to the terrain model for the basic application developed in \textbf{Stage 1}.
 
 \section{Static risk factors of avalanche release} \label{sec:static-factors} % Surface fitting.
 
@@ -237,6 +245,10 @@ For an application that could be used in the field under time and user attention
 \section{Colour visualisation of risk} \label{sec:chosen-colour-coding}
 
 \section{A* pathfinding in a risk-adjusted environment} \label{sec:risky-pathfinding}
+
+\section{Statistical evaluation of forecast accuracy} \label{sec:stats-eval}
+
+
 
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
