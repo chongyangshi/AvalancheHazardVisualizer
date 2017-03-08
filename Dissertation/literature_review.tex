@@ -52,7 +52,7 @@ As a front-runner of digital avalanche forecasts, the Scottish Avalanche Informa
 
 In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass ross, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in Figure \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, as it is not only easy to underestimate the risk due to risk levels varying sharply between neighbouring aspects and altitudes (as shown in Figure \ref{fig:mapping}), but also requires the user not to be unnecessarily cautious to avoid better routes with less risk than the user believes. 
 
-Therefore, the primary purpose of this project is to vastly simply this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain height-map raster), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis}.
+Therefore, the primary purpose of this project is to vastly simplify this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain height-map raster), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis} (also shown on the right is the final product with high risk terrain areas accentuated and an improved colour coding).
 
 In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
 
@@ -79,9 +79,9 @@ The course of the project was divided into a preliminary stage and four developm
 
 \textbf{Stage 1 - Basic Functionalities:} The aim of this stage was to select appropriate application frameworks and libraries to produce a basic but functional application: a 3D terrain viewer with a hazard map overlay, the data for which would be derived solely from forecasts by the Scottish Avalanche Information Service \cite{sais}. The WebGL framework Cesium \cite{cesium} was chosen as the foundation for front-end developments, while Python was chosen for developing the backend, and to interface other systems such as GIS processors with its vast range of interfacing libraries.
 
-\textbf{Stage 2 - Improved Spatial Analysis and Evaluation:} This stage of the project extends the data source for the hazard map overlay by performing surface fitting and spatial analysis on the terrain model data \cite{os-5}, in order to make the hazards more localised and to better reflect the hazard posed by unique terrain features such as concave slopes. MATLAB \cite{matlab-primer} and GIS tools used to perform the computations for these purposes. Evaluations on the localised hazard map against avalanche records were also conducted at this stage, with a focus on the avalanche ``blackspots'' of Scottish mountains.
+\textbf{Stage 2 - Improved Spatial Analysis and Evaluation:} This stage of the project extends the data source for the hazard map overlay by performing surface fitting and spatial analysis on the terrain model data \cite{os-5}, in order to make the hazards more localised and to better reflect the hazard posed by unique terrain features such as concave slopes. MATLAB \cite{matlab-primer} and other GIS tools were used to perform the computations for these purposes. Evaluations on the localised hazard map against avalanche records were also conducted at this stage, with a focus on the avalanche ``blackspots'' of Scottish mountains.
 
-\textbf{Stage 3 - Pathfinding and Risk Calculator:} With a localised hazard map obtained in Stage 2, this stage was focused on developing a pathfinding tool for the front end application, allowing the user to plot a potential hiking path with a configurable avalanche risk level. Techniques such as A* path finding \cite{cui2011based} were utilised to develop this functionality. 
+\textbf{Stage 3 - Risk-adjusted Pathfinding:} With a localised hazard map obtained in Stage 2, this stage was focused on developing a pathfinding tool for the front end application, allowing the user to plot a potential hiking path with a configurable avalanche risk level. Techniques such as A* path finding \cite{cui2011based} were utilised to develop this functionality. 
 
 \textbf{Stage 4 - Usability Testing:} The final stage of the project focus on the human-computer interaction aspects of the application. Experienced mountaineers were consulted and invited to test use the application and to provide feedback on usability as well as the effectiveness of the application guiding them away from avalanches that would have occurred in real use. Some improvements were made based on the feedbacks.
 
@@ -227,6 +227,16 @@ On modern mobile devices, touchscreen is often the only interface available for 
 For an application that could be used in the field under time and user attention constraints, a study by Pascoe \textit{et al.} \cite{pascoe2000using} shows that the application should have context awareness and utilise interaction designs which minimise distraction to the user. Another study by Albinsson and Zhai \cite{Albinsson:2003:HPT:642611.642631} explored methods to improve the precision of touchscreen interactions under rough inputs from human fingers.
  
 \chapter{Background Theory} \label{ch:theory}
+
+\section{Dynamic risk factors of avalanche release} \label{sec:dynamic-factors}
+
+\section{Static risk factors of avalanche release} \label{sec:static-factors} % Surface fitting.
+
+\section{Conversion between geographic coordinate systems} \label{sec:coordinate-systems}
+
+\section{Colour visualisation of risk} \label{sec:chosen-colour-coding}
+
+\section{A* pathfinding in a risk-adjusted environment} \label{sec:risky-pathfinding}
 
 \chapter{Procurement and Processing of Data} \label{ch:data}
 
