@@ -11,6 +11,8 @@
 \geometry{a4paper}            		
 \usepackage{graphicx}					
 \usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{gensymb}
 \usepackage{url}
 \usepackage[parfill]{parskip}
 \usepackage{natbib}
@@ -239,6 +241,74 @@ Purves \textit{et al.} \cite{Purves2003343} described the process utilised by th
 Based on the existing evaluations of the accuracy of SAIS avalanche forecasts \cite[p. 351]{Purves2003343} \cite{heierli2004verification}, with an accuracy of above 70\% on clear winter days, we have confidence that the dynamic risk model used by the SAIS provides a relatively reliable overview of dynamic avalanche risk across different aspects and altitudes, through a composition of different dynamic factors available to the SAIS observers. Therefore, SAIS risk data were applied directly to the terrain model for the basic application developed in \textbf{Stage 1}.
 
 \section{Static risk factors of avalanche release} \label{sec:static-factors} % Surface fitting.
+
+Static factors in avalanche forecasting mainly concern the terrain topography features that rarely change over time. Based on a height map of the terrain, various features can be computed through mathematical formulations. As summarised in Section \ref{sec:modelling-avalanche}, past efforts in modelling avalanche risks based on terrain features have generally covered the following features: altitude, slope angle and terrain curvature (convexities and concavities) and aspect angle. While past researches such as Ghinoi and Chung \cite[p. 313]{Ghinoi2005305} have attempted to reclassify altitudes data into distinct altitude bands to take into account the effects of altitude on avalanche risks, this has been equivalently considered in the dynamic risk model (\ref{sec:dynamic-factors}). Therefore, only slope, curvature and aspect are considered in the static risk model of this project. 
+
+\subsection{Surface fitting with a 2nd order polynomial}
+
+By definition, slope, curvature and aspect are topography properties relative to a pixel's neighbourhood, usually within a window of 8 surrounding points in a rectangular grid. Therefore to calculate these properties for each point, it is necessary to fit a polynomial surface within each such neighbourhood. A commonly used process is to fit a second degree polynomial surface to the neighbourhood. While it is generally agreed that a 2nd order polynomial is the most suitable for the 9-point 3D surface \cite{zevenbergen1987quantitative} \cite{heerdegen1982quantifying} \cite{evans1979integrated}, past efforts have applied different configurations of parameters. The configuration chosen for this project is a 9-parameter polynomial by Zevenbergen and Thorne \cite[p. 49]{heerdegen1982quantifying}, which has an order of 2 in each of the x and y directions, as shown in \ref{eq:surface-polynomial}. This model has the advantage of accurately passing through each point in the neighbourhood with uniquely determined parameters \cite[Sec. 6.1.3]{de2007geospatial}.
+
+\begin{equation} \label{eq:surface-polynomial}
+Z = Ax^{2}y^{2} + Bx^{2}y + Cxy^{2}+Dx^{2} + Ey^{2} + Fxy + Gx + Hy + I
+\end{equation}
+
+Where coefficients \textit{A} to \textit{I} are determined by solving a linear system of equations between coordinates of (\textit{x}, \textit{y}) and known \textit{Z} values in the height map. The pixel where the neighbourhood is centered on is (0, 0), and the grid is expressed as followed:
+
+\begin{center}
+\begin{tabular}{ccc}
+(-1,1) & (0,1) & (1,1) \\
+(-1,0) & (0,0) & (1,0) \\
+(-1,-1) & (0,-1) & (1,-1) \\
+\end{tabular}
+\end{center}
+
+As the center pixel (0, 0) is the point where we would like to determine the values of slope, curvature and aspect, which are all derived from the first or second derivatives of the surface polynomial \cite[p. 312]{Ghinoi2005305}, only constant terms in the derivatives will be required for the calculations, as described in \ref{subsec:slope}, \ref{subsec:curvature} and \ref{subsec:roughness}.
+
+\subsection{Modelling avalanche risk from slope} \label{subsec:slope}
+
+The slope angle represents the steepness of the terrain at a point, which can be determined by calculating the magnitude of change (first derivative) in both directions \cite[p. 50]{zevenbergen1987quantitative}. Practically, negation is applied to the value to represent that the slope is down-hill, but this is not required in modelling avalanche risk.
+
+The first order partial derivatives of the surface polynomial described in \ref{eq:surface-polynomial} are as followed:
+
+\begin{equation} \label{eq:first-derivatives}
+\begin{aligned}
+\frac{\partial{Z}}{\partial{x}} = 2Axy^{2} + 2Bxy + Cy^{2} + 2Dx + Fy + G \\
+\frac{\partial{Z}}{\partial{y}} = 2Ax^{2}y + Bx^{2} + 2Cxy + 2Ey + Fx + H
+\end{aligned}
+\end{equation}
+
+At the center point where the slope angle value is required, with coordinates (0, 0), it is trivial to determine the magnitude of change:
+\begin{equation} \label{eq:first-derivatives-zeros}
+\begin{aligned}
+When \   x = 0,\ y = 0: \\
+\frac{\partial{Z}}{\partial{x}} =  G, \   \frac{\partial{Z}}{\partial{y}} = H \\
+\Rightarrow SLOPE = \sqrt{G^{2} + H^{2}}
+\end{aligned}
+\end{equation}
+
+According to Horn \cite{1456186}, the slope angle is simply the inverse tangent of the magnitude in degree form: 
+\begin{equation}
+S_t = \tan ^{ - 1} (SLOPE) = \tan ^{ - 1}(\sqrt{G^{2} + H^{2}})
+\end{equation}
+
+The consensus of most researches is that the majority of avalanches occur between a slope angle range of 25\degree \ and 60\degree, with the highest level of risk near the middle of the range \cite[p. 42]{91097820150101}\cite[p. 112]{mcclung2006avalanche}. Veitinger and Sovilla \cite[p. 2215]{veitinger2016potential} modelled this observation as a bell-shaped curve, which has been adapted by our model. The modification we made to the curve was moving the symmetrical line in x direction to \textit{x} = 42.5\degree \ to make the curve fit better in line with the McClung \cite[p. 112]{mcclung2006avalanche} model, as shown in Figure \ref{fig:slope-curve}.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=6cm]{slope-curve.png}
+		\begin{equation}
+		R = \frac{1}{(1+(\frac{x-42.5}{8})^{6})}
+		\end{equation}
+		\caption{\label{fig:slope-curve} Adapted bell-shaped curve for modelling avalanche risk of slope angles.}
+\end{figure}
+
+\subsection{Modelling avalanche risk from curvature} \label{subsec:curvature}
+
+\subsection{Modelling avalanche risk from terrain roughness based on aspect and slope} \label{subsec:roughness}
+
+While slope angle and curvature have a direct influence on the likelihood of avalanche release \cite[p. 1311]{buhler2013automated}, aspect angle does not hold a significance in avalanche risk itself, as it only indicates the direction in horizontal plane the terrain is facing. Instead, aspect angle is used in conjunction with slope angle to calculate the roughness of the terrain, which determines the mechanical resistance of the terrain, and therefore affecting the likelihood of avalanche release \cite[p. 313]{Ghinoi2005305}.
+
+\subsection{Combining different models} 
 
 \section{Conversion between geographic coordinate systems} \label{sec:coordinate-systems}
 
