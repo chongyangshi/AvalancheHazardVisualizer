@@ -291,11 +291,11 @@ According to Horn \cite{1456186}, the slope angle is simply the inverse tangent 
 S_t = \tan ^{ - 1} (SLOPE) = \tan ^{ - 1}(\sqrt{G^{2} + H^{2}})
 \end{equation}
 
-The consensus of most researches is that the majority of avalanches occur between a slope angle range of 25\degree \ and 60\degree, with the highest level of risk near the middle of the range \cite[p. 42]{91097820150101}\cite[p. 112]{mcclung2006avalanche}. Veitinger and Sovilla \cite[p. 2215]{veitinger2016potential} modelled this observation as a bell-shaped curve, which has been adapted by our model. The modification we made to the curve was moving the symmetrical line in x direction to \textit{x} = 42.5\degree \ to make the curve fit better in line with the McClung \cite[p. 112]{mcclung2006avalanche} model, as shown in Figure \ref{fig:slope-curve}.
+The consensus of most researches is that the majority of avalanches occur between a slope angle range of 25\degree \ and 60\degree, with the highest level of risk near the middle of the range \cite[p. 42]{91097820150101}\cite[p. 112]{mcclung2006avalanche}. Veitinger and Sovilla \cite[p. 2215]{veitinger2016potential} modelled this observation as a bell-shaped curve, which has been adapted by our model. The modification our model made to the curve was to move the symmetrical line in x direction to \textit{x} = 42.5\degree \ to make the curve fit better in line with the McClung \cite[p. 112]{mcclung2006avalanche} model, as shown in Figure \ref{fig:slope-curve}.
 
 \begin{figure}[h]
 		\centering
-		\includegraphics[height=6cm]{slope-curve.png}
+		\includegraphics[height=5cm]{slope-curve.png}
 		\begin{equation}
 		R = \frac{1}{(1+(\frac{x-42.5}{8})^{6})}
 		\end{equation}
@@ -304,9 +304,46 @@ The consensus of most researches is that the majority of avalanches occur betwee
 
 \subsection{Modelling avalanche risk from curvature} \label{subsec:curvature}
 
+Another significant static influence on the risk of avalanche release is terrain curvature, which can either be convex, concave or linear, as shown in  \ref{fig:convex-concave}. Along the vertical and the horizontal plane, there are two different types of terrain curvatures: profile curvature and planform curvature \cite[p. 50]{zevenbergen1987quantitative}. As the release of avalanches are mainly concerned with gravity in vertical plane, only the profile curvature is considered in our risk model.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=3cm]{convex-concave.png}
+		\caption{\label{fig:convex-concave} An illustration of concave (A), convex (B) and linear (C) terrains. \cite[p. 360]{menno2013map}}
+\end{figure}
+
+In conformance with the convention, our model defines the value of the profile curvature as one over the radius of the neighbourhood curvature in meters. As with illustrated in Figure \ref{fig:convex-concave}, concave curvatures are expressed as negative, convex curvatures are expressed as positive, while linear terrain is defined to have a curvature value of zero. 
+
+As observed by McClung \cite[p. 115]{mcclung2006avalanche}, a majority of avalanches occur on terrains that are without significant curvature (forming a region of similar risk levels near a curvature value of zero), and convex terrains tend to increase the probability of slab avalanches by gliding. Conversely, snowpacks taper off on concave slopes, which reduces the probability of slab avalanches. Therefore, we produced a new curve for our model in modelling avalanche risk from curvature, as shown in Figure \ref{fig:curvature-curve}.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=5cm]{curvature-curve.png}
+\begin{equation} \label{eq:curvature-curve}
+  R =
+  \begin{cases}
+    x^3 + 0.5 & -0.7937 \leq x \leq 0.7937 \\
+    1 & x > 0.7937 \\
+    0 & \text{otherwise}
+  \end{cases}
+\end{equation}
+\caption{\label{fig:curvature-curve} A spline modelling avalanche risk of terrain curvature.}
+\end{figure}
+
+As shown by (\ref{eq:curvature-curve}), the numerical model of the curvature is based on the curve of function $y = x^3 + 0.5$, but with a range of $[0, 1]$ to form a numerically-valid risk factor. Extreme curvatures represented by $x > 0.7937$ or $x < -0.7937$ (curvature radius $r < 1.26m$) will be capped at extreme risk factors $R = 1$ and $R = 0$ respectively. We believe that the shape of the spline models the aforementioned effects of changing terrain curvature well: as the terrain levels off from a concave, the avalanche risk increases steeply until approaching the linear region, where there is no significance change in the risk level; as the terrain curvature increases away from this region into convex, the avalanche risk increases again steeply.
+
+In practise, the curvature value $x$ can be easily computed by taking the second derivative of (\ref{eq:surface-polynomial}) with respect to aspect angle (calculated by $\theta = atan(\frac{H}{G})$) in the fitted neighbourhood, which is:
+
+\begin{equation} \label{eq:curvature-equation}
+x = \frac{-2(DG^2+EH^2+FGH)}{G^2+H^2}
+\end{equation}
+
 \subsection{Modelling avalanche risk from terrain roughness based on aspect and slope} \label{subsec:roughness}
 
-While slope angle and curvature have a direct influence on the likelihood of avalanche release \cite[p. 1311]{buhler2013automated}, aspect angle does not hold a significance in avalanche risk itself, as it only indicates the direction in horizontal plane the terrain is facing. Instead, aspect angle is used in conjunction with slope angle to calculate the roughness of the terrain, which determines the mechanical resistance of the terrain, and therefore affecting the likelihood of avalanche release \cite[p. 313]{Ghinoi2005305}.
+While slope angle and curvature have a direct influence on the risk of avalanche release \cite[p. 1311]{buhler2013automated}, aspect angle does not hold a significance in avalanche risk itself, as it only indicates the direction in horizontal plane the terrain is facing. Instead, aspect angle is used in conjunction with slope angle to calculate the roughness of the terrain, which determines the mechanical resistance of the terrain, and therefore affecting the risk of avalanche release \cite[p. 313]{Ghinoi2005305}.
+
+
+
 
 \subsection{Combining different models} 
 
