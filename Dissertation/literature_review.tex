@@ -242,7 +242,7 @@ Based on the existing evaluations of the accuracy of SAIS avalanche forecasts \c
 
 \section{Static risk factors of avalanche release} \label{sec:static-factors} % Surface fitting.
 
-Static factors in avalanche forecasting mainly concern the terrain topography features that rarely change over time. Based on a height map of the terrain, various features can be computed through mathematical formulations. As summarised in Section \ref{sec:modelling-avalanche}, past efforts in modelling avalanche risks based on terrain features have generally covered the following features: altitude, slope angle and terrain curvature (convexities and concavities) and aspect angle. While past researches such as Ghinoi and Chung \cite[p. 313]{Ghinoi2005305} have attempted to reclassify altitudes data into distinct altitude bands to take into account the effects of altitude on avalanche risks, this has been equivalently considered in the dynamic risk model (\ref{sec:dynamic-factors}). Therefore, only slope, curvature and aspect are considered in the static risk model of this project. 
+Static factors in avalanche forecasting mainly concern the terrain topography features that rarely change over time. Based on a height map of the terrain, various features can be computed through mathematical formulations. As summarised in Section \ref{sec:modelling-avalanche}, past efforts in modelling avalanche risks based on terrain features have generally covered the following features: altitude, slope angle and terrain curvature (convexities and concavities) and aspect. While past researches such as Ghinoi and Chung \cite[p. 313]{Ghinoi2005305} have attempted to reclassify altitudes data into distinct altitude bands to take into account the effects of altitude on avalanche risks, this has been equivalently considered in the dynamic risk model (\ref{sec:dynamic-factors}). Therefore, only slope, curvature and aspect are considered in the static risk model of this project. 
 
 \subsection{Surface fitting with a 2nd order polynomial}
 
@@ -280,9 +280,9 @@ The first order partial derivatives of the surface polynomial described in \ref{
 At the center point where the slope angle value is required, with coordinates (0, 0), it is trivial to determine the magnitude of change:
 \begin{equation} \label{eq:first-derivatives-zeros}
 \begin{aligned}
-When \   x = 0,\ y = 0: \\
-\frac{\partial{Z}}{\partial{x}} =  G, \   \frac{\partial{Z}}{\partial{y}} = H \\
-\Rightarrow SLOPE = \sqrt{G^{2} + H^{2}}
+&When \   x = 0,\ y = 0: \\
+&\frac{\partial{Z}}{\partial{x}} =  G, \   \frac{\partial{Z}}{\partial{y}} = H \\
+&\Rightarrow SLOPE = \sqrt{G^{2} + H^{2}}
 \end{aligned}
 \end{equation}
 
@@ -327,12 +327,12 @@ As observed by McClung \cite[p. 115]{mcclung2006avalanche}, a majority of avalan
     0 & \text{otherwise}
   \end{cases}
 \end{equation}
-\caption{\label{fig:curvature-curve} A spline modelling avalanche risk of terrain curvature.}
+\caption{\label{fig:curvature-curve} A spline for modelling avalanche risk of terrain curvature.}
 \end{figure}
 
 As shown by (\ref{eq:curvature-curve}), the numerical model of the curvature is based on the curve of function $y = x^3 + 0.5$, but with a range of $[0, 1]$ to form a numerically-valid risk factor. Extreme curvatures represented by $x > 0.7937$ or $x < -0.7937$ (curvature radius $r < 1.26m$) will be capped at extreme risk factors $R = 1$ and $R = 0$ respectively. We believe that the shape of the spline models the aforementioned effects of changing terrain curvature well: as the terrain levels off from a concave, the avalanche risk increases steeply until approaching the linear region, where there is no significance change in the risk level; as the terrain curvature increases away from this region into convex, the avalanche risk increases again steeply.
 
-In practise, the curvature value $x$ can be easily computed by taking the second derivative of (\ref{eq:surface-polynomial}) with respect to aspect angle (calculated by $\theta = atan(\frac{H}{G})$) in the fitted neighbourhood, which is:
+In practise, the curvature value $x$ can be easily computed by taking the second derivative of (\ref{eq:surface-polynomial}) with respect to the aspect angle (calculated by $\theta = atan(\frac{H}{G})$) in the fitted neighbourhood, which is:
 
 \begin{equation} \label{eq:curvature-equation}
 x = \frac{-2(DG^2+EH^2+FGH)}{G^2+H^2}
@@ -340,10 +340,30 @@ x = \frac{-2(DG^2+EH^2+FGH)}{G^2+H^2}
 
 \subsection{Modelling avalanche risk from terrain roughness based on aspect and slope} \label{subsec:roughness}
 
-While slope angle and curvature have a direct influence on the risk of avalanche release \cite[p. 1311]{buhler2013automated}, aspect angle does not hold a significance in avalanche risk itself, as it only indicates the direction in horizontal plane the terrain is facing. Instead, aspect angle is used in conjunction with slope angle to calculate the roughness of the terrain, which determines the mechanical resistance of the terrain, and therefore affecting the risk of avalanche release \cite[p. 313]{Ghinoi2005305}.
+While slope angle and curvature have a direct influence on the risk of avalanche release \cite[p. 1311]{buhler2013automated}, aspect angle does not hold a significance in avalanche risk itself, as it only indicates the direction in horizontal plane the terrain is facing. Instead, aspect angle is used in conjunction with slope angle to calculate the roughness of the terrain, which measures the mechanical resistance of the terrain on the snow cover. The higher the mechanical resistance, the harder it is for a large scale avalanche to be released \cite[p. 313]{Ghinoi2005305}.
 
+There are various methods for calculating a terrain roughness index, some of which involves the consideration of landcover, which may change between seasons. Other factors such as change of vegetation due to planting and logging may also affect the accuracy of a roughness index calculated from landcover data. Therefore, an alternative method based on elevation can be used. A notable method based on vector dispersion, originally developed by Sappington \textit{et al.} \cite{sappington2007quantifying} and improved by Veitinger and Sovilla \cite[p. 2216]{veitinger2016potential} can be used.
 
+The methods works by decomposing the fitted neighbourhood of nine points into three components ($x$, $y$ and $z$) based on the values of slope angle ($\alpha$) and aspect ($\beta$) at each point. Then for each of the three components, we sum up the neighbourhood. Then a resultant vector |r| can be calculated for the center point by further sum up the squares of the three neighbourhood sums and take the square root. The roughness index $R$ can then be determined by normalising the vector with the number of points in the neighbourhood (that is, 9) and subtract it from 1. The process is shown as followed:
 
+\begin{equation}\label{eq:roughness-equation}
+\begin{aligned}
+d_xy &= 1 \cdot sin(\alpha) \\ &\Rightarrow z = 1 \cdot cos(\alpha),\  x = d_xy \cdot cos(\beta),\  y = d_xy \cdot sin(\beta) \\
+|r| &= \sqrt{(\sum x)^2 + (\sum y) ^ 2 + (\sum z) ^ 2} \\
+R &= 1 - \frac{|r|}{9}
+\end{aligned}
+\end{equation}
+
+From (\ref{eq:roughness-equation}), it is easily seen that the value of $R$ is always positive. The tested model by Veitinger and Sovilla \cite[p. 2216]{veitinger2016potential} believes that avalanche risk decreases sharply between 0 and 0.01, and further decreases slowly between 0.01 and 0.02. At a roughness level of above 0.02, an avalanche release will be unlikely. Therefore, a similar bell shaped curve is used as shown in Figure \ref{fig:roughness-curve}, albeit only the relevant section where $x > 0$.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=6cm]{roughness-curve.png}
+\begin{equation} \label{eq:roughness-curve}
+R = \frac{1}{(1+(\frac{x+0.005}{0.01})^{4})}
+\end{equation}
+\caption{\label{fig:roughness-curve} A bell-shaped curve for modelling avalanche risk of terrain roughness index.}
+\end{figure}
 
 \subsection{Combining different models} 
 
