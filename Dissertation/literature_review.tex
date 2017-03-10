@@ -228,7 +228,7 @@ On modern mobile devices, touchscreen is often the only interface available for 
 
 For an application that could be used in the field under time and user attention constraints, a study by Pascoe \textit{et al.} \cite{pascoe2000using} shows that the application should have context awareness and utilise interaction designs which minimise distraction to the user. Another study by Albinsson and Zhai \cite{Albinsson:2003:HPT:642611.642631} explored methods to improve the precision of touchscreen interactions under rough inputs from human fingers.
  
-\chapter{Background Theory} \label{ch:theory}
+\chapter{Theory and Methodology} \label{ch:theory}
 
 This chapter provides the details and applications of theories in avalanche forecasting, spatial analysis, risk representation and search algorithms across different stages of the project. Section \ref{sec:dynamic-factors} has been utilised in the construction of basic functionalities in \textbf{Stage 1}, which was improved in \textbf{Stage 2} with the introduction of Sections \ref{sec:static-factors} and \ref{sec:chosen-colour-coding}. Section \ref{sec:risky-pathfinding} provides the basis of algorithm design and implementation in \textbf{Stage 3}. Finally, Section \ref{sec:stats-eval} provides theoretical basis of statistically evaluating the risk model devised in \textbf{Stage 2} against past efforts.
 
@@ -296,8 +296,8 @@ The consensus of most researches is that the majority of avalanches occur betwee
 \begin{figure}[h]
 		\centering
 		\includegraphics[height=5cm]{slope-curve.png}
-		\begin{equation}
-		R = \frac{1}{(1+(\frac{x-42.5}{8})^{6})}
+		\begin{equation} \label{eq:slope-curve}
+		R_s = \frac{1}{(1+(\frac{x-42.5}{8})^{6})}
 		\end{equation}
 		\caption{\label{fig:slope-curve} Adapted bell-shaped curve for modelling avalanche risk of slope angles.}
 \end{figure}
@@ -320,7 +320,7 @@ As observed by McClung \cite[p. 115]{mcclung2006avalanche}, a majority of avalan
 		\centering
 		\includegraphics[height=5cm]{curvature-curve.png}
 \begin{equation} \label{eq:curvature-curve}
-  R =
+  R_c =
   \begin{cases}
     x^3 + 0.5 & -0.7937 \leq x \leq 0.7937 \\
     1 & x > 0.7937 \\
@@ -350,7 +350,7 @@ The methods works by decomposing the fitted neighbourhood of nine points into th
 \begin{aligned}
 d_xy &= 1 \cdot sin(\alpha) \\ &\Rightarrow z = 1 \cdot cos(\alpha),\  x = d_xy \cdot cos(\beta),\  y = d_xy \cdot sin(\beta) \\
 |r| &= \sqrt{(\sum x)^2 + (\sum y) ^ 2 + (\sum z) ^ 2} \\
-R &= 1 - \frac{|r|}{9}
+roughness index &= 1 - \frac{|r|}{9}
 \end{aligned}
 \end{equation}
 
@@ -360,12 +360,22 @@ From (\ref{eq:roughness-equation}), it is easily seen that the value of $R$ is a
 		\centering
 		\includegraphics[height=6cm]{roughness-curve.png}
 \begin{equation} \label{eq:roughness-curve}
-R = \frac{1}{(1+(\frac{x+0.005}{0.01})^{4})}
+R_r = \frac{1}{(1+(\frac{x+0.005}{0.01})^{4})}
 \end{equation}
 \caption{\label{fig:roughness-curve} A bell-shaped curve for modelling avalanche risk of terrain roughness index.}
 \end{figure}
 
 \subsection{Combining different models} 
+
+With three different static risk factors calculated: slope angle, curvature and roughness, a method of uniforming the three into a single per-point risk value is needed. While it is possible to apply a Support Vector Machine (SVM) \cite{pozdnoukhov2011spatio} as described in Section \ref{sec:avalanche-forecasting} or a fuzzy logic operator \cite[p. 2218]{veitinger2016potential}, because all three static risk factors are in the range of $[0, 1]$, and all represent a linear risk scale, the most efficient way to combine them is to multiply the three risk factors at each point together after normalising them. This also has the advantage of avoiding potential biases caused by the choice of weighting factors in a SVM or fuzzy operator.
+
+In order to determine the normalising constant, the integral of $x$ is calculated from each of the three models: the risk curve of slope angles (\ref{eq:slope-curve}), the risk spline of terrain curvature (\ref{eq:curvature-curve}), and the risk curve of terrain roughness index (\ref{eq:roughness-curve}); with intervals $[0, 90]$ (valid slope angles), $[-0.7937, 0.7937]$ (uncapped range of terrain curvature), and $[0, \infty]$ (valid roughness index values) respectively. Values of each risk factor at each point is divided by its normalising constant, and then multiplied together at each point. The process is shown as followed:
+
+\begin{equation}\label{eq:combining-static-risk}
+R_{combined} = \frac{R_s}{C_s} \cdot \frac{R_c}{C_c} \cdot \frac{R_r}{C_r} 
+\end{equation}
+
+Where $R_s$, $R_c$ and $R_r$  are risk factors for slope, curvature and roughness respectively, and $C_s$, $C_c$ and $C_r$  are their normalising constants.
 
 \section{Conversion between geographic coordinate systems} \label{sec:coordinate-systems}
 

@@ -10,4 +10,4 @@ ys = dxys .* sind(aspects);
 modr = sqrt(sum(xs).^2 + sum(ys).^2 + sum(zs).^2);
 R = 1 - modr ./ 9;
 val = 1./(1+((R+0.005)./0.01).^4);
-risk = val ./ 0.0062; % integral(fun, -Inf, Inf);
+risk = val ./ 0.0062; % integral(fun, 0, Inf);
