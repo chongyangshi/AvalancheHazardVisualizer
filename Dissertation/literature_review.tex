@@ -344,23 +344,23 @@ While slope angle and curvature have a direct influence on the risk of avalanche
 
 There are various methods for calculating a terrain roughness index, some of which involves the consideration of landcover, which may change between seasons. Other factors such as change of vegetation due to planting and logging may also affect the accuracy of a roughness index calculated from landcover data. Therefore, an alternative method based on elevation can be used. A notable method based on vector dispersion, originally developed by Sappington \textit{et al.} \cite{sappington2007quantifying} and improved by Veitinger and Sovilla \cite[p. 2216]{veitinger2016potential} can be used.
 
-The methods works by decomposing the fitted neighbourhood of nine points into three components ($x$, $y$ and $z$) based on the values of slope angle ($\alpha$) and aspect ($\beta$) at each point. Then for each of the three components, we sum up the neighbourhood. Then a resultant vector |r| can be calculated for the center point by further sum up the squares of the three neighbourhood sums and take the square root. The roughness index $R$ can then be determined by normalising the vector with the number of points in the neighbourhood (that is, 9) and subtract it from 1. The process is shown as followed:
+The methods works by decomposing the fitted neighbourhood of nine points into three components ($X$, $Y$ and $Z$) based on the values of slope angle ($\alpha$) and aspect ($\beta$) at each point. Then for each of the three components, we sum up the neighbourhood. Then a resultant vector |r| can be calculated for the center point by further sum up the squares of the three neighbourhood sums and take the square root. The roughness index $R$ can then be determined by normalising the vector with the number of points in the neighbourhood (that is, 9) and subtract it from 1. The process is shown as followed:
 
 \begin{equation}\label{eq:roughness-equation}
 \begin{aligned}
-d_xy &= 1 \cdot sin(\alpha) \\ &\Rightarrow z = 1 \cdot cos(\alpha),\  x = d_xy \cdot cos(\beta),\  y = d_xy \cdot sin(\beta) \\
-|r| &= \sqrt{(\sum x)^2 + (\sum y) ^ 2 + (\sum z) ^ 2} \\
-roughness index &= 1 - \frac{|r|}{9}
+d_{xy} &= 1 \cdot sin(\alpha) \\ &\Rightarrow Z = 1 \cdot cos(\alpha),\  X = d_{xy} \cdot cos(\beta),\  Y = d_{xy} \cdot sin(\beta) \\
+|r| &= \sqrt{(\sum X)^2 + (\sum Y) ^ 2 + (\sum Z) ^ 2} \\
+x_r &= 1 - \frac{|r|}{9}
 \end{aligned}
 \end{equation}
 
-From (\ref{eq:roughness-equation}), it is easily seen that the value of $R$ is always positive. The tested model by Veitinger and Sovilla \cite[p. 2216]{veitinger2016potential} believes that avalanche risk decreases sharply between 0 and 0.01, and further decreases slowly between 0.01 and 0.02. At a roughness level of above 0.02, an avalanche release will be unlikely. Therefore, a similar bell shaped curve is used as shown in Figure \ref{fig:roughness-curve}, albeit only the relevant section where $x > 0$.
+From (\ref{eq:roughness-equation}), it is easily seen that the value of $R$ is always positive. The tested model by Veitinger and Sovilla \cite[p. 2216]{veitinger2016potential} believes that avalanche risk decreases sharply between 0 and 0.01, and further decreases slowly between 0.01 and 0.02. At a roughness level of above 0.02, an avalanche release will be unlikely. Therefore, a similar bell shaped curve is used as shown in Figure \ref{fig:roughness-curve}, albeit only the relevant section where $x_r > 0$.
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[height=6cm]{roughness-curve.png}
 \begin{equation} \label{eq:roughness-curve}
-R_r = \frac{1}{(1+(\frac{x+0.005}{0.01})^{4})}
+R_r = \frac{1}{(1+(\frac{x_r+0.005}{0.01})^{4})}
 \end{equation}
 \caption{\label{fig:roughness-curve} A bell-shaped curve for modelling avalanche risk of terrain roughness index.}
 \end{figure}
