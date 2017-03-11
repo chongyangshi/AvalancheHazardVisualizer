@@ -28,6 +28,12 @@
 \definecolor{considerable}{RGB}{255,178,102}
 \definecolor{high}{RGB}{255,102,102}
 \definecolor{veryhigh}{RGB}{102,0,0}
+\definecolor{notapplicable-new}{RGB}{255, 255, 255}
+\definecolor{low-new}{RGB}{255, 255, 112}
+\definecolor{moderate-new}{RGB}{230, 172, 0}
+\definecolor{considerable-new}{RGB}{255, 127, 0}
+\definecolor{high-new}{RGB}{255, 0, 0}
+\definecolor{veryhigh-new}{RGB}{128, 0, 0}
 
 \title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
@@ -173,7 +179,7 @@ Risk visualisations produced by all past efforts discussed in this section are s
 
 \section{Colour representation of risks} \label{sec:colour-representation}
 
-While a realistic imagery of the surface can be produced in the 3D viewer by covering the artificial surface with corresponding aerial photographs, an appropriate colour representation scheme needs to be chosen for the hazard map overlay, which visualises the risk level at each point in the terrain model. Considerations need to be made regarding the choice of the colouring scheme, as well as in what form the colours are displayed. While all colouring schemes should have an unique representation for each distinct level of risk, how well an average user of the application perceives the colouring scheme is a usability issue. The two main colouring schemes proposed by existing researches and some attempts of applying them will be discussed in this section.
+While a realistic imagery of the surface can be produced in the 3D viewer by covering the artificial surface with corresponding aerial photographs, an appropriate colour representation scheme needs to be chosen for the hazard map overlay, which visualises the risk level at each point in the terrain model. Considerations need to be made regarding the choice of the colour scheme, as well as in what form the colours are displayed. While all colour schemes should have an unique representation for each distinct level of risk, how well an average user of the application perceives the colour scheme is a usability issue. The two main colour schemes proposed by existing researches and some attempts of applying them will be discussed in this section.
 
 \subsection{Saturation-based colouring}
 
@@ -190,21 +196,21 @@ This colour representation scheme is similar to the saturation-based scheme, but
 \centering
 \begin{tabular}{|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.9cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}| } 
  \hline
- \cellcolor{low!50}Low Risk 
- & \cellcolor{moderate!50}Moderate Risk
- & \cellcolor{considerable!50}Considerable Risk
- & \cellcolor{high!50}High Risk
- & \cellcolor{veryhigh!50}Very High Risk \\
+ \cellcolor{low}Low Risk 
+ & \cellcolor{moderate}Moderate Risk
+ & \cellcolor{considerable}Considerable Risk
+ & \cellcolor{high}High Risk
+ & \cellcolor{veryhigh}\textcolor{white}{Very High Risk} \\
  \hline
 \end{tabular}
-\caption{\label{fig:eu-avalanche-scale} Colouring scheme reconstructed from the European Avalanche Hazard Scale, used by the SAIS \cite{sais-report}.}
+\caption{\label{fig:eu-avalanche-scale} colour scheme reconstructed from the European Avalanche Hazard Scale, used by the SAIS \cite{sais-report}.}
 \end{figure}
 		
-However, some studies have considered the hue-based scheme used in Figure \ref{fig:eu-avalanche-scale} to be less effective, most notably by Conger \cite{conger2004review}, which found that using green to represent low risk deviates from the common perception of green being a safe-indicator colour, which is not always the case in avalanche forecasting. Orange was also found to be inappropriate in association with a risk, and more difficult to print cartographically \cite[Ch. 4.2]{conger2004review}. Therefore Conger has suggested that the risk scale should be rescaled into four, in order to abolish the use of orange. 
+However, some studies have considered the hue-based scheme used in Figure \ref{fig:eu-avalanche-scale} to be less effective, most notably by Conger \cite{conger2004review}, which found that using green to represent low risk deviates from the common perception of green being a safe-indicator colour, which is not always the case in avalanche forecasting. Orange was also found to be sometimes inappropriate in association with a risk, and more difficult to print cartographically \cite[Ch. 4.2]{conger2004review}. Therefore Conger has suggested that the risk scale should be rescaled into four, in order to abolish the use of orange. However, other researches such as Braun and Silver \cite[p. 2212]{braun1995interaction} disagree with this assessment of orange.
 
 HCI evaluations conducted by Cheong \textit{et al.} \cite[Ch. 5]{cheong2016evaluating} concluded that while a hue-based scheme is often most preferred by users, its user decision accuracy is not the best among different colour representation schemes.
  
-Other variations of applying hue-based colouring include an attempt by Gavaldà and Moner \cite{gavalda2008mountaineeroriented} to represent mountaineering route hazards with red-yellow-green traffic signals; as well as a method developed by Saito \textit{et al.} \cite{saito2005two}, using two tones of hue to represent hazard at each level, which in this case is unsuitable for the steep transitions of risk frequently occurring in avalanche hazard maps \cite[Ch. 5.1]{saito2005two}. Conger \cite[Ch. 5.2]{conger2004review} also suggested a method of partially filling hazard areas with triangles that are coloured according to the colouring scheme. This however would be difficult to implement in practice, due to the size variations of neighbouring points with the same risk level.
+Other variations of applying hue-based colouring include an attempt by Gavaldà and Moner \cite{gavalda2008mountaineeroriented} to represent mountaineering route hazards with red-yellow-green traffic signals; as well as a method developed by Saito \textit{et al.} \cite{saito2005two}, using two tones of hue to represent hazard at each level, which in this case is unsuitable for the steep transitions of risk frequently occurring in avalanche hazard maps \cite[Ch. 5.1]{saito2005two}. Conger \cite[Ch. 5.2]{conger2004review} also suggested a method of partially filling hazard areas with triangles that are coloured according to the colour scheme. This however would be difficult to implement in practice, due to the size variations of neighbouring points with the same risk level.
 
 \section{Cost-based terrain pathfinding} \label{sec:terrain-pathfinding}
 
@@ -365,11 +371,11 @@ R_r = \frac{1}{(1+(\frac{x_r+0.005}{0.01})^{4})}
 \caption{\label{fig:roughness-curve} A bell-shaped curve for modelling avalanche risk of terrain roughness index.}
 \end{figure}
 
-\subsection{Combining different models} 
+\subsection{Combining static risk models}
 
 With three different static risk factors calculated: slope angle, curvature and roughness, a method of uniforming the three into a single per-point risk value is needed. While it is possible to apply a Support Vector Machine (SVM) \cite{pozdnoukhov2011spatio} as described in Section \ref{sec:avalanche-forecasting} or a fuzzy logic operator \cite[p. 2218]{veitinger2016potential}, because all three static risk factors are in the range of $[0, 1]$, and all represent a linear risk scale, the most efficient way to combine them is to multiply the three risk factors at each point together after normalising them. This also has the advantage of avoiding potential biases caused by the choice of weighting factors in a SVM or fuzzy operator.
 
-In order to determine the normalising constant, the integral of $x$ is calculated from each of the three models: the risk curve of slope angles (\ref{eq:slope-curve}), the risk spline of terrain curvature (\ref{eq:curvature-curve}), and the risk curve of terrain roughness index (\ref{eq:roughness-curve}); with intervals $[0, 90]$ (valid slope angles), $[-0.7937, 0.7937]$ (uncapped range of terrain curvature), and $[0, \infty]$ (valid roughness index values) respectively. Values of each risk factor at each point is divided by its normalising constant, and then multiplied together at each point. The process is shown as followed:
+In order to determine the normalising constant, the integral of $x$ is calculated from each of the three models: the risk curve of slope angles (\ref{eq:slope-curve}), the risk spline of terrain curvature (\ref{eq:curvature-curve}), and the risk curve of terrain roughness index (\ref{eq:roughness-curve}); with intervals $[0, 90]$ (valid slope angles in degrees), $[-0.7937, 0.7937]$ (uncapped range of terrain curvature), and $[0, \infty]$ (valid roughness index values) respectively. Values of each risk factor at each point is divided by its normalising constant, and then multiplied together at each point. The process is shown as followed:
 
 \begin{equation}\label{eq:combining-static-risk}
 R_{combined} = \frac{R_s}{C_s} \cdot \frac{R_c}{C_c} \cdot \frac{R_r}{C_r} 
@@ -377,14 +383,51 @@ R_{combined} = \frac{R_s}{C_s} \cdot \frac{R_c}{C_c} \cdot \frac{R_r}{C_r}
 
 Where $R_s$, $R_c$ and $R_r$  are risk factors for slope, curvature and roughness respectively, and $C_s$, $C_c$ and $C_r$  are their normalising constants.
 
-\section{Conversion between geographic coordinate systems} \label{sec:coordinate-systems}
+\section{Colour visualisation of risk} \label{sec:chosen-colour-coding} % Explain change of colour coding first.
 
-\section{Colour visualisation of risk} \label{sec:chosen-colour-coding}
+For the basic application completed in \textbf{Stage 1}, a colour coding scheme identical to the colour coding used by the SAIS (as shown in Figure \ref{fig:eu-avalanche-scale}) was used for the risk levels (which at \textbf{Stage 1} contains only the dynamic risk model). However, as described in Section \ref{sec:colour-representation}, past researches have found this colour coding scheme to be ineffective and has the potential to mislead the user. Therefore, a new colour scheme was implemented, as shown in Figure \ref{fig:new-avalanche-scale}.
+
+\begin{figure}[h]
+\small
+\centering
+\begin{tabular}{|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.9cm}|>{\centering\arraybackslash}p{2.6cm}|>{\centering\arraybackslash}p{2.6cm}| } 
+ \hline
+ \cellcolor{low-new}Low Risk
+ & \cellcolor{moderate-new}Moderate Risk
+ & \cellcolor{considerable-new}Considerable Risk
+ & \cellcolor{high-new}\textcolor{white}{High Risk}
+ & \cellcolor{veryhigh-new}\textcolor{white}{Very High Risk} \\
+ \hline
+\end{tabular}
+\caption{\label{fig:new-avalanche-scale} The new colour scheme implemented in \textbf{Stage 3}.}
+\end{figure}
+
+Recommendations made by Conger \cite{conger2004review} was partially applied: green has been eliminated from the colour scheme to avoid giving the user a false perception of safety; however, the recommendation to eliminate orange was not applied, due to inconsistency of findings on orange between past researches, and orange's wide usage in risk colour codings. 
+
+With the elimination of green, yellow is instead used for representing the low risk level, while a new risk colour with a hue value between yellow and orange, but lower lightness than both in the HSL scale is used for representing moderate risk. The hue values for other risk colourings were also slightly adjusted to produce a good distinction between different colours, the effect of which can be seen in Figure \ref{fig:stage1bennevis} (right).
+
+\section{Combining the static risk model and the dynamic risk model} 
+
+As shown in Figure \ref{fig:eu-avalanche-scale}, the dynamic risk model produced by the SAIS has five distinct bands of risk levels (six if the grey data-not-available is included). In contrast, as shown in Section \ref{sec:static-factors}, the static risk model contains continuous data. This requires an appropriate method to combine the two models for visualisation purposes in the application. While it is possible to merge the two models numerically again through either a Support Vector Machine (SVM) or a fuzzy logic operator, due to the lack of established precedence between the influence of the static model and the dynamic model used in this project, the use of different representations for the two models was instead preferred. 
+
+As described in Section \ref{sec:colour-representation}, the two main schemes for colour representation of risk are saturation-based and hue-based. This provides an opportunity for implementing a mixed approach, in which two different representations can be used: one with hue and the other with saturation. 
+
+In particular, the dynamic risk level will determine the value of hue at a point, thus determining the "colour" of the point in the traditional sense, which is in turn determined by its altitude and terrain aspect as intended by the SAIS. The static risk level will then determine the saturation at that point. This means that the less likely static risk analysis believes that an avalanche release could occur at a point, the fainter the colour of that point will be. Conversely, a strong colour implies a high likelihood of avalanche release at a point based on static risk analysis.
+
+In practise, thresholding will be applied to all static risk levels in the raster for the scaling of static risk value to saturation. To reduce the influence of extreme values on the visualisation of static risk, the static risk values are scaled between the 1st percentile and the 99th percentile rather than between the minimum and maximum risk values.
+
+The resulting risk colour scheme, used by the final product of \textbf{Stage 3}, can be seen in Figure \ref{fig:final-colour-scheme}. The effects of static risk controlling saturation can also be observed in Figure \ref{fig:stage1bennevis} (right). 
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=5cm]{final-colour-scheme.png}
+		\caption{\label{fig:final-colour-scheme} The new risk colour scheme implemented in the final product. Each row represents a dynamic risk level.}
+\end{figure}
+
 
 \section{A* pathfinding in a risk-adjusted environment} \label{sec:risky-pathfinding}
 
 \section{Statistical evaluation of forecast accuracy} \label{sec:stats-eval}
-
 
 
 \chapter{Procurement and Processing of Data} \label{ch:data}
