@@ -300,7 +300,7 @@ class PathFinder:
         dx = abs(current[0] - goal[0])
         dy = abs(current[1] - goal[1])
 
-        # Consider both 2D and 3D distance, using half the max height difference for vertical Naismith distance.
+        # Find the shorter edge.
         if dx < dy:
             longer_side_res = pixel_res_y
             shorter_side = dx

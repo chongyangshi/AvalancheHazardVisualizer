@@ -103,13 +103,13 @@ As a result, while the application is functional and has shown promise during ou
 
 \section{Structure of this report}
 
-A literature review is conducted in Chapter \ref{ch:lit-review} over existing research and developments in the various aspects of Computer Science involved in this project. Theories studied and developed for the development of the application are discussed in Chapter \ref{ch:theory}. The procurement and processing of both avalanche forecast and topographical data used across all stages of the project are discussed in Chapter \ref{ch:data}. Chapter \ref{ch:app-description} describes in detail the features and internal architectures of the application, as well as its development process. This is followed by Chapter \ref{ch:app-testing}, which describes the evaluation and testing conducted on the application as well as on the quality of its data. Finally, Chapter \ref{ch:conclusions} concludes the report and discusses the potential uses and future developments of the application.
+A literature review is conducted in Chapter \ref{ch:lit-review} over existing research and developments in the various aspects of Computer Science involved in this project. Theories studied and developed for the development of the application as well as the processing of available data are discussed in Chapter \ref{ch:theory}. Chapter \ref{ch:app-description} describes in detail the features and internal architectures of the application, as well as its development process. This is followed by Chapter \ref{ch:app-testing}, which describes the evaluation and testing conducted on the application as well as on the quality of its data. Finally, Chapter \ref{ch:conclusions} concludes the report and discusses the potential uses and future developments of the application.
 
 \chapter{Literature Review} \label{ch:lit-review}
 
 As an application designed to improve the usability of snow avalanche forecasts, it is necessary to first consider and evaluate past research and efforts made to understand and predict avalanches, as well as efforts in visualising these knowledge and predictions. While the term avalanche can be applied to various types of moving substances, such as rock and mud \cite[p. 1]{91097820150101}, only snow avalanches are studied by this project.
 
-The literature review starts with an overview of the cause, classification and consequences of snow avalanches in Section \ref{sec:avalanche-background} to motivate the need of accurately visualising avalanche risks. This is followed by comparisons and critiques on existing methods and models for forecasting avalanches in Section \ref{sec:avalanche-forecasting}, which can be potentially applied in analysing avalanche forecasts and topographical data in Chapters \ref{ch:theory} and \ref{ch:data}. Past efforts in modelling and visualising avalanches risks are then discussed in Section \ref{sec:modelling-avalanche}, which provides reference theories in designing risk analysis models used in Chapter \ref{ch:theory}. Section \ref{sec:colour-representation} looks into the theories behind colour representations of risk, providing a basis for the colour design of the visualisation in Chapter \ref{ch:app-description}. Section \ref{sec:terrain-pathfinding} discusses existing methods in 3D path cost calculations and compares researches in the pathfinding algorithm A*, for algorithmic designs of the route planning tool in Chapter \ref{ch:app-description}. Finally, Section \ref{sec:application-usability} covers existing Human-computer Interaction researches in 3D navigation and field usage required by the project, which provides background and guidance to evaluations conducted in Chapter \ref{ch:app-testing}.
+The literature review starts with an overview of the cause, classification and consequences of snow avalanches in Section \ref{sec:avalanche-background} to motivate the need of accurately visualising avalanche risks. This is followed by comparisons and critiques on existing methods and models for forecasting avalanches in Section \ref{sec:avalanche-forecasting}, which can be potentially applied in analysing avalanche forecasts and topographical data in Chapter \ref{ch:theory}. Past efforts in modelling and visualising avalanches risks are then discussed in Section \ref{sec:modelling-avalanche}, which provides reference theories in designing risk analysis models used in Chapter \ref{ch:theory}. Section \ref{sec:colour-representation} looks into the theories behind colour representations of risk, providing a basis for the colour design of the visualisation in Chapter \ref{ch:app-description}. Section \ref{sec:terrain-pathfinding} discusses existing methods in 3D path cost calculations and compares researches in the pathfinding algorithm A*, for algorithmic designs of the route planning tool in Chapter \ref{ch:app-description}. Finally, Section \ref{sec:application-usability} covers existing Human-computer Interaction researches in 3D navigation and field usage required by the project, which provides background and guidance to evaluations conducted in Chapter \ref{ch:app-testing}.
 
 \section{Background on snow avalanches} \label{sec:avalanche-background}
 
@@ -220,7 +220,7 @@ As according to Moore \textit{et al.} \cite[pp. 4-5]{moore1991digital}, the terr
 
 A* is most widely implemented in the development of pathfinder artificial intelligences in computer games \cite{cui2011based}. Since its introduction, a significant number of studies have been conducted to improve the performance of A* search, including iterative-deepening A* (IDA) \cite{korf1985depth}  which requires less memory at runtime; hierarchical path-finding A* (HPA) \cite{botea2004near}, which utilises hierarchical abstraction on large data grids to produce a near-optimal solution at very high performance; and \textit{navigational mesh} (NavMesh) \cite{tozour2002building}, which minimises the structure representation of data to reduce memory use and computation time. However, the hierarchical structure of HPA means that interconnection points between sub-level grids are often picked around obstacles, which do not exist on the elevation-based terrain grid, potentially hindering HPA's performance if applied.
 
-When adapting A* or its aforementioned variants for computing a path in the terrain and taking into account the avalanche risk level at each point in the terrain raster, both the distance and the risk levels need to considered by the heuristic function of A*. Due to the nature of the uneven terrain, the proper walking distances between points can be estimated by Naismith's Rule and its variants \cite{magyari2012determining}. The accuracy of this estimation decreases as the resolution of the terrain raster decreases, which can occur if the terrain has to be downsampled to reduce search space size.
+When adapting A* or its aforementioned variants for computing a path in the terrain and taking into account the avalanche risk level at each point in the terrain raster, both the distance and the risk levels need to considered by the heuristic function of A*. Due to the nature of the uneven terrain, the proper walking distances between points can be estimated by Naismith's Rule and its variants \cite{magyari2012determining}. The accuracy of this estimation decreases as the resolution of the terrain raster decreases, which can occur if the terrain has to be down-sampled to reduce search space size.
 
 To represent the points as a data structure, Yap \cite{yap2002grid} has suggested using a tiled hex grid to organise neighbouring points for optimisation of performance, which then be analysed with a hierarchical search algorithm such as HPA \cite{botea2004near}. However, it is relatively difficult to re-project square grids of the terrain model into hex tiles, as terrain feature displacements can occur.
 
@@ -399,7 +399,7 @@ For the basic application completed in \textbf{Stage 1}, a colour coding scheme 
  & \cellcolor{veryhigh-new}\textcolor{white}{Very High Risk} \\
  \hline
 \end{tabular}
-\caption{\label{fig:new-avalanche-scale} The new colour scheme implemented in \textbf{Stage 3}.}
+\caption{\label{fig:new-avalanche-scale} The new colour scheme implemented in \textbf{Stage 2}.}
 \end{figure}
 
 Recommendations made by Conger \cite{conger2004review} was partially applied: green has been eliminated from the colour scheme to avoid giving the user a false perception of safety; however, the recommendation to eliminate orange was not applied, due to inconsistency of findings on orange between past researches, and orange's wide usage in risk colour codings. 
@@ -416,21 +416,79 @@ In particular, the dynamic risk level will determine the value of hue at a point
 
 In practise, thresholding will be applied to all static risk levels in the raster for the scaling of static risk value to saturation. To reduce the influence of extreme values on the visualisation of static risk, the static risk values are scaled between the 1st percentile and the 99th percentile rather than between the minimum and maximum risk values.
 
-The resulting risk colour scheme, used by the final product of \textbf{Stage 3}, can be seen in Figure \ref{fig:final-colour-scheme}. The effects of static risk controlling saturation can also be observed in Figure \ref{fig:stage1bennevis} (right). 
+The resulting risk colour scheme, used by the improved application of \textbf{Stage 2}, can be seen in Figure \ref{fig:final-colour-scheme}. The effects of static risk controlling saturation can also be observed in Figure \ref{fig:stage1bennevis} (right). 
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[height=5cm]{final-colour-scheme.png}
-		\caption{\label{fig:final-colour-scheme} The new risk colour scheme implemented in the final product. Each row represents a dynamic risk level.}
+		\caption{\label{fig:final-colour-scheme} The new risk colour scheme implemented in the improved application. Each row represents a dynamic risk level.}
 \end{figure}
-
 
 \section{A* pathfinding in a risk-adjusted environment} \label{sec:risky-pathfinding}
 
+As described in Section \ref{sec:terrain-pathfinding}, A* search is a well-studied algorithm for pathfinding in a graph, especially in challenging conditions such as large dataset and strict or real-time timing constraints. It has been chosen as the basis for the pathfinding feature in \textbf{Stage 3} over a simpler implementation of Dijkstra's Algorithm, due to the convenience of introducing avalanche risk into the former's heuristic function, as well as former's usually superior performance \cite{goldberg2005computing} when only an approximate answer is required.
+
+There are nevertheless a number of challenges when adapting A* search for the specific purpose of risk-adjusted pathfinding in a 3D terrain, including calculating the vertical distance between two points, balancing costs in distance and risk as required, and devising a suitable heuristic function for the problem. These will be addressed in the next few subsections, followed by an overview of the adapted algorithm. 
+
+\subsection{Vertical distance between two points}
+
+As the height map raster available to the application arranges data in a grid with uniform resolution, vertical distances between neighbouring nodes are consistent. Therefore, the only distinction of distance between two neighbouring nodes is the vertical distance. While it is possible to calculate the linear distance between two points based on trigonometry, this is both computationally expensive for a large data grid and inaccurate: it is unlikely that the terrain surface is smooth and straight between two neighbouring points. As an alternative, it is possible to estimate this distance based on observations and average cases, as introduced in \ref{sec:terrain-pathfinding}: the Naismith's Rule.
+
+The Naismith's Rule estimates the amount of equivalent distance walked by a mountaineer to ascend or descend each unit of vertical distance, called the Naismith distance. In average case on a natural terrain, it has been estimated that walking on a levelled terrain for 3 miles is equivalent to ascending or descending 2000 feet vertically, which is equivalent to 7.92 meters of walking distance for each meter of vertical distance, as summarised by Scarf \cite{scarf2008mathematical}. This allows a simple conversion process to be established as followed:
+
+\begin{equation} \label{eq:naismith-equation}
+\begin{aligned}
+Naismith\_Distance(NodeA,\ NodeB) &= Raster\_Resolution(NodeA,\ NodeB) \\
+&+ 7.92 * | NodeA.height - NodeB.height | \\
+\text{where Raster\_Resolution returns the }&\text{raster resolution in the direction of PointA} \\
+\text{to PointB, which is either straight or }&\text{diagonal.} 
+\end{aligned}
+\end{equation}
+
+\subsection{Balancing costs in distance and risk}
+
+The requirement of the project requires the algorithm to accept a user-configurable weighting of risk against distance, allowing the user to receive several possible routes between two points based on the importance they give to the risk enroute and the overall distance. After the user has requested a path with such a risk weighting, the application needs to calculate the overall cost of moving between two nodes accordingly. The risk weighting is between 0 and 1, representing the percentage of overall cost attributed to avalanche risk.
+
+While it is simple to multiply the separately calculated distance cost and avalanche risk cost by their defined weights, it is also important that the two costs are normalised into the same scale before combining them. This requires the maximum and minimum distance cost and avalanche risk cost to be calculated beforehand. The full process is shown as followed:
+
+\begin{equation} \label{eq:risk-weighting-equation}
+\begin{aligned}
+normalised\_distance &= \frac{Naismith\_Distance(NodeA,\ NodeB) - min\_distance}{max\_distance - min\_distance} \\
+normalised\_risk &= \frac{NodeB.risk - min\_risk}{max\_risk - min\_risk} \\
+overall\_movement\_cost &= normalised\_risk \cdot risk\_weighting \\
+&+ normalised\_distance \cdot (1 - risk\_weighting)
+\end{aligned}
+\end{equation}
+
+It is worth noting that the avalanche risk of moving between two nodes is dependent on the target node only, as calculating a potentially negative difference in risk levels between two nodes could affect the admissibility of the heuristic function.
+
+\subsection{Heuristic function for risk-adjusted A*}
+
+The heuristic function used to determine the priority under which each node is explored considers not only the Naismith distance between the candidate node and the goal node, but also the immediate static risk of moving to the candidate node from the current node. The latter creates a risk-averse behaviour for the algorithm, which helps the pathfinding to avoid localised avalanche hotspots.
+
+Due to the fact that the search will be conducted on a rectangular section of the data grid whose position is determined by the location of the start node and the goal node, and that it is possible to move diagonally in the real world, the commonly used goal distance estimation based on the Manhattan Distance must be altered, as shown in Figure \ref{fig:heuristic-distance}. 
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=3cm]{heuristic.png}
+		\begin{equation}\label{eq:heuristic-equation}
+		\begin{aligned}
+		estimated\_distance &=  (x - y) + \sqrt{2 \cdot y^2} \\
+		&+ 7.92 * | NextNode.height - GoalNode.height | \\
+		heuristic\_cost &= estimated\_distance \cdot GoalNode.risk \\
+		scaled\_heuristic &= \frac{heuristic\_cost - min\_naismith}{max\_naismith - min\_naismith}
+		\end{aligned}
+		\end{equation}
+		\caption{\label{fig:heuristic-distance} Calculating the scaled heuristic cost.}
+\end{figure}
+
+The heuristic cost of moving to a node can then be calculated by multiplying the risk level of the next node with the estimated Naismith distance to the goal node. The resulting heuristic cost is then scaled to between the maximum and minimum actual Naismith distance calculated, for combining with the actual cost of moving to the node, as shown in (\ref{eq:heuristic-equation}).
+
+\subsection{Overview of adapted A* algorithm}
+
+
 \section{Statistical evaluation of forecast accuracy} \label{sec:stats-eval}
 
-
-\chapter{Procurement and Processing of Data} \label{ch:data}
 
 \chapter{Description of the Application} \label{ch:app-description}
 
