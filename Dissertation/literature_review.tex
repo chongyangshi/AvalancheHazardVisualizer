@@ -8,7 +8,14 @@
 \protect\abstract{This project produces a functional web application to visualise potential avalanche hazards. Within a virtual 3D terrain reality, avalanche hazards along popular winter mountaineering routes can be observed. The project has a primary focus on Scottish mountains while providing excellent adaptability for other regions with appropriate data sources. Avalanche hazards were calculated from a combination of professional avalanche forecasts and spatial analysis of mountain terrain models. Both the accuracy and the usability of the application were evaluated through statistical comparisons with past avalanche records and user experimentation. Additional features such as locating historical avalanches and route planning are also provided in the application. The safety and ethical considerations of the application being put into real world use are discussed.}
 
 \usepackage[left=26mm,top=26mm,right=26mm,bottom=26mm]{geometry}    
-\geometry{a4paper}            		
+\geometry{a4paper}
+\usepackage{algorithm,algpseudocode}     
+\algnewcommand\Or{\textbf{ or }}   
+\algnewcommand\In{\textbf{ in }}   
+\algnewcommand\NotIn{\textbf{ not in }} 
+\makeatletter
+\renewcommand{\ALG@beginalgorithmic}{\small}
+\makeatother     		
 \usepackage{graphicx}					
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -484,8 +491,51 @@ Due to the fact that the search will be conducted on a rectangular section of th
 
 The heuristic cost of moving to a node can then be calculated by multiplying the risk level of the next node with the estimated Naismith distance to the goal node. The resulting heuristic cost is then scaled to between the maximum and minimum actual Naismith distance calculated, for combining with the actual cost of moving to the node, as shown in (\ref{eq:heuristic-equation}).
 
-\subsection{Overview of adapted A* algorithm}
+\subsection{Overview of the adapted A* algorithm}
 
+\begin{algorithm}
+\label{alg:a-star}
+\begin{algorithmic}[1]
+\State $search\_queue\gets$ PriorityQueue()
+\State $search\_queue$.push(priority $\gets$ 0, $initial\_node$)
+\State $source\_index\gets$ \{\}
+\State $costs_dict\gets$ \{\}
+\State $source\_index[initial\_node]\gets$ None
+\State $costs\_dict[inital\_node]\gets$ 0
+\While{$search\_queue \not=$ empty} 
+    \State $current\_node \gets$ $search\_queue$.pop();
+    \If{$current\_node = goal\_node$}
+         \Comment{Goal found, terminate.}
+        \State break
+    \EndIf
+    \State $neighbours\gets$ get\_neighbours($current\_node$)
+    \ForAll{$neighbour\_node \In neighbours$}
+        \State $cost\gets$ naismith\_distance($current\_node$, $neighbour\_node$) * (1 - $risk\_weighting$) + $neighbour\_node$.risk * $risk\_weighting$;
+        \State $new\_cost\gets$ $costs\_dict[current\_node]$ + $cost$;
+        \If{$neighbour\_node \NotIn costs\_dict \Or new\_cost < costs\_dict[neighbour\_node]$}
+            \State $costs\_dict[neighbour\_node]\gets$ $new\_cost$ \Comment{A shorter path.}
+            \State $neighbour\_priority\gets$ $new\_cost$ + heuristic($neighbour\_node$, $goal\_node$)
+            \State $search\_queue$.push(priority $\gets$ $neighbour\_priority$, $neighbour\_node$)
+            \State $source\_index[neighbour\_node]\gets$ $current\_node$
+        \EndIf
+    \EndFor
+\EndWhile
+\State reconstruct\_path($goal\_node$, $source\_index$);
+\end{algorithmic}
+\caption{Pseudocode for the adapted A* search algorithm.}
+\end{algorithm}
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=6cm]{a-star.png}
+		\caption{\label{fig:a-star} The operations of the pathfinder implementation.}
+\end{figure}
+
+As shown in Figure \ref{fig:a-star}, a few preprocessing steps are required to ensure that the algorithm can finish timely with a meaningful result. If the bounding box created by the initial and final node coordinates is too small (occurs when the line between two nodes is close to parallel with a longitude or latitude line), the search area is enlarged to allow the algorithm more choices. If the search space is too large, linear down-sampling is applied, picking the maximum height and risk level in the sample (for conservative estimation of Naismith distance and risk), and the mean aspect angle in the sample. 
+
+Thereafter, the Naismith distances from each node to its neighbours are calculated by applying (\ref{eq:naismith-equation}). A clipping of risk values to between the 5th percentile of non-zero risk values and the maximum risk is also conducted, as preliminary testing of the implementation showed that blocks of zero risk values significantly reduce the performance of the algorithm. 
+
+Finally, the A* search algorithm as shown above is performed on the search space. A path in the form of a list of coordinates can then be constructed through backtracking the search space from the goal node.
 
 \section{Statistical evaluation of forecast accuracy} \label{sec:stats-eval}
 
