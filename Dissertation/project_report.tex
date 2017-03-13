@@ -482,7 +482,7 @@ Due to the fact that the search will be conducted on a rectangular section of th
 		\begin{aligned}
 		estimated\_distance &=  (x - y) + \sqrt{2 \cdot y^2} \\
 		&+ 7.92 * | NextNode.height - GoalNode.height | \\
-		heuristic\_cost &= estimated\_distance \cdot GoalNode.risk \\
+		heuristic\_cost &= estimated\_distance \cdot NextNode.risk \\
 		scaled\_heuristic &= \frac{heuristic\_cost - min\_naismith}{max\_naismith - min\_naismith}
 		\end{aligned}
 		\end{equation}
