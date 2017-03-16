@@ -399,6 +399,10 @@ def get_past_avalanches(start_date, end_date):
                 avalanche_item['comment'] = avalanche[5]
                 avalanche_item['height'] = height_raster.read_point(coordinates[0], coordinates[1])
 
+                # Fix the issue when SAIS labels an avalanche outside raster boundary.
+                if not avalanche_item['height']:
+                    avalanche_item['height'] = 0.0;          
+
                 avalanches_data.append(avalanche_item)
 
         else:

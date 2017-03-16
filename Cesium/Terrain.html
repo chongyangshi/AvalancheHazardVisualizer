@@ -295,7 +295,7 @@ function loadPastAvalanches(dates) {
                             color : Cesium.Color.CRIMSON
                         },
                         name : 'Avalanche on ' + avalanches[n]['time'],
-                        description : avalanches[n]['comment']
+                        description : encodeURIComponent(avalanches[n]['comment'])
                     });
                     past_avalanches_collection.add(point);
                 }
@@ -359,7 +359,11 @@ function pastAvalanchePicker(click) {
             getValue : function() {
                 // Prevent rendering error when hiding avalanches.
                 if ((typeof infoBox.name !== 'undefined') && (Cesium.defined(pickedObject.id.description))) {
-                    return pickedObject.id.description._value.toString() + '<br /><br />' + '<i>Information recorded by the Scottish Avalanche Information Service.</i>';
+                    if (typeof pickedObject.id.description._value !== 'undefined') {
+                        return decodeURIComponent(pickedObject.id.description._value.toString()) + '<br /><br />' + '<i>Information recorded by the Scottish Avalanche Information Service.</i>';
+                    } else {
+                        return "";
+                    }
                 } else {
                     return "";
                 }
