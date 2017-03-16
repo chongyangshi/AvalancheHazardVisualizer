@@ -122,12 +122,12 @@ class Crawler:
 
                     #Decode the altitude parameters. They may not always be integers (e.g. "1055m"), so match first int found.
                     crawlerParsedForecastLowerBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txts'][0]))[0]
-                    #In case some reports not setting the middle boundary (found on Report #6095):
+                    crawlerParsedForecastUpperBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txte'][0]))[0]
+                    #In case some reports not setting the middle boundary (found on Report #6095, #6632):
                     try:
                         crawlerParsedForecastMiddleBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txtm'][0]))[0]
-                    except KeyError:
-                        crawlerParsedForecastMiddleBoundary = 0
-                    crawlerParsedForecastUpperBoundary = re.findall(r'\d+', str(crawlerParsedQuery['txte'][0]))[0]
+                    except:
+                        crawlerParsedForecastMiddleBoundary = str((int(crawlerParsedForecastLowerBoundary) + int(crawlerParsedForecastUpperBoundary)) / 2)
 
                     #Check that the data is of correct length.
                     if len(crawlerParsedForecastData) != 32:
