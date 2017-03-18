@@ -4,3 +4,4 @@ convertbng
 flask
 Pillow
 scikit-image
+scipy
