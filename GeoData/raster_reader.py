@@ -110,6 +110,16 @@ class RasterReader:
         return x, y
 
 
+    def index_to_coordinate(self, index_x, index_y):
+        """ Convert raster indices into WGS84 coordinates. """
+
+        transform_info = self.__corners[id(self._raster)]['corner_info']
+        x = index_x * transform_info[1] + transform_info[0]
+        y = index_y * transform_info[5] + transform_info[3]
+
+        return x, y
+
+
     def check_access_window(self, coord_x, coord_y):
         """ Check whether a coordinate is within the acceptable
             access window, if not, return False; else, return

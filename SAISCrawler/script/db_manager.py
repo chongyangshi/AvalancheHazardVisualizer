@@ -368,6 +368,16 @@ class CrawlerDB:
         return avalanches
 
 
+    def select_all_past_avalanches(self):
+        """ Retrieve all recorded past avalanches, very slow, for use in evaluation
+            script only. """
+
+        self.__CrawlerDBCursor.execute("SELECT * FROM past_avalanches ")
+        avalanches = self.__CrawlerDBCursor.fetchall()
+
+        return avalanches
+
+
     def delete_past_avalanches_by_date_range(self, start_date, end_date):
         """ Delete past avalanches that happened between start_date and
             end_date. """
