@@ -5,6 +5,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from collections import OrderedDict
 
 from SAISCrawler.script import db_manager, utils
 from GeoData import raster_reader, rasters, bng_to_lonlat
@@ -20,7 +21,7 @@ avalanche_dbm = db_manager.CrawlerDB(dbFile)
 static_risk = raster_reader.RasterReader(rasters.RISK_RASTER)
 
 all_past_avalanches = avalanche_dbm.select_all_past_avalanches()
-accuracy_data = {}
+accuracy_data = OrderedDict({})
 print("==========================================================")
 for distance in DISTANCES:
     accuracy_data[distance*RASTER_RESOLUTION] = []
