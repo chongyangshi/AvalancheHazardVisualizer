@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/pythonw
 # Evaluate the static risk model against past avalanches recorded by the SAIS.
 from __future__ import division
 import os
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 
 from SAISCrawler.script import db_manager, utils
 from GeoData import raster_reader, rasters, bng_to_lonlat
@@ -11,6 +12,7 @@ from GeoData import raster_reader, rasters, bng_to_lonlat
 THRESHOLD_PERCENTILES = [0.5, 0.75, 0.9, 0.95, 0.99, 0.995]
 THRESHOLD_VALUES = [2.0151e-04, 6.6681e-04, 0.0029, 0.0086, 0.0890, 0.1230]
 DISTANCES = [5, 10, 25, 50, 100]
+DISTANCE_COLOURS = ['r', 'b', 'g', 'k', 'm']
 RASTER_RESOLUTION = 5
 
 dbFile = './SAISCrawler/data/forecast.db'
@@ -50,9 +52,26 @@ for distance in DISTANCES:
             if max_risk >= threshold:
                 current_threshold_hits += 1
 
-        accuracy_data[distance*RASTER_RESOLUTION] = (threshold * 100, current_threshold_hits/total_tested) # (percentile, accuracy)
+        accuracy_data[distance*RASTER_RESOLUTION].append((threshold * 100, current_threshold_hits/total_tested)) # (percentile, accuracy)
 
         print("At a percentile of {} ({}), within a square bounding box of {} meters, the accuracy is {} ({}/{})"
         .format(str(threshold * 100) + '%', THRESHOLD_VALUES[THRESHOLD_PERCENTILES.index(threshold)],
         distance * RASTER_RESOLUTION, current_threshold_hits/total_tested, current_threshold_hits,
         total_tested))
+print("==========================================================")
+
+# Make plots.
+plt.figure(1)
+plt.axis([40, 110, 0, 100])
+plt.title('Accuracy of Static Risk Model in Recalling Recorded Avalanches')
+plt.xlabel("Risk Threshold (percentile)")
+plt.ylabel("Recall Accuracy (%)")
+plt.grid(True)
+colour_count = 0
+text_y = 2
+for d in accuracy_data:
+    plt.plot([i[0] for i in accuracy_data[d]], [i[1] * 100 for i in accuracy_data[d]], DISTANCE_COLOURS[colour_count] + '+')
+    plt.text(41, text_y, "+: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
+    colour_count += 1
+    text_y += 3.5
+plt.show()
