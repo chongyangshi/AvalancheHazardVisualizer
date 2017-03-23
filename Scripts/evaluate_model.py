@@ -11,17 +11,21 @@ from SAISCrawler.script import db_manager, utils
 from GeoData import raster_reader, rasters, bng_to_lonlat
 
 THRESHOLD_PERCENTILES = [
-    50.000000, 52.500000, 55.000000, 57.500000, 60.000000,
-    62.500000, 65.000000, 67.500000, 70.000000, 72.500000,
-    75.000000, 77.500000, 80.000000, 82.500000, 85.000000,
-    87.500000, 90.000000, 92.500000, 95.000000, 97.500000,
-    99.500000]
+    70, 71, 72, 73, 74,
+    75, 76, 77, 78, 79,
+    80, 81, 82, 83, 84,
+    85, 86, 87, 88, 89,
+    90, 91, 92, 93, 94,
+    95, 96, 97, 98, 99,
+    99.5, 99.9]
 THRESHOLD_VALUES = [
-    2.015127e-04, 2.015127e-04, 2.015127e-04, 2.015127e-04, 2.119121e-04,
-    2.673585e-04, 3.260623e-04, 3.911575e-04, 4.662734e-04, 5.560244e-04,
-    6.668069e-04, 8.067768e-04, 9.898760e-04, 1.235987e-03, 1.580646e-03,
-    2.089052e-03, 2.906299e-03, 4.449752e-03, 8.608662e-03, 3.165039e-02,
-    0.1230]
+    4.662734e-04, 4.999712e-04, 5.365540e-04, 5.762908e-04, 6.196216e-04,
+    6.668069e-04, 7.184984e-04, 7.757625e-04, 8.394114e-04, 9.103318e-04,
+    9.898760e-04, 1.079330e-03, 1.180318e-03, 1.295451e-03, 1.427700e-03,
+    1.580646e-03, 1.759083e-03, 1.969195e-03, 2.220621e-03, 2.526284e-03,
+    2.906299e-03, 3.391978e-03, 4.037947e-03, 4.945721e-03, 6.317833e-03,
+    8.608662e-03, 1.295777e-02, 2.262644e-02, 4.515500e-02, 8.902361e-02,
+    0.1230, 0.3411]
 
 DISTANCES = [5, 10, 25, 50, 100]
 DISTANCE_COLOURS = ['r', 'b', 'g', 'k', 'm']
@@ -70,7 +74,7 @@ print("==========================================================")
 
 # Make plots.
 plt.figure(1)
-plt.axis([40, 110, 0, 100])
+plt.axis([70, 100, 0, 100])
 plt.title('Accuracy of Static Risk Model in Recalling Recorded Avalanches')
 plt.xlabel("Risk Threshold (percentile)")
 plt.ylabel("Recall Accuracy (%)")
@@ -79,7 +83,7 @@ colour_count = 0
 text_y = 2
 for d in accuracy_data:
     plt.plot([i[0] for i in accuracy_data[d]], [i[1] * 100 for i in accuracy_data[d]], DISTANCE_COLOURS[colour_count] + '-')
-    plt.text(41, text_y, "-: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
+    plt.text(71, text_y, "--: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
     colour_count += 1
     text_y += 3.5
 plt.show()
