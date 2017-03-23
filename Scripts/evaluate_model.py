@@ -10,8 +10,19 @@ from collections import OrderedDict
 from SAISCrawler.script import db_manager, utils
 from GeoData import raster_reader, rasters, bng_to_lonlat
 
-THRESHOLD_PERCENTILES = [0.5, 0.75, 0.9, 0.95, 0.99, 0.995]
-THRESHOLD_VALUES = [2.0151e-04, 6.6681e-04, 0.0029, 0.0086, 0.0890, 0.1230]
+THRESHOLD_PERCENTILES = [
+    50.000000, 52.500000, 55.000000, 57.500000, 60.000000,
+    62.500000, 65.000000, 67.500000, 70.000000, 72.500000,
+    75.000000, 77.500000, 80.000000, 82.500000, 85.000000,
+    87.500000, 90.000000, 92.500000, 95.000000, 97.500000,
+    99.500000]
+THRESHOLD_VALUES = [
+    2.015127e-04, 2.015127e-04, 2.015127e-04, 2.015127e-04, 2.119121e-04,
+    2.673585e-04, 3.260623e-04, 3.911575e-04, 4.662734e-04, 5.560244e-04,
+    6.668069e-04, 8.067768e-04, 9.898760e-04, 1.235987e-03, 1.580646e-03,
+    2.089052e-03, 2.906299e-03, 4.449752e-03, 8.608662e-03, 3.165039e-02,
+    0.1230]
+
 DISTANCES = [5, 10, 25, 50, 100]
 DISTANCE_COLOURS = ['r', 'b', 'g', 'k', 'm']
 RASTER_RESOLUTION = 5
@@ -25,7 +36,7 @@ accuracy_data = OrderedDict({})
 print("==========================================================")
 for distance in DISTANCES:
     accuracy_data[distance*RASTER_RESOLUTION] = []
-    for threshold in THRESHOLD_PERCENTILES:
+    for t in range(len(THRESHOLD_PERCENTILES)):
         current_threshold_hits = 0
         total_tested = 0
         for avalanche in all_past_avalanches:
@@ -50,15 +61,11 @@ for distance in DISTANCES:
             total_tested += 1
             max_risk = np.amax(risk_points)
 
-            if max_risk >= threshold:
+            if max_risk >= THRESHOLD_VALUES[t]:
                 current_threshold_hits += 1
 
-        accuracy_data[distance*RASTER_RESOLUTION].append((threshold * 100, current_threshold_hits/total_tested)) # (percentile, accuracy)
-
-        print("At a percentile of {} ({}), within a square bounding box of {} meters, the accuracy is {} ({}/{})"
-        .format(str(threshold * 100) + '%', THRESHOLD_VALUES[THRESHOLD_PERCENTILES.index(threshold)],
-        distance * RASTER_RESOLUTION, current_threshold_hits/total_tested, current_threshold_hits,
-        total_tested))
+        accuracy_data[distance*RASTER_RESOLUTION].append((THRESHOLD_PERCENTILES[t], current_threshold_hits/total_tested)) # (percentile, accuracy)
+        print("{}m at {}pct: accuracy {}%".format(distance * RASTER_RESOLUTION, THRESHOLD_PERCENTILES[t], current_threshold_hits/total_tested * 100))
 print("==========================================================")
 
 # Make plots.
@@ -71,8 +78,8 @@ plt.grid(True)
 colour_count = 0
 text_y = 2
 for d in accuracy_data:
-    plt.plot([i[0] for i in accuracy_data[d]], [i[1] * 100 for i in accuracy_data[d]], DISTANCE_COLOURS[colour_count] + '+')
-    plt.text(41, text_y, "+: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
+    plt.plot([i[0] for i in accuracy_data[d]], [i[1] * 100 for i in accuracy_data[d]], DISTANCE_COLOURS[colour_count] + '-')
+    plt.text(41, text_y, "-: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
     colour_count += 1
     text_y += 3.5
 plt.show()
