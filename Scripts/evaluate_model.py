@@ -116,3 +116,15 @@ for thres in range(len(ANNOTATE_THRESHOLDS)):
     plt.plot((thres_x, thres_x), (0, HIST_Y_MAX), ANNOTATE_COLOURS[thres] + '-')
     pos_y += 0.05
 plt.show()
+
+# Make extra histogram for full view.
+print("==========================================================")
+print("Making a full view histogram...")
+plt.figure(3)
+hist_arr, bins, patches = plt.hist(full_raster, 5000)
+plt.xlabel('Statick Risk Value')
+plt.ylabel('Number of Points')
+plt.title('Distribution of Static Risk Values in Calculated Data (Full)')
+plt.axis([0, THRESHOLD_VALUES[-1] * 2, 0, HIST_Y_MAX * 1000])
+plt.grid(True)
+plt.show()
