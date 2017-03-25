@@ -100,6 +100,15 @@ class RasterReader:
         return data # Two-dimensional array, rows of data.
 
 
+    def read_full_raster(self):
+        """ Read the entire raster. NOT TO BE USED LIVE, FOR STATIC COMPUTATION
+            PURPOSES ONLY. """
+
+        data = self._raster.ReadAsArray(0, 0, self._raster.RasterXSize, self._raster.RasterYSize)
+
+        return data
+
+        
     def coordinate_to_index(self, coord_x, coord_y):
         """ Convert WGS84 coordinates into raster indices. """
 

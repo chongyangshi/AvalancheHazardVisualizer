@@ -26,6 +26,10 @@ THRESHOLD_VALUES = [
     2.906299e-03, 3.391978e-03, 4.037947e-03, 4.945721e-03, 6.317833e-03,
     8.608662e-03, 1.295777e-02, 2.262644e-02, 4.515500e-02, 8.902361e-02,
     0.1230, 0.3411]
+HIST_Y_MAX = 1000000
+HIST_X_CUT_OFF = 0.006
+ANNOTATE_COLOURS = ['r', 'b', 'g', 'k', 'm']
+ANNOTATE_THRESHOLDS = [95, 98, 99, 99.5, 99.9]
 
 DISTANCES = [5, 10, 25, 50, 100]
 DISTANCE_COLOURS = ['r', 'b', 'g', 'k', 'm']
@@ -37,6 +41,7 @@ static_risk = raster_reader.RasterReader(rasters.RISK_RASTER)
 
 all_past_avalanches = avalanche_dbm.select_all_past_avalanches()
 accuracy_data = OrderedDict({})
+
 print("==========================================================")
 for distance in DISTANCES:
     accuracy_data[distance*RASTER_RESOLUTION] = []
@@ -86,4 +91,28 @@ for d in accuracy_data:
     plt.text(71, text_y, "--: searching within " + str(d) + 'm', color=DISTANCE_COLOURS[colour_count])
     colour_count += 1
     text_y += 3.5
+plt.show()
+
+# Make Histogram.
+plt.figure(2)
+print("==========================================================")
+print("Reading full raster...")
+full_raster = static_risk.read_full_raster().flatten()
+print("Full raster read. Running hist...")
+hist_arr, bins, patches = plt.hist(full_raster, 5000)
+plt.xlabel('Statick Risk Value')
+plt.ylabel('Number of Points')
+plt.title('Distribution of Static Risk Values in Calculated Data')
+plt.axis([0, THRESHOLD_VALUES[-1] * 2, 0, HIST_Y_MAX])
+plt.grid(True)
+plt.annotate('capped (max > 8e8)', xy=(HIST_X_CUT_OFF, HIST_Y_MAX), xytext=(HIST_X_CUT_OFF + 0.2, HIST_Y_MAX * 0.95),
+            arrowprops=dict(facecolor='red', shrink=0.05),
+            )
+
+pos_y = 0.3
+for thres in range(len(ANNOTATE_THRESHOLDS)):
+    thres_x = THRESHOLD_VALUES[THRESHOLD_PERCENTILES.index(ANNOTATE_THRESHOLDS[thres])]
+    plt.text(THRESHOLD_VALUES[-1] * 2 - 0.25, HIST_Y_MAX * pos_y, "| : " + str(ANNOTATE_THRESHOLDS[thres]) + 'th percentile', color=ANNOTATE_COLOURS[thres])
+    plt.plot((thres_x, thres_x), (0, HIST_Y_MAX), ANNOTATE_COLOURS[thres] + '-')
+    pos_y += 0.05
 plt.show()
