@@ -3,7 +3,7 @@ BEng Project: Avalanche Hazard Visualiser
 
 An app to visualise avalanche hazards in Scottish mountains, using data from Ordnance Survey and Scottish Avalanche Information Service, a complex system programmed in Python, MATLAB, JavaScript and many other languages.
 
-#Installation#
+# Installation #
 This system is to be deployed on an Ubuntu 14.04 LTS or 16.04 LTS system.
 
 Locations of the height map and aspect raster files are defined in `GeoData/raster.py`, change them as necessary before proceeding. The system requires the following rasters computed in QGIS:
