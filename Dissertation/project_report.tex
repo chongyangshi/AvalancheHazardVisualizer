@@ -613,7 +613,17 @@ Therefore, a simpler statistical test can be designed. Based on the avalanche re
 
 \chapter{Design and Implementation of the Application} \label{ch:app-description}
 
-\section{Structure of the system} \label{sec:app-system}
+This chapter provides details on the implementation of the software system of the application. Starting with an overview on the architecture design in Section \ref{sec:app-system}, different aspects of the implementation will be covered: retrieval processing of various types of data (\ref{sec:data-processing}), the API servers serving as an intermediate between data and the user interface (\ref{sec:api-server}), and the user interface itself (\ref{sec:user-interface}).
+
+\section{Architecture of the system} \label{sec:app-system}
+
+As shown in Figure \ref{fig:new-system}, the system is structured across four levels: Data Store, Data Interface, API Servers and Front-end. The first two are collectively described in detail in Section \ref{sec:data-processing}, and the last two in \ref{sec:api-server} and \ref{sec:user-interface} respectively. Each level abstracts away the implementation details of the previous level by providing interfaces of interaction for the next level, allowing maintenance and extensions to be conducted easily on the codebase. During live operations, a user request is handed down each level from the Front-end to the Data Store, and returned in the reverse order, forming the operation flows.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[height=8cm]{System-new.pdf}
+		\caption{\label{fig:new-system} The architecture of the system.}
+\end{figure}
 
 \section{Data retrieval and processing} \label{sec:data-processing}
 
