@@ -24,6 +24,8 @@
 \usepackage[parfill]{parskip}
 \usepackage{natbib}
 \usepackage{array}
+\usepackage{siunitx}
+\usepackage{listings}
 \usepackage{color}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \setlength{\headsep}{7pt}
@@ -41,6 +43,12 @@
 \definecolor{considerable-new}{RGB}{255, 127, 0}
 \definecolor{high-new}{RGB}{255, 0, 0}
 \definecolor{veryhigh-new}{RGB}{128, 0, 0}
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fixed,
+  fontadjust=true,
+  basewidth=0.5em
+}
 
 \title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
@@ -613,7 +621,7 @@ Therefore, a simpler statistical test can be designed. Based on the avalanche re
 
 \chapter{Design and Implementation of the Application} \label{ch:app-description}
 
-This chapter provides details on the implementation of the software system of the application. Starting with an overview on the architecture design in Section \ref{sec:app-system}, different aspects of the implementation will be covered: retrieval processing of various types of data (\ref{sec:data-processing}), the API servers serving as an intermediate between data and the user interface (\ref{sec:api-server}), and the user interface itself (\ref{sec:user-interface}).
+This chapter provides details on the implementation of the software system of the application. Starting with an overview on the architecture design in Section \ref{sec:app-system}, different levels of the implementation will be covered: retrieval and processing of various types of data (\ref{sec:data-processing}), the API servers serving as an intermediate between data and the user interface (\ref{sec:api-server}), and the user interface itself (\ref{sec:user-interface}).
 
 \section{Architecture of the system} \label{sec:app-system}
 
@@ -625,21 +633,201 @@ As shown in Figure \ref{fig:new-system}, the system is structured across four le
 		\caption{\label{fig:new-system} The architecture of the system.}
 \end{figure}
 
+The Front-end takes the form of a Cesium application running in the user's web browser, served by Nginx running on the application server. Nginx also terminates the TLS connection from the user to ensure secure and tamper-resistant data transmission. As the user interacts with the virtual 3D scene in Cesium, it will automatically request the necessary data from the API servers on the next level -- either overlay images through the Imagery API or route and past avalanche data through the Data API.
+
+The intermediate level, API Servers, contains the two Python APIs implemented with the Flask library: Imagery API and Data API (covered in \ref{sec:api-server}). Upon receiving data requests, the APIs will first determine whether the requests are of valid form, and scrutinise the parameters. Once a request is verified, the handling API will make function calls to both the utility library and the modules of the next level -- Data Interface. In addition to serving the Front-end, Nginx also provides reverse proxy for the API Servers, passing requests and returned data in between them and Front-end.
+
+Data Interface is the level where specialised functionalities are implemented, and modules interact with stored data. They are called upon by specific APIs for specific purposes, such as pathfinding or retrieving past avalanche records. For operational safety, input sanitisation is conducted again at this level. 
+
+Data Store is the lowest level, where various types of data required for the operation are stored. Some types of data such as terrain models are stored as static files once computed, while others are stored in a SQLite database for dynamic update and retrieval.
+
 \section{Data retrieval and processing} \label{sec:data-processing}
+
+The Data Store of the application stores various form of data, some of which require pre-processing before usage (static risk data, \ref{subsec:static-risk-processing}), while others are fetched and stored directly live (\ref{subsec:dynamic-data-processing} and \ref{subsec:past-avalanche-data}. This section covers both their sourcing and pre-processing (if applicable). 
 
 \subsection{Dynamic risk data} \label{subsec:dynamic-data-processing}
 
-\subsection{Static risk data} \label{subsec:static-risk-processing}
+The Scottish Avalanche Information Service (SAIS)\cite{sais} provides forecasts and information of the avalanche risks in Scottish Mountains several days a week during the winter sports season. The most prominent scale of risk is the hazard compass rose \cite[p. 4]{sais-report}, as shown in Figure \ref{fig:compassrose}. Although not completely representing the risk assessment by itself, it provides an excellent source of information in correlating altitude and aspect to the approximate level of avalanche risk, ranging from 0 (Risk Not Applicable) to 5 (Very High Risk), which can be used as part of a data model in estimating avalanche risk.
+
+		\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.3]{CompassRose.png}
+		\caption{\label{fig:compassrose}An example compass rose produced by the SAIS.\cite[p. 4]{sais-report}}
+		\end{figure}
+		
+Unfortunately, the SAIS does not provide an API with which the risk levels making up the compass rose could be retrieved easily. Therefore, it was necessary to build a web crawler (\textit{SAISCrawler}) with the Selenium library \href{http://docs.seleniumhq.org/}{Selenium} to automatically search for and download avalanche forecasts from the SAIS.
+		
+The crawler retrieves forecast data by visiting a predefined list of SAIS location pages, each corresponding to a location under observation, and then locate a list of forecasts conducted for that location. Each forecast has a unique page containing the image link to the compass rose for the forecast, and the URL encoding of the image link contains the altitude thresholds and risk levels that can be stored. 
+
+Vertically, the forecast data is divided by altitude into two sectors, each of which is further divided by terrain aspect into eight sections, each representing a 30\si{\degree} circular segment, as depicted in Figure \ref{fig:compassrose}. Each segment contains two risk levels: the primary level and the secondary level. Therefore, a total of 32 risk level values are extracted from each compass rose. 
+		
+In conformity with the entity-relationship model, eight forecast records are created for the eight circular segments, each containing the primary and secondary risk levels for the two altitude sectors in that segment, along with the date of forecast and the transition altitudes. These records are stored in the SQLite database \href{https://sqlite.org/}{SQLite} by the crawler. An example set of forecast records is depicted in Figure \ref{fig:sqlite}.
+		
+    		\begin{figure}[h]
+    		\centering
+    		\includegraphics[scale=0.3]{SQLite.png}
+    		\includegraphics[scale=0.5]{DangerousRose.png}
+    		\caption{\label{fig:sqlite}An example set of forecast records (left) extracted from a compass rose (right) \cite{sais}.}
+    		\end{figure}
+		
+As a conservative assessment of dynamic risk, the higher of the primary and the secondary risk levels in each section is used as the dynamic risk of that section in processing.
+
+\subsection{Altitude, aspect and static risk data} \label{subsec:static-risk-processing}
+
+As static risk data originate from analyses of the terrain model, it is necessary to obtain a full Digital Elevation Model (DEM) for the areas of interest (Scottish Highlands). There are a number of available sources for DEM data of the United Kingdom, most notably the EU-DEM Data \cite{eu-dem} provided by the European Commission and the UK Government's Ordnance Survey Data (OS5) \cite{os-5} (mentioned in \ref{sec:modelling-avalanche}).
+		
+The EU-DEM Data covers the entire Western Europe with an accuracy of 25 to 30 meters. The data is available in full, and can be used for both educational and commercial purposes subject to citation requirements. 
+		
+The OS5 Data covers the United Kingdom only, with a superior accuracy of 5 meters, arranged in the British National Grid \cite{osgb-1936} reference system. The data can be requested per-tile either at a cost (no usage restrictions) or free through EDINA (educational uses only), subject to citation requirements.
+		
+With considerations on the nature of the project and the potential uses of the application, the Ordnance Survey Data is used for the course of the project, as an elevation model with higher accuracy is beneficial for accurate computations and evaluations. However, should an expansion of coverage or usage be required, the EU-DEM Data can be processed and used with the same procedures.
+
+The Ordnance Survey Data is supplied on a tile-by-tile basis. To improve processing efficiency, the first part of the processing procedures is to merge the data into a single GeoTIFF \cite{geotiff} raster with the GDAL tool:
+\begin{lstlisting}[breaklines]
+find ./OS5/ -name '*.tif' | xargs gdal_merge.py -of GTiff -o OS5_Merged.tif 
+\end{lstlisting}
+		
+The merged DEM data is then reprojected by GDAL into the WGS84 geodetic system \cite{wgs84} that is used by the majority of mapping and navigation systems:
+\begin{lstlisting}[breaklines]
+gdal_translate -a_srs EPSG:4326 -of GTiff OS5_Merged.tif WGS84.tif
+\end{lstlisting}
+		
+The reprojected elevation (height-map) raster {\ttfamily WGS84.tif} can now be used to look up altitude for each point in the geographical area covered by the DEM Data. However, we must also analyse the elevation raster to infer a few other sets of raster data: a raster storing terrain aspect at each point ({\ttfamily WGS84\_Aspects.tif}) is required for both dynamic (\ref{sec:dynamic-factors}) and static risk analysis (\ref{subsec:roughness}); a raster storing terrain slope angle ({\ttfamily WGS84\_Slope.tif}) is part of the static risk model (\ref{subsec:slope}); as well as a raster ({\ttfamily WGS84\_Curvature.tif}) storing terrain curvature (\ref{subsec:curvature}). The aspect and slope angle rasters are computed with {\ttfamily gdaldem} as shown:
+
+\begin{lstlisting}[breaklines]
+gdaldem aspect WGS84.tif WGS84_Aspects.tif -of GTiff
+gdaldem slope WGS84.tif WGS84_Slope.tif -of GTiff
+\end{lstlisting}
+
+The curvature raster is computed with the {\ttfamily Slope, Aspect, Curvature} tool in the \href{https://grass.osgeo.org/grass64/manuals/r.slope.aspect.html}{GRASS} library.
+
+The final raster, {\ttfamily WGS\_StaticRisk.tif}, storing the static risk level of each point in the static risk model is one-time computed with a MATLAB script, using data from aspect, slope angle, and curvature rasters. The methodology behind this script has been covered in detail in Section \ref{sec:static-factors}.
+
+For the convenience of the user, a map raster directly downloaded from The Ordnance Survey is also stored, providing overlay images of roads, location names and contours lines.
+
+The terrain shape files used by Cesium to display 3D terrain models can also be built and served with third-party tools developed by the University of Southampton \footnote{cesium-terrain-builder: https://github.com/geo-data/cesium-terrain-builder}, which provides an alternative to the default terrain shape files served by the maintainers of the Cesium library.
 
 \subsection{Past avalanches} \label{subsec:past-avalanche-data}
 
-\section{The API server} \label{sec:api-server}
+As reflected in the requirements, requests from a potential user include the ability to label the location of past avalanches on the map. The SAIS provides an \href{www.sais.gov.uk/avalanche_map/}{avalanche map} which labels the time, approximate location and additional descriptions of each past avalanche in the monitored area, as reported by both the SAIS' field forecasters and users of the website. This information is not only useful to the user assessing the avalanche risk of their route, but also a good source of reference data for statistical evaluations of the risk model. However, it is worth noting that the existence, the date, and the location of each avalanche are not exact, as they were not recorded scientifically. 
+
+A crawler similar to the one used for retrieving SAIS avalanche forecasts (\ref{subsec:dynamic-data-processing}) was written for retrieving past avalanche records. The data is arranged in the format shown in Figure \ref{fig:sais-past-avalanche} and stored in a SQLite database.
+
+\begin{figure}[h]
+		\centering
+		\begin{tabular}{ | c | c | c |}
+  		\hline
+		Field & Type & Description \\ \hline   
+  		avalanche\_internal\_id & INT & Our ID of avalanche record, primary key. \\ \hline
+		avalanche\_id & INT & The SAIS' ID of the avalanche for update checking. \\ \hline
+		easting & INT & The horizontal coordinate value of the location in OSGB36 format. \\ \hline
+		norting & INT & The vertical coordinate value of the location in OSGB36 format.  \\ \hline
+		avalanche\_time & TEXT & The date and time of the recorded avalanche. \\ \hline
+		avalanche\_comment & TEXT & Additional descriptions of the avalanche supplied by the SAIS. \\ \hline
+		\end{tabular}
+		\caption{\label{fig:sais-past-avalanche}The format of a stored past avalanche record.}
+\end{figure}
+
+\section{The API servers} \label{sec:api-server}
+
+Serving as the intermediate between the user and the data processors, the API Servers level provide two categories of APIs required for implementing the actions of the application: Data API and Imagery API, both of which will be covered in this section. In order to ensure the continuity of operations, APIs return empty content (empty image or JSON dataset) when an error is encountered instead of exiting with error code, and these errors can be logged for debugging. 
 
 \subsection{Imagery APIs} \label{subsec:imagery-api}
 
+APIs returning an image on valid calls are categorised as Imagery APIs. This includes: {\ttfamily avalanche\_risks}, {\ttfamily terrain\_aspects}, and {\ttfamily contours}. The images returned are PNG images varying levels transparency for optimised interlacing.
+
+\textbf{{\ttfamily avalanche\_risks}}: this is the main imagery API, responsible for returning per-point risk level images for either dynamic-only or static-and-dynamic risk models (\ref{sec:combine-models}), as determined by an optional parameter. It fetches data for an area defined by input parameters representing two points in the raster, as shown in Figure \ref{fig:avalanche-risks-retrieval}. Height and aspect rasters are required for dynamic-only mode, while the computed static risk raster is also required for the combined mode. 
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.3]{Retrieval.png}
+		\caption{\label{fig:avalanche-risks-retrieval}A diagram illustrating the retrieval of any raster's data with geodetic coordinates.}
+\end{figure}
+
+\begin{figure}[h]
+\begin{lstlisting}[breaklines]
+/imagery/api/v1.0/avalanche_risks/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:forecast_date>?showStaticRisk=[0,1]
+\end{lstlisting}
+{\small
+Required: {\ttfamily longitude\_initial, latitude\_initial, longitude\_final, latitude\_final}.\\
+Optional: {\ttfamily forecast\_date} (default: today's date), {\ttfamily showStaticRisk} (default: 0).
+}
+\caption{\label{fig:avalanche-risks-doc}The API call format for {\ttfamily avalanche\_risks}.}
+\end{figure}
+
+The API call format is shown in Figure \ref{fig:avalanche-risks-doc}. Note that the parameter format of coordinate components separated by slashes are designed specifically for Cesium's \textit{UrlTemplateImageryProvider} \cite{urltemplate} class to automatically retrieve risk level images as tiles.
+
+\textbf{{\ttfamily terrain\_aspects}}: this API works in a similar way as {\ttfamily avalanche\_risks}, but instead of retrieving risk level images, it retrieve terrain aspect images encoded by the full spectrum of RGB colours. It was used for debugging aspect fitting and can be potentially used to provide the user with a terrain facing map.
+
+\textbf{{\ttfamily contours}}: this also works in a similar way as {\ttfamily terrain\_aspects} and as shown in Figure \ref{fig:avalanche-risks-retrieval}. However, it returns general map images as described in Section \ref{subsec:static-risk-processing}, rather than risk level images.
+
+\begin{figure}[h]
+\begin{lstlisting}[breaklines]
+/imagery/api/v1.0/[terrain_aspects,contours]/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>
+\end{lstlisting}
+{\small Required: {\ttfamily longitude\_initial, latitude\_initial, longitude\_final, latitude\_final}}.
+\caption{\label{fig:terrain-aspects-doc}The API call format for both {\ttfamily terrain\_aspects} and {\ttfamily contours}.}
+\end{figure}
+
+The same call format for both {\ttfamily terrain\_aspects} and {\ttfamily contours} is shown in Figure \ref{fig:terrain-aspects-doc}.
+
 \subsection{Data APIs} \label{subsec:data-api}
 
+APIs returning JSON datasets on valid calls are categorised as Data APIs. This includes: {\ttfamily forecast\_dates}, {\ttfamily find\_path}, and {\ttfamily past\_avalanches}. 
+
+\textbf{{\ttfamily forecast\_dates}}: This simple API returns up to 50 most recent dates when an avalanche forecast has been conducted by the SAIS in an area, defined by a single geodetic point. This is to allow the user to adjust the {\ttfamily forecast\_date} parameter of the {\ttfamily avalanche\_risks} API on the UI, in order to view risk model of past days. Its call format is shown in Figure \ref{fig:forecast-dates-doc}.
+
+\begin{figure}[h]
+\begin{lstlisting}[breaklines]
+/data/api/v1.0/forecast_dates/<string:longitude>/<string:latitude>
+\end{lstlisting}
+{\small Required: {\ttfamily longitude, latitude}}.
+\caption{\label{fig:forecast-dates-doc}The API call format for {\ttfamily forecast\_dates}.}
+\end{figure}
+
+\textbf{{\ttfamily find\_path}}: This API interfaces the Path Finder module, which implements risk-adjusted pathfinding as required in \textbf{Stage 3}. The methodology and algorithms behind the implementation have been discussed in detail in Section \ref{sec:risky-pathfinding}. The start and end locations for pathfinding are supplied as geodetic points, along with a weighting factor to for risk-distance adjustment. The call format is shown in Figure \ref{fig:find-path-doc}.
+
+\begin{figure}[h]
+\begin{lstlisting}[breaklines]
+/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>
+\end{lstlisting}
+{\small Required: (all parameters).}
+\caption{\label{fig:find-path-doc}The API call format for {\ttfamily find\_path}.}
+\end{figure}
+
+\textbf{{\ttfamily past\_avalanches}}: Another simple API. Given a start and an end date, it returns a list of recorded avalanches at any location between the dates. The user interface will provide the user with a set of quick date range choices, such as the past month or the past year. The returned data for each avalanche is identical to that of Figure \ref{fig:sais-past-avalanche}. The call format of this API is shown in Figure \ref{fig:past-avalanches-doc}.
+
+\begin{figure}[h]
+\begin{lstlisting}[breaklines]
+/data/api/v1.0/past_avalanches/<string:start_date>/<string:end_date>
+\end{lstlisting}
+{\small Required: \ttfamily{start\_date, end\_date} (must be in ascending order).}
+\caption{\label{fig:past-avalanches-doc}The API call format for {\ttfamily past\_avalanches}.}
+\end{figure}
+
 \section{The user interface} \label{sec:user-interface}
+
+The user interface of the application is modified from a reference application of the Cesium WebGL library, which runs in most modern web browsers, as shown in Figure \ref{fig:ui}. The vast majority of the interface area are left to the virtual 3D scene that the user can navigate freely in, while the main features of the application are accessed via UI elements on the top-left corner of the interface.
+
+\begin{figure}[h]
+    		\centering
+    		\includegraphics[scale=0.6]{UI.png} %ToDo: replace this with the final product's.
+    		\caption{\label{fig:ui}The user interface of the final product.}
+\end{figure}
+
+From top to bottom, there are five elements for feature access:
+
+\begin{description}
+\item[Terrain Picker] - A dropdown menu for switching between different terrain shape sources provided by the self-hosted terrain server. Due to difficulties in building terrain shape files from very large rasters, the terrain for each observation area (Glencoe, Lochaber, etc) had to be built separately, prompting this feature. This dropdown can be omitted by switching to the terrain server provided by the Cesium's maintainers.
+\item[Past Forecast Picker] - A dropdown menu with up to 50 dates of past avalanche forecasts. The user is able to view risk level images for any of the past 50 forecasts with this feature.
+\item[Past Avalanche Picker] - A dropdown menu allowing the user to choose the date range of past avalanches labeled on the map. The options are: past month, past year, past three years, all recorded avalanches, and show none. The default is to show avalanches recorded in the past month. A dynamic panel displays the time and description of an avalanche when the user clicks on the red-dot labels.
+\item[Risk Model Switcher] - A button allowing the user to switch between the two risk models: the dynamic risk-only model (\textbf{Stage 1}), and the comprehensive dynamic and static risk model (\textbf{Stage 2}). The text of the button changes to the opposite model when the model is switched.
+\item[Route Selector] - A panel for pathfinding capabilities introduced in \textbf{Stage 3}. It contains a slider for adjusting the weighting between minimising risk and distance, two buttons for picking the start and end location, a button for starting route search, and a clearing button.
+\end{description}
+
+The interface is programmed in JavaScript, interfacing the APIs provided by Cesium. Extensive use of asynchronous XHTML requests allows seamingless transmission of dropdown options, user inputs and returned data, as well as necessary interface changes and map labelings required by the returned data.
+
+The user interface is designed in conformance with the principles described in Section \ref{sec:application-usability}. While it is necessary to use a mouse or a touchscreen to interact with the application, the mouse proficiency required on the user \cite{Dubois:2007:EAI:1531407.1531416} is no greater than what's required by a standard map application such as Google Maps, as no new types of interactions are programmed. The Cesium library also implements the style of touchscreen interactions recommended by \cite{ku2014study}. The application also responded well to rough touchscreen inputs \cite{Albinsson:2003:HPT:642611.642631} during test uses.
 
 \chapter{Evaluation and Testing of the Application} \label{ch:app-testing}
 
