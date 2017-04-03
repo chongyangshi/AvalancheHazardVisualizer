@@ -118,7 +118,7 @@
                {Declare the word count in the preamble using \protect\wordcount{Numeral}.} %
   \else
     Number of words = \UoYCSP@wordcount, as counted by
-    \textsf{wc~-w}.
+    \textsf{detex~report.tex~|~wc~-w}.
   \fi
 
   This includes the body of the report%

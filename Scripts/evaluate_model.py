@@ -10,6 +10,8 @@ from collections import OrderedDict
 from SAISCrawler.script import db_manager, utils
 from GeoData import raster_reader, rasters, bng_to_lonlat
 
+THRESHOLD_PERCENTILES_TABLE = [70, 80, 90, 95, 99.5, 99.9]
+THRESHOLD_VALUES_TABLE = [4.662734e-04, 9.898760e-04, 2.906299e-03, 8.608662e-03, 0.1230, 0.3411]
 THRESHOLD_PERCENTILES = [
     70, 71, 72, 73, 74,
     75, 76, 77, 78, 79,
@@ -26,6 +28,7 @@ THRESHOLD_VALUES = [
     2.906299e-03, 3.391978e-03, 4.037947e-03, 4.945721e-03, 6.317833e-03,
     8.608662e-03, 1.295777e-02, 2.262644e-02, 4.515500e-02, 8.902361e-02,
     0.1230, 0.3411]
+
 HIST_Y_MAX = 1000000
 HIST_X_CUT_OFF = 0.006
 ANNOTATE_COLOURS = ['r', 'b', 'g', 'k', 'm']
@@ -76,6 +79,24 @@ for distance in DISTANCES:
         accuracy_data[distance*RASTER_RESOLUTION].append((THRESHOLD_PERCENTILES[t], current_threshold_hits/total_tested)) # (percentile, accuracy)
         print("{}m at {}pct: accuracy {}%".format(distance * RASTER_RESOLUTION, THRESHOLD_PERCENTILES[t], current_threshold_hits/total_tested * 100))
 print("==========================================================")
+
+# Print TeX table.
+print("Data Table for LaTeX:")
+print("\\centering \\begin{tabular}{ " + '| c' * (len(accuracy_data) + 1) + "| }")
+print("\\hline")
+header = "\\% of test area &"
+for d in accuracy_data:
+    header += " Search {}m &".format(d)
+print(header[:-1] + "\\\\ \\hline")
+
+for t in THRESHOLD_PERCENTILES_TABLE:
+    line = "{}\\% of area &".format(100-t)
+    for d in accuracy_data:
+        accuracy = [i[1] for i in accuracy_data[d] if i[0] == t][0]
+        line += " %.2f" % (accuracy*100) + "\\% &"
+    print(line[:-1] + "\\\\ \\hline")
+print("\\end{tabular}")
+sys.exit(0)
 
 # Make plots.
 plt.figure(1)
