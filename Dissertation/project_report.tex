@@ -611,13 +611,9 @@ Finally, the A* search algorithm is performed on the pre-procesed search space. 
 
 \section{Statistical evaluation of forecast accuracy} \label{sec:stats-eval}
 
-In order to determine the quality of the avalanche risk models used by the project, it is essential to conduct some statistical tests on the model. An ordinary approach is to conduct an inferential statistical test such as the Mann-Whitney U test \cite{mann1947test} to determine whether our models accurately determines the locations of actual avalanche releases. However, the unique design of the models and how they are combined have made applying inferential statistics difficult.
+In order to determine the quality of the avalanche risk models used by the project, it is essential to conduct some statistical tests on the model. An ordinary approach is to conduct an inferential statistical test such as the Mann-Whitney U test \cite{mann1947test} to determine whether our models accurately determines the locations of actual avalanche releases. However, as there is no prior static risk model applied to the Scottish Highlands that we are aware of, it was not possible to compare our devised static risk model along with another through inferential statistics. 
 
-As described in Section \ref{sec:dynamic-factors}, the dynamic risk model was individually evaluated as a Nearest Neighbour model \cite[p. 351]{Purves2003343}, and was used without modification in this project. The static risk model as described in Section \ref{sec:static-factors} however uses a separate representation, and was not merged with the dynamic risk model. As there is no prior static risk model applied to the Scottish Highlands that we are aware of, it is not possible to compare the static risk model along with another model through inferential statistics. 
-
-On the other hand, comparing the static model alone against the dynamic model also makes little sense, as the avalanche risk factors considered by the two models are largely disjoint. However, since all of these factors are critical to accurately forecasting avalanches (as described in Sections \ref{sec:avalanche-forecasting} and \ref{sec:modelling-avalanche}), demonstrating whether one model is better than the other cannot demonstrate the effectiveness of our overall model.
-
-Therefore, a simpler statistical test can be designed. Based on the avalanche records marked by the SAIS \cite{sais-map}, avalanches that happened sufficiently close to a point with a high avalanche risk level will be recorded as a successful forecast, and vice versa. Both the threshold for the proximity of a point and for the avalanche risk level can be adjusted for multiple observations. % Talk about problems with avalanche map in evaluation section.
+As described in Section \ref{sec:combine-models}, our static risk model is combined with the dynamic model through multiplication at runtime, as the dynamic factors change too frequently to efficiently store a combined model. This is one of the major difficulties in evaluating the combined model, in addition to historic SAIS forecasts being incomplete, as well as the computational difficulties in storing 5-6 large dynamic risk rasters for each of the thousands of days. Therefore, our statistical evaluation will focus on the static risk model only, as described in Section \ref{sec:risk-model-eval}.
 
 \chapter{Design and Implementation of the Application} \label{ch:app-description}
 
@@ -837,7 +833,7 @@ The evaluations conducted on the application attempt two answer two questions: h
 
 \section{Evaluation of the risk model} \label{sec:risk-model-eval}
 
-In order to evaluate the accuracy of the risk model as described in Section \ref{sec:static-factors}, a Python script was produced to read in data from modules in Data Interface, and compare the risk model with past avalanche records (nearly 4,000 since 1991) to measure the accuracy of the model.
+In order to evaluate the accuracy of the static risk model as described in Section \ref{sec:static-factors}, a Python script was produced to read in data from modules in Data Interface, and compare the risk model with past avalanche records (nearly 4,000 since 1991) to measure the accuracy of the model.
 
 As our risk model essentially computes the probability of each point being an avalanche release area, a common evaluation strategy for release area estimation models can be used: calculate the accuracy of release area identification at different percentages of areas of study. As our risk model produces a continuous value for each point, multiple percentile points are established as risk thresholds for converting into binary classifications.
 
