@@ -811,7 +811,7 @@ The user interface of the application is modified from a reference application o
 
 \begin{figure}[h]
     		\centering
-    		\includegraphics[scale=0.6]{UI.png} %ToDo: replace this with the final product's.
+    		\includegraphics[scale=0.5]{UI.pdf}
     		\caption{\label{fig:ui}The user interface of the final product.}
 \end{figure}
 
@@ -837,7 +837,7 @@ The evaluations conducted on the application attempt two answer two questions: h
 
 \section{Evaluation of the risk model} \label{sec:risk-model-eval}
 
-In order to evaluate the accuracy of the risk model as described in Section \ref{sec:static-factors}, a Python script was produced to read in data from modules in Data Interface, and compare the risk model with past avalanche records to measure the accuracy of the model.
+In order to evaluate the accuracy of the risk model as described in Section \ref{sec:static-factors}, a Python script was produced to read in data from modules in Data Interface, and compare the risk model with past avalanche records (nearly 4,000 since 1991) to measure the accuracy of the model.
 
 As our risk model essentially computes the probability of each point being an avalanche release area, a common evaluation strategy for release area estimation models can be used: calculate the accuracy of release area identification at different percentages of areas of study. As our risk model produces a continuous value for each point, multiple percentile points are established as risk thresholds for converting into binary classifications.
 
@@ -854,24 +854,48 @@ A histogram of all risk values is first produced to help determine the cut-off p
 Based on the distribution of risk values, the threshold percentiles were selected as each whole number between 70\% and 99\%, as well as 99.5\% and 99.9\% to test the nature of extreme risk values. The value of each threshold percentile is calculated separately, and a point is identified as a potential release area by that threshold percentile if its value is above the percentile's value. The results of this evaluation is shown in Figure \ref{fig:stat-eval-table} and plotted in Figure \ref{fig:stat-eval-plot}.
 
 \begin{figure}[h]
-\centering \begin{tabular}{ | c| c| c| c| c| c| }
+\centering 
+\fontsize{9}{11}\selectfont
+\begin{tabular}{ | c| c| c| c| c| c| }
 \hline
-\% of test area & Search 25m & Search 50m & Search 125m & Search 250m & Search 500m \\ \hline
-30\% of area & 98.69\% & 98.77\% & 98.79\% & 98.79\% & 98.79\% \\ \hline
-20\% of area & 97.92\% & 98.67\% & 98.79\% & 98.79\% & 98.79\% \\ \hline
-10\% of area & 96.20\% & 98.28\% & 98.72\% & 98.79\% & 98.79\% \\ \hline
-5\% of area & 93.48\% & 97.07\% & 98.56\% & 98.77\% & 98.79\% \\ \hline
-0.5\% of area & 70.12\% & 88.17\% & 96.48\% & 98.28\% & 98.69\% \\ \hline
-0.1\% of area & 27.41\% & 54.44\% & 82.60\% & 94.56\% & 98.25\% \\ \hline
+Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search 250m \\ \hline
+70\% & 30\% & 98.69\% & 98.77\% & 98.79\% & 98.79\%  \\ \hline
+80\% & 20\% & 97.92\% & 98.67\% & 98.79\% & 98.79\%  \\ \hline
+90\% & 10\% & 96.20\% & 98.28\% & 98.72\% & 98.79\%  \\ \hline
+95\% & 5\% & 93.48\% & 97.07\% & 98.56\% & 98.77\%  \\ \hline
+99.5\% & 0.5\% & 70.12\% & 88.17\% & 96.48\% & 98.28\%  \\ \hline
+99.9\% & 0.1\% & 27.41\% & 54.44\% & 82.60\% & 94.56\%  \\ \hline
 \end{tabular}
-\caption{\label{fig:stat-eval-fig}The accuracy of our model's release area estimation at varying search area side lengths.}
+\caption{\label{fig:stat-eval-table}The accuracy of our model's release area estimation at varying search area side lengths.}
 \end{figure}
 
 \begin{figure}[h]
 		\centering
-		\includegraphics[scale=0.5]{static-risk-eval-plot.png}
+		\includegraphics[scale=0.6]{static-risk-eval-plot.png}
 		\caption{\label{fig:stat-eval-plot}A diagram showing the accuracy of our model's release area estimation at different risk threshold percentiles. Note that \% of area = 100\% - threshold.}
 \end{figure}
+
+Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Due to requirements, our study area is significantly larger than many others, and the lack of precisely located avalanches added another layer of complications. It would however appear that searching within a side length of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
+
+\begin{figure}[h]
+\centering 
+\fontsize{9}{11}\selectfont
+\begin{tabular}{ | p{2.2cm}| p{2.5cm} | p{2cm}| p{2cm}| p{2.5cm}| p{1.8cm}|}
+\hline
+Study & Method & Location & Study area & \% area identified as risky & Identification accuracy \\ \hline
+Ghinoi and Chung \cite{Ghinoi2005305} & slope, aspect, elevation, crest distance, roughness and curvature & Italian Dolomites & $\approx 230 km^2$ & 7\%-20\% & 67-82\% \\ \hline 
+Bühler \textit{et al.} \cite{buhler2013automated} & slope, curvature, roughness, land cover & Manali, India & $126 km^2$ & 36\% & 66.7\% \\ \hline 
+Veitinger \textit{et al.} \cite{veitinger2016potential} & slope, wind shelter, roughness & Zuoz, Switzerland & $\approx 50 km^2$ & 20\% & 60-80\% \\ \hline
+Pistocchi and Notarnicola \cite{Pistocchi2013} & statistical methods and morphology & Italian Alps & $7,400 km^2$ & 20\% & $\approx70\%$ \\ \hline
+Purves \textit{et al.} \cite{Purves2003343} & statistical methods and dynamic observations & Scottish Highlands & $> 5,000 km^2$ & Not Localised & 71\%-82\% \\ \hline
+Our Model & slope, aspect, curvature, roughness and dynamic observations & Scottish Highlands & $> 5,000 km^2$ & 0.5-30\% & 70.12\%-98.69\% \\ \hline 
+\end{tabular}
+\caption{\label{fig:eval-compare}Comparing the accuracy of our model against other release area estimation models, picking the most representative accuracy covering all avalanche releases in other studies. In most cases, the identification accuracy increases as the percentage of area allowed to be identified as risky increases.} 
+\end{figure}
+
+Despite the difficulties in comparing the identification accuracy of our model against other models directly, for the 0.5\% of area of Scottish Highlands identified as most likely avalanche release areas by our model, the positive rate to within 25 meters is above 70\%. This increases to above 90\% for the top 5\% of areas.
+
+As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains.
 
 \chapter{Conclusions} \label{ch:conclusions}
 

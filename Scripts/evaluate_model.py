@@ -82,16 +82,16 @@ print("==========================================================")
 
 # Print TeX table.
 print("Data Table for LaTeX:")
-print("\\centering \\begin{tabular}{ " + '| c' * (len(accuracy_data) + 1) + "| }")
+print("\\centering \\begin{tabular}{ " + '| c' * (len(accuracy_data) + 2) + "| }")
 print("\\hline")
-header = "\\% of test area &"
+header = "Threshold\\% & \\% of test area &"
 for d in accuracy_data:
     header += " Search {}m &".format(d)
 print(header[:-1] + "\\\\ \\hline")
 
-for t in THRESHOLD_PERCENTILES_TABLE:
-    line = "{}\\% of area &".format(100-t)
-    for d in accuracy_data:
+for t in THRESHOLD_PERCENTILES_TABLE[:-1]:
+    line = "{}\\% & {}\\% &".format(t, 100-t)
+    for d in accuracy_data[:-1]:
         accuracy = [i[1] for i in accuracy_data[d] if i[0] == t][0]
         line += " %.2f" % (accuracy*100) + "\\% &"
     print(line[:-1] + "\\\\ \\hline")
