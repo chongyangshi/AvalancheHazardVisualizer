@@ -98,17 +98,7 @@ In later stages of the project, we also seek to improve hazard representation th
 
 \section{Stages of the project} \label{sec:stages}
 
-The course of the project was divided into a preliminary stage and four development stages, in order to effectively track and manage the workload. As the product from each stage is able to function independently of work done in later stages, unforeseen difficulties encountered in the research and development process can be effectively mitigated. The stages are described as followed:
-
-\textbf{Preliminary Stage - Requirement Gathering:} As a preparation for the software development, some analysis were performed on the project specification and stakeholders were interviewed in order to gather requirements for the application. In particular, potential users were inquired about how they access and use avalanche forecasts at the time, and what improvements could the application of the project bring.
-
-\textbf{Stage 1 - Basic Functionalities:} The aim of this stage was to select appropriate application frameworks and libraries to produce a basic but functional application: a 3D terrain viewer with a hazard map overlay, the data for which would be derived solely from forecasts by the Scottish Avalanche Information Service \cite{sais}. The WebGL framework Cesium \cite{cesium} was chosen as the foundation for front-end developments, while Python was chosen for developing the backend, and to interface other systems such as GIS processors with its vast range of interfacing libraries.
-
-\textbf{Stage 2 - Improved Spatial Analysis and Evaluation:} This stage of the project extends the data source for the hazard map overlay by performing surface fitting and spatial analysis on the terrain model data \cite{os-5}, in order to make the hazards more localised and to better reflect the hazard posed by unique terrain features such as concave slopes. MATLAB \cite{matlab-primer} and other GIS tools were used to perform the computations for these purposes. 
-
-\textbf{Stage 3 - Risk-adjusted Pathfinding:} With a localised hazard map obtained in Stage 2, this stage was focused on developing a pathfinding tool for the front end application, allowing the user to plot a potential hiking path with a configurable avalanche risk level. Techniques such as A* path finding \cite{cui2011based} were utilised to develop this functionality. 
-
-\textbf{Stage 4 - Evaluation and Usability Testing:} The final stage of the project focus on the human-computer interaction aspects of the application. Experienced mountaineers were consulted and invited to test use the application and to provide feedback on usability as well as the effectiveness of the application guiding them away from avalanches that would have occurred in real use. Some improvements were made based on the feedbacks. Evaluations on the localised hazard map against avalanche records were also conducted at this stage.
+In order to effectively track and manage the workload, the course of the project was divided into a requirement gathering stage and four development stages: basic functionalities, improved spatial analysis, risk-adjusted pathfinding, and evaluation \& testing. As the product from each stage is able to function independently of work done in later stages, unforeseen difficulties encountered in the research and development process can be effectively mitigated. The stages are described in Chapter \ref{ch:problem}.
 
 \section{Considerations and statements on ethics}
 
