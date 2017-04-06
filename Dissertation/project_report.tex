@@ -2,10 +2,12 @@
 
 \protect\BEng
 \protect\supervisor{Dr William Smith}
-\protect\wordcount{(to-be-completed)}
-\protect\includes{the title page and the abstract}
-\protect\excludes{bibliographies}
-\protect\abstract{This project produces a functional web application to visualise potential avalanche hazards. Within a virtual 3D terrain reality, avalanche hazards along popular winter mountaineering routes can be observed. The project has a primary focus on Scottish mountains while providing excellent adaptability for other regions with appropriate data sources. Avalanche hazards were calculated from a combination of professional avalanche forecasts and spatial analysis of mountain terrain models. Both the accuracy and the usability of the application were evaluated through statistical comparisons with past avalanche records and user experimentation. Additional features such as locating historical avalanches and route planning are also provided in the application. The safety and ethical considerations of the application being put into real world use are discussed.}
+\protect\wordcount{12734}
+\protect\includes{}
+\protect\excludes{acknowledgements and bibliographies}
+\protect\abstract{This project produces a functional web application to visualise potential avalanche hazards. Within a virtual 3D terrain reality, avalanche hazards along popular winter mountaineering routes can be observed. The project has a primary focus on Scottish mountains while providing excellent adaptability for other regions with appropriate data sources. Avalanche hazards were calculated from a combination of professional avalanche forecasts and spatial analysis of mountain terrain models. Both the accuracy and the usability of the application were evaluated through statistical comparisons with past avalanche records and user experimentation. Statistical evaluations conducted on our static risk model demonstrates better or comparable performance to past efforts. Additional features such as locating historical avalanches and route planning are also provided in the application. The safety and ethical considerations of the application being put into real world use are discussed.}
+\protect\acknowledgements{I would like to thank Dr William Smith for coming up the original idea for this project, as well as his excellent guidance throughout the course of this project, making much of this possible.\\
+I would also like to thank Dr Christopher Power and Dr Lilian Blot for their support throughout my academic study, as well as all three academics' references enabling my future academic studies.}
 
 \usepackage[left=20mm,top=26mm,right=20mm,bottom=20mm]{geometry}    
 \geometry{a4paper}
@@ -79,7 +81,7 @@ In addition to written observations on conditions of the snowpack and weather, a
 
 Therefore, the primary purpose of this project is to vastly simplify this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain height-map raster), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis} (also shown on the right is the final product with high risk terrain areas accentuated and an improved colour coding).
 
-In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by adding in features such as pathfinding.
+In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by implementing features such as pathfinding.
 
 \begin{figure}[h]
 		\centering
@@ -709,7 +711,7 @@ The terrain shape files used by Cesium to display 3D terrain models can also be 
 
 \subsection{Past avalanches} \label{subsec:past-avalanche-data}
 
-As reflected in the requirements, requests from a potential user include the ability to label the location of past avalanches on the map. The SAIS provides an \href{www.sais.gov.uk/avalanche_map/}{Avalanche Map} which labels the time, approximate location and additional descriptions of each past avalanche in the monitored area, as reported by both the SAIS' field forecasters and users of the website. This information is not only useful to the user assessing the avalanche risk of their route, but also a good source of reference data for statistical evaluations of the risk model. However, it is worth noting that the existence, the date, and the location of each avalanche are not exact, as they were not recorded scientifically. 
+As reflected in the requirements, requests from a potential user include the ability to label the location of past avalanches on the map. The SAIS provides an \href{www.sais.gov.uk/avalanche_map/}{Avalanche Map} which labels the time, approximate location and additional descriptions of each past avalanche in the monitored area, as reported by both the SAIS' field forecasters and users of the website. This information is not only useful to the user assessing the avalanche risk of their route, but also a good source of reference data for statistical evaluations of the risk model. However, it is worth noting that the existence, the date, and the location of each avalanche are not exact, as they were not always recorded scientifically. 
 
 A crawler similar to the one used for retrieving SAIS avalanche forecasts (\ref{subsec:dynamic-data-processing}) was written for retrieving past avalanche records. The data is arranged in the format shown in Figure \ref{fig:sais-past-avalanche} and stored in a SQLite database.
 
@@ -813,7 +815,7 @@ The user interface of the application is modified from a reference application o
 \begin{figure}[h]
     		\centering
     		\includegraphics[scale=0.5]{UI.pdf}
-    		\caption{\label{fig:ui}The user interface of the final product.}
+    		\caption{\label{fig:ui}The user interface of the final product. The red-dots indicate the locations of past avalanches.}
 \end{figure}
 
 From top to bottom, there are five elements for feature access:
@@ -874,7 +876,7 @@ Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search
 		\caption{\label{fig:stat-eval-plot}A diagram showing the accuracy of our model's release area estimation at different risk threshold percentiles. Note that \% of area = 100\% - threshold.}
 \end{figure}
 
-Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Similar to the previous study in the Scottish Highlands by Purves \textit{et al.} \cite{Purves2003343}, our study area is significantly larger than many others, and the lack of precisely located avalanches added another layer of complications. It would however appear that searching within an extent of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
+Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Similar to the previous study in the Scottish Highlands by Purves \textit{et al.} \cite{Purves2003343}, our study area is significantly larger than many others, and the lack of precisely recorded avalanches added another layer of complications. It would however appear that searching within an extent of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
 
 \begin{figure}[h]
 \centering 
@@ -886,7 +888,7 @@ Ghinoi and Chung \cite{Ghinoi2005305} & slope, aspect, elevation, crest distance
 Bühler \textit{et al.} \cite{buhler2013automated} & slope, curvature, roughness, land cover & Manali, India & $126 km^2$ & 36\% & 66.7\% \\ \hline 
 Veitinger \textit{et al.} \cite{veitinger2016potential} & slope, wind shelter, roughness & Zuoz, Switzerland & $\approx 50 km^2$ & 20\% & 60-80\% \\ \hline
 Pistocchi and Notarnicola \cite{Pistocchi2013} & statistical methods and morphology & Italian Alps & $7,400 km^2$ & 20\% & $\approx70\%$ \\ \hline
-Purves \textit{et al.} \cite{Purves2003343} & statistical methods and dynamic observations & Scottish Highlands & $> 5,000 km^2$ & Not Localised & 71\%-82\% (broad area only) \\ \hline
+Purves \textit{et al.} \cite{Purves2003343} & statistical methods and dynamic observations & Scottish Highlands & $> 5,000 km^2$ & Not a static risk model, no localisation. & 71\%-82\% (broad area only) \\ \hline
 Our Model & slope, aspect, curvature, roughness and dynamic observations & Scottish Highlands & $> 5,000 km^2$ & 0.5-30\% & 70.12\%-98.69\% (details in Figure \ref{fig:stat-eval-table}) \\ \hline 
 \end{tabular}
 \caption{\label{fig:eval-compare}Comparing the accuracy of our model against other release area estimation models, picking the most representative accuracy covering all avalanche releases in other studies. In most cases, the identification accuracy increases as the percentage of area allowed to be identified as risky increases.} 
@@ -897,6 +899,26 @@ Despite the difficulties in comparing the identification accuracy of our model a
 As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains, such as shown in Figure \ref{fig:ui}.
 
 \chapter{Conclusions} \label{ch:conclusions}
+
+This chapter summarises what has been achieved by the project over its course, as well as potentials for related work to be conducted in the future.
+
+\section{Summary of achievements}
+
+This project implemented a new visualisation approach for avalanche hazards, providing a potential solution to the difficulties mountaineers face in correlating avalanche risk forecasts with mountainous terrains. The application follows usability considerations related to its potential uses.
+
+While the dynamic risk model was based on data from the SAIS, a new static risk model was devised and evaluated, as well as a methods of combining them in both visualisation and pathfinding. In addition to adaptations of existing topographical analysis techniques, new modelling techniques were devised together with a new risk colour coding. Evaluations demonstrated that our static risk model has better or comparable performance compared to past efforts (Figure \ref{fig:eval-compare}), and when combined with the dynamic risk model effectively and accurately visualises avalanche hazards.
+
+The A* search algorithm has been adapted by this project for mountain terrains in a risk-adjusted environment, providing a method for safety-critical pathfinding in areas with avalanche risk.
+
+In statistical evaluation of the risk model, a threshold-based method for evaluating the risk model against data with poor localisation and coverage was created, which can be adapted for evaluating similar models in lack of reliable test data.
+
+The application was developed with Git version control, and in accordance with software engineering principles. The codebase is well-structured, documented and can be easily redeployed on most Linux environments, providing convenience for future work. 
+
+\section{Potential of future work}
+
+As mentioned in Section \ref{sec:risk-model-eval}, the extreme computational requirement of storing thousands of combined risk models has made evaluating a combined static and dynamic risk model difficult. With greater access to computational resources, our risk model can be further evaluated.
+
+During test uses, it was found that transferring and displaying large amount of data have slowed down the application, especially on devices with less computing power and slower network connections. In order to improve the usability of the application in the field, future developments could be conducted to migrate the user-end to native code and store pre-downloaded data to improve performance.
 
 \small{\bibliography{project}}
 \end{document}  

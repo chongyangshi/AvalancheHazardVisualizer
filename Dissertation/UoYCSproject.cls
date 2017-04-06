@@ -118,7 +118,7 @@
                {Declare the word count in the preamble using \protect\wordcount{Numeral}.} %
   \else
     Number of words = \UoYCSP@wordcount, as counted by
-    \textsf{detex~report.tex~|~wc~-w}.
+    \textsf{texcount~-inc~project\_report.tex}.
   \fi
 
   This includes the body of the report%
@@ -177,9 +177,17 @@
     {No abstract!}%
     {Declare an abstract in the preamble using \protect\abstract{Text}.}
   \else%
-    \begin{old@abstract}%
+    { 
+      \vspace{3cm}
+      \normalsize%
+      \begin{center}%
+        \large\bfseries Abstract%
+      \end{center}%
       \UoYCSP@abstract%
-    \end{old@abstract}%
+    }%
+    %\begin{old@abstract}%
+      %\UoYCSP@abstract%
+    %\end{old@abstract}%
   \fi%
   % dedication & acknowledgements
   \ifthenelse%
@@ -198,7 +206,7 @@
     }%
     %
     \ifacknowledgements%
-    { \vfill%
+    { \vspace{6cm}
       \normalsize%
       \begin{center}%
         \large\bfseries Acknowledgements%
