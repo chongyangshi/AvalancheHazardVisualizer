@@ -826,7 +826,7 @@ From top to bottom, there are five elements for feature access:
 \item[Route Selector] - A panel for pathfinding capabilities introduced in \textbf{Stage 3}. It contains a slider for adjusting the weighting between minimising risk and distance, two buttons for picking the start and end location, a button for starting route search, and a clearing button.
 \end{description}
 
-The interface is programmed in JavaScript, interfacing the APIs provided by Cesium. Extensive use of asynchronous XHTML requests allows seamingless transmission of dropdown options, user inputs and returned data, as well as necessary interface changes and map labelings required by the returned data.
+The interface is programmed in JavaScript, interfacing the APIs provided by Cesium. Extensive use of asynchronous XHTML requests allows seemingless transmission of dropdown options, user inputs and returned data, as well as necessary interface changes and map labelings required by the returned data.
 
 The user interface is designed in conformance with the principles described in Section \ref{sec:application-usability}. While it is necessary to use a mouse or a touchscreen to interact with the application, the mouse proficiency required on the user \cite{Dubois:2007:EAI:1531407.1531416} is no greater than what's required by a standard map application such as Google Maps, as no new types of interactions are programmed. The Cesium library also implements the style of touchscreen interactions recommended by \cite{ku2014study}. The application also responded well to rough touchscreen inputs \cite{Albinsson:2003:HPT:642611.642631} during test uses.
 
@@ -840,19 +840,17 @@ The evaluations conducted on the application attempt two answer two questions: h
 
 In order to evaluate the accuracy of the static risk model as described in Section \ref{sec:static-factors}, a Python script was produced to read in data from modules in Data Interface, and compare the risk model with past avalanche records (nearly 4,000 since 1991) to measure the accuracy of the model.
 
-As our risk model essentially computes the probability of each point being an avalanche release area, a common evaluation strategy for release area estimation models can be used: calculate the accuracy of release area identification at different percentages of areas of study. As our risk model produces a continuous value for each point, multiple percentile points are established as risk thresholds for converting into binary classifications.
+As our risk model essentially computes the probability of each point being an avalanche release area, a common evaluation strategy for release area estimation models can be used: calculate the accuracy of release area identification at different percentages of areas of study, which produces two important metrics: the accuracy itself, and the percentage of area identified as at risk -- if this is too large then the accuracy becomes meaningless.  Since our risk model produces a continuous value for each point, risk thresholds can be set at different percentiles of all risk values to create definite percentages of identified areas.
 
-Unfortunately, as discussed in Section \ref{subsec:past-avalanche-data}, the avalanche locations pin-pointed by the SAIS's Avalanche Map are far from exact. Therefore, it was necessary for us to search in a square box around the pined location of each avalanche, with varying side lengths (starting from 25m).
+Unfortunately, as discussed in Section \ref{subsec:past-avalanche-data}, the avalanche locations pin-pointed by the SAIS's Avalanche Map are far from exact. Therefore, it was necessary for us to search in a square box around the pined location of each avalanche, with varying extents (starting from 25m).
 
-A histogram of all risk values is first produced to help determine the cut-off percentile points, as shown in Figure \ref{fig:risk-eval-hist}.
+A histogram of all risk values is first produced to help determine the risk thresholds, as shown in Figure \ref{fig:risk-eval-hist}.Based on the distribution of risk values, the thresholds were selected as each whole number between 70\% and 99\%, as well as 99.5\% and 99.9\% to test the nature of extreme risk values. The value of each threshold is calculated, and a point is identified as a potential release area under that threshold if its value is above the threshold's risk value. The results of this evaluation is shown in Figure \ref{fig:stat-eval-table} and plotted in Figure \ref{fig:stat-eval-plot}.
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.55]{static-risk-distribution.png}
 		\caption{\label{fig:risk-eval-hist}A histogram showing the distribution of risk values in the static risk model. The main histogram is capped at a count of 1,000,000 due to the distinct values of high risk points, as shown in the overview diagram at top-right. The total number of points in the full raster is just under 1,000,000,000.}
 \end{figure}
-
-Based on the distribution of risk values, the threshold percentiles were selected as each whole number between 70\% and 99\%, as well as 99.5\% and 99.9\% to test the nature of extreme risk values. The value of each threshold percentile is calculated separately, and a point is identified as a potential release area by that threshold percentile if its value is above the percentile's value. The results of this evaluation is shown in Figure \ref{fig:stat-eval-table} and plotted in Figure \ref{fig:stat-eval-plot}.
 
 \begin{figure}[h]
 \centering 
@@ -867,7 +865,7 @@ Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search
 99.5\% & 0.5\% & 70.12\% & 88.17\% & 96.48\% & 98.28\%  \\ \hline
 99.9\% & 0.1\% & 27.41\% & 54.44\% & 82.60\% & 94.56\%  \\ \hline
 \end{tabular}
-\caption{\label{fig:stat-eval-table}The accuracy of our model's release area estimation at varying search area side lengths.}
+\caption{\label{fig:stat-eval-table}The accuracy of our model's release area estimation at varying search area extents.}
 \end{figure}
 
 \begin{figure}[h]
@@ -876,7 +874,7 @@ Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search
 		\caption{\label{fig:stat-eval-plot}A diagram showing the accuracy of our model's release area estimation at different risk threshold percentiles. Note that \% of area = 100\% - threshold.}
 \end{figure}
 
-Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Due to requirements, our study area is significantly larger than many others, and the lack of precisely located avalanches added another layer of complications. It would however appear that searching within a side length of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
+Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Similar to the previous study in the Scottish Highlands by Purves \textit{et al.} \cite{Purves2003343}, our study area is significantly larger than many others, and the lack of precisely located avalanches added another layer of complications. It would however appear that searching within an extent of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
 
 \begin{figure}[h]
 \centering 
@@ -896,7 +894,7 @@ Our Model & slope, aspect, curvature, roughness and dynamic observations & Scott
 
 Despite the difficulties in comparing the identification accuracy of our model against other models directly, for the 0.5\% of area of Scottish Highlands identified as most likely avalanche release areas by our model, the positive rate to within 25 meters is above 70\%. This increases to above 90\% for the top 5\% of areas.
 
-As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains.
+As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains, such as shown in Figure \ref{fig:ui}.
 
 \chapter{Conclusions} \label{ch:conclusions}
 
