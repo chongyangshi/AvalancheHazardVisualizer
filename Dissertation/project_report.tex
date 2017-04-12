@@ -1,8 +1,8 @@
 \documentclass[openany]{UoYCSproject}
 
 \protect\BEng
-\protect\supervisor{Dr William Smith}
-\protect\wordcount{12734}
+\protect\supervisor{Dr William A. P. Smith}
+\protect\wordcount{12488}
 \protect\includes{}
 \protect\excludes{acknowledgements and bibliographies}
 \protect\abstract{This project produces a functional web application to visualise potential avalanche hazards. Within a virtual 3D terrain reality, avalanche hazards along popular winter mountaineering routes can be observed. The project has a primary focus on Scottish mountains while providing excellent adaptability for other regions with appropriate data sources. Avalanche hazards were calculated from a combination of professional avalanche forecasts and spatial analysis of mountain terrain models. Both the accuracy and the usability of the application were evaluated through statistical comparisons with past avalanche records and user experimentation. Statistical evaluations conducted on our static risk model demonstrates better or comparable performance to past efforts. Additional features such as locating historical avalanches and route planning are also provided in the application. The safety and ethical considerations of the application being put into real world use are discussed.}
@@ -54,7 +54,7 @@ I would also like to thank Dr Christopher Power and Dr Lilian Blot for their sup
 
 \title{An App for Visualisation of Avalanche Hazard}
 \author{Chongyang Shi}
-\date{May 2, 2017}							
+\date{DRAFT 1 - April 12, 2017}							
 \begin{document}
 
 {\let\cleardoublepage\clearpage 
@@ -77,9 +77,9 @@ At the time of writing, the application can be accessed at \href{https://avalanc
 
 As a front-runner of digital avalanche forecasts, the Scottish Avalanche Information Service (SAIS) \cite{sais} have been providing frequent and reliable winter avalanche forecasts for decades in Scotland.
 
-In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass rose, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in Figure \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, as it is not only easy to underestimate the risk due to risk levels varying sharply between neighbouring aspects and altitudes (as shown in Figure \ref{fig:mapping}), but also requires the user not to be unnecessarily cautious to avoid better routes with less risk than the user believes. 
+In addition to written observations on conditions of the snowpack and weather, a typical SAIS avalanche forecast also includes a compass rose, providing avalanche risk levels on the scale of 1 to 5 for slopes of different aspects above and below a transition threshold altitude, shown in Figure \ref{fig:mapping}. However, while this compass rose provides a comprehensive overview on avalanche risks across the forecast region, it is not straightforward to interpret, as the user will need to work out the surface aspects and altitudes along their route, and mentally infer the risk levels of different locations along their route. This is a very complex task, as it is not only easy to underestimate the risk due to risk levels varying sharply between neighbouring aspects and altitudes (as shown in Figure \ref{fig:mapping}), but also requires the user not to be unnecessarily cautious -- avoiding better routes with less-than-anticipated risk.
 
-Therefore, the primary purpose of this project is to vastly simplify this process, by generating a coloured image based on the altitude and surface aspects at each point (as determined by a terrain height-map raster), which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis} (also shown on the right is the final product with high risk terrain areas accentuated and an improved colour coding).
+Therefore, the primary purpose of this project is to vastly simplify this process, by generating a coloured image based on the altitude and surface aspects at each point, which is then laid on top of a computer-generated terrain model in the 3D terrain viewer. Hence the information supplied by the compass rose can be visualised in the most straightforward way, allowing the user to freely navigate the 3D model and observe the hazard levels at each location along their route. The avalanche hazard of the same area mapped in Figure \ref{fig:mapping} is visualised as shown in Figure \ref{fig:stage1bennevis} (also shown on the right is the final product with high risk terrain areas accentuated and an improved colour coding).
 
 In later stages of the project, we also seek to improve hazard representation through constructing a custom risk model based on information from the compass rose and terrain spatial data; and to improve the functionalities of the application by implementing features such as pathfinding.
 
@@ -93,14 +93,14 @@ In later stages of the project, we also seek to improve hazard representation th
 		\centering
 		\includegraphics[height=4.5cm]{Stage1BenNevisRight.png}
 		\includegraphics[height=4.5cm]{Stage3BenNevis.png}
-		\caption{\label{fig:stage1bennevis} The avalanche hazard visualisation of the same area mapped in Figure \ref{fig:mapping}, generated in the 3D terrain viewer using the same avalanche forecast by both the basic product (dynamic risk only, left) and the final product (both static terrain and dynamic risk with new colour coding, right).}
+		\caption{\label{fig:stage1bennevis} The avalanche hazard visualisation of the same area mapped in Figure \ref{fig:mapping}, generated in the 3D terrain viewer using the same avalanche forecast by both the essential framework (dynamic risk only, left) and the final product (both static terrain and dynamic risk with new colour coding, right).}
 \end{figure}
 
 
 
 \section{Stages of the project} \label{sec:stages}
 
-In order to effectively track and manage the workload, the course of the project was divided into a requirement gathering stage and four development stages: basic functionalities, improved spatial analysis, risk-adjusted pathfinding, and evaluation \& testing. As the product from each stage is able to function independently of work done in later stages, unforeseen difficulties encountered in the research and development process can be effectively mitigated. The stages are described in Chapter \ref{ch:problem}.
+In order to effectively track and manage the workload, the course of the project was divided into a requirement gathering stage and four development stages: the essential framework, static risk integration, risk-adjusted pathfinding, and evaluation \& testing. As the product from each stage is able to function independently of work done in later stages, unforeseen difficulties encountered in the research and development process can be effectively mitigated. The stages are described in Chapter \ref{ch:problem}.
 
 \section{Considerations and statements on ethics}
 
@@ -112,13 +112,13 @@ As a result, while the application is functional and has shown promise during ou
 
 \section{Structure of this report}
 
-A literature review is conducted in Chapter \ref{ch:lit-review} over existing research and developments in the various aspects of Computer Science involved in this project. Chapter \ref{ch:problem} describes the problem analysis and requirement gathering conducted in the planning stage, for which the theories studied and developed for the development of the application as well as the processing of available data are discussed in Chapter \ref{ch:theory}. Chapter \ref{ch:app-description} describes in detail the features and internal architectures of the application, as well as its development process. This is followed by Chapter \ref{ch:app-testing}, which describes the evaluation and testing conducted on the application as well as on the quality of its data. Finally, Chapter \ref{ch:conclusions} concludes the report and discusses the potential uses and future developments of the application.
+A literature review is conducted in Chapter \ref{ch:lit-review} over existing research and developments in the various aspects of Computer Science involved in this project. Chapter \ref{ch:problem} describes the problem analysis and requirement gathering conducted in the planning stage. The theories studied and developed for the application, as well as the processing of available data are discussed in Chapter \ref{ch:theory}. Chapter \ref{ch:app-description} describes in detail the features and internal architectures of the application, as well as its development process. This is followed by Chapter \ref{ch:app-testing}, which describes the evaluation and testing conducted on the application as well as its risk model. Finally, Chapter \ref{ch:conclusions} concludes the report and discusses the potential uses and future developments of the application.
 
 \chapter{Literature Review} \label{ch:lit-review}
 
 As an application designed to improve the usability of snow avalanche forecasts, it is necessary to first consider and evaluate past research and efforts made to understand and predict avalanches, as well as efforts in visualising these knowledge and predictions. While the term avalanche can be applied to various types of moving substances, such as rock and mud \cite[p. 1]{91097820150101}, only snow avalanches are studied by this project.
 
-The literature review starts with an overview of the cause, classification and consequences of snow avalanches in Section \ref{sec:avalanche-background} to motivate the need of accurately visualising avalanche risks. This is followed by comparisons and critiques on existing methods and models for forecasting avalanches in Section \ref{sec:avalanche-forecasting}, which can be potentially applied in analysing avalanche forecasts and topographical data in Chapter \ref{ch:theory}. Past efforts in modelling and visualising avalanches risks are then discussed in Section \ref{sec:modelling-avalanche}, which provides reference theories in designing risk analysis models used in Chapter \ref{ch:theory}. Section \ref{sec:colour-representation} looks into the theories behind colour representations of risk, providing a basis for the colour design of the visualisation in Chapters \ref{ch:theory} and \ref{ch:app-description}. Section \ref{sec:terrain-pathfinding} discusses existing methods in cost calculations in 3D space, and compares researches in the pathfinding algorithm A*, for algorithmic designs of the route planning tool in Chapter \ref{ch:app-description}. Finally, Section \ref{sec:application-usability} covers existing Human-computer Interaction researches in 3D navigation and field usage required by the project, which provides background and guidance to evaluations conducted in Chapter \ref{ch:app-testing}.
+The literature review starts with an overview of the cause, classification and consequences of snow avalanches in Section \ref{sec:avalanche-background} to motivate the need of accurately visualising avalanche risks. This is followed by comparisons and critiques on existing methods and models for forecasting avalanches in Section \ref{sec:avalanche-forecasting}, which can be potentially applied in analysing avalanche forecasts and topographical data in Chapter \ref{ch:theory}. Past efforts in modelling and visualising avalanches risks are then discussed in Section \ref{sec:modelling-avalanche}, which provides reference theories in designing risk analysis models used in Chapter \ref{ch:theory}, and statistical evaluations in Chapter \ref{ch:app-testing}. Section \ref{sec:colour-representation} looks into the theories behind colour representations of risk, providing a basis for the colour design of the visualisation in Chapters \ref{ch:theory} and \ref{ch:app-description}. Section \ref{sec:terrain-pathfinding} discusses existing methods in cost calculations in 3D space, and compares researches in the pathfinding algorithm A*, for algorithmic designs of the route planning tool in Chapter \ref{ch:theory}. Finally, Section \ref{sec:application-usability} covers existing Human-computer Interaction researches in 3D navigation and field usage, guiding the interaction design of the application.
 
 \section{Background on snow avalanches} \label{sec:avalanche-background}
 
@@ -140,11 +140,11 @@ A conventional approach to avalanche forecasting involves extensive field observ
 
 However, human avalanche forecasting can sometimes be impractical or sometimes cost-prohibitive, often due to area inaccessibility or vast size, as observed by Bühler \textit{et al.} \cite{buhler2013automated} in the northwestern Himalaya. McClung \cite{McClung1994} has explored as early as 1994 that computational methods can be used to improve data analysis and provide supplementary opinions through machine learning methods. Utilisation of computational methods also allow rapid coverage of new areas without undertaking increased human observations, as discussed by Lehning \cite{lehning1999snowpack}. Notable computational models on different types of data include \textit{SNOWPACK} and the NN method.
 
-\textit{SNOWPACK}, a snow profile comparison method was first published by Lehning \textit{et al.} \cite{Lehning2001253} in 2001. The method attempts to establish a numerical profile of snow cover conditions based on various measured properties of the cover, such as the size and type of snow grains, temperature and density of the environments. An agreement score could then be established by comparing the numerical profile with an observed profile in the field. If high agreement scores are reached by the experiments, the numerical profile becomes suitable for use in avalanche forecasts. In addition, while SNOWPACK considers dynamic environmental factors such as the influence of solar radiation and warm winds on the stability of snow layers \cite[p. 124]{bartelt2002physical}, it does not consider the influence of static terrain features on the stability of snow, such as the slope and the aspect.
+\textit{SNOWPACK}, a snow profile comparison method was first published by Lehning \textit{et al.} \cite{Lehning2001253} in 2001. The method attempts to establish a numerical profile of snow cover conditions based on various measured properties of the cover, such as the size and type of snow grains, temperature and density of the environments. An agreement score could then be established by comparing the numerical profile with an observed profile in the field. If high agreement scores are reached by the experiments, the numerical profile becomes suitable for use in avalanche forecasts. While SNOWPACK also considers dynamic environmental factors such as the influence of solar radiation and warm winds on the stability of snow layers \cite[p. 124]{bartelt2002physical}, it does not consider the influence of static terrain features on the stability of snow, such as the slope and the aspect.
 
-However, attempts to apply SNOWPACK in other regions with different snow conditions have identified weaknesses in the assumptions made by the model, which was originally developed for the Swiss Alps. A notable attempt was made by Hirashima \textit{et al.} \cite{Hirashima2008191} from 2005 to 2006 in Tsunan, Japan. While numerical profiles computed were in reasonable agreement with the observed snow profiles in Tsunan, it was found that the stability index estimators embedded in the model was not suitable for the shear strength of Japanese snow, and an alternative method for calculating the index had to be adopted. This suggested that adaptation of \textit{SNOWPACK} to a new region may require appropriate changes to the model based on local snow conditions.
+However, attempts to apply SNOWPACK in other regions with different snow conditions have identified weaknesses in the assumptions made, which was originally developed for the Swiss Alps. A notable attempt was made by Hirashima \textit{et al.} \cite{Hirashima2008191} from 2005 to 2006 in Tsunan, Japan. While numerical profiles computed were in reasonable agreement with the observed snow profiles in Tsunan, it was found that the stability index estimators embedded in the model was not suitable for the shear strength of Japanese snow, and an alternative method for calculating the index had to be adopted. This suggested that adaptation of \textit{SNOWPACK} to a new region may require appropriate changes to the model based on local snow conditions.
 
-While SNOWPACK was developed as a specialised method for analysis of snow covers, more generalised models such as the Nearest Neighbours (NN) method have also been developed. The NN model was initially developed by Buser \cite{buser1983avalanche} in 1983, which has since been supplemented by various studies, such as Purves \textit{et al.} \cite{Purves2003343} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004. The NN model constructs a vector-space consisting of measurements on weather and terrain conditions on different days of observation, and applies a k-nearest-neighbour method to calculate the likelihood of an avalanche based on a new day's measurements. While measurements may be on different units and scales, which make distance measurement difficult, this is partly compensated by applying scaling and weighting \cite[p. 599]{buser1983avalanche}. As the NN method has difficulties with high dimensional data, an alternative method based on Support Vector Machines (SVMs) have been proposed and developed \cite{Lehning2001253} \cite{pozdnoukhov2011spatio}. Another deficiency of the NN method is the increased uncertainty when there is not sufficient data available in the vector space \cite[p. 379]{pozdnoukhov2011spatio}.
+While SNOWPACK was developed as a specialised method for analysis of snow covers, more generalised models such as the Nearest Neighbours (NN) method have also been developed. The NN model was initially developed by Buser \cite{buser1983avalanche} in 1983, which has since been supplemented by various studies, such as Purves \textit{et al.} \cite{Purves2003343} in 2003, and Singh and Ganju \cite{Singh2004105} \cite{Singh201533} since 2004. The NN model constructs a vector-space consisting of measurements on weather and terrain conditions on different days of observation, and applies a k-nearest-neighbour method to calculate the likelihood of an avalanche based on a new day's measurements. While measurements may be on different units and scales, which makes distance measurement difficult, this is partly compensated by applying scaling and weighting \cite[p. 599]{buser1983avalanche}. As the NN method has difficulties with high dimensional data, an alternative method based on Support Vector Machines (SVMs) have been proposed and developed \cite{Lehning2001253} \cite{pozdnoukhov2011spatio}. Another deficiency of the NN method is the increased uncertainty when there is not sufficient data available in the vector space \cite[p. 379]{pozdnoukhov2011spatio}.
 
 \begin{figure}[h]
 		\centering
@@ -152,13 +152,13 @@ While SNOWPACK was developed as a specialised method for analysis of snow covers
 		\caption{\label{fig:scotava1516} Reported avalanches in the Cairngorms and the Glencoe regions during winter sports season of 2015-2016, generated by the SAIS.\cite{sais-map}}
 \end{figure}
 
-The most notable application of the NN method is by the SAIS. Avalanche forecasts from the SAIS that are partially dependent on the NN method achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1998 and 2002 \cite[p. 351]{Purves2003343}. With up to 205 avalanches reported during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. Data from SAIS forecasts would also be a critical component in data sourcing and hazard modelling during this project, and is directly used to derive the hazard map overlay in \textbf{Stage 1} of the project.
+The most notable application of the NN method is by the SAIS. Avalanche forecasts from the SAIS that are partially dependent on the NN method achieved a weighted accuracy of between 71\% and 82\% on visible winter days between 1998 and 2002 \cite[p. 351]{Purves2003343}. With up to 205 avalanches reported during the winter season of 2015-2016 \cite{sais} (as partly shown in Figure \ref{fig:scotava1516}), the SAIS plays a very significant role in saving lives from avalanches. Data from SAIS forecasts would also be a critical component in data sourcing and hazard modelling during this project, and is directly used to derive the hazard overlay in \textbf{Stage 1} of the project.
 
-In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in forecasting temporal avalanches, as the formation of general vegetation conditions require a long period of time. However, for the purpose of this project, this model could potentially be used for establishing a static risk level for each point in the terrain, which is to be included in the overall risk model.
+In addition to analysis of snow and terrain conditions and past avalanche records, studies of vegetations in mountainous areas can also provide important information on recurrence of avalanches. Christophe \textit{et al.} \cite{Christophe2010107} developed a model based on observation of tree-rings. As avalanches affect the growth of trees and other vegetations on the mountain slopes, growth condition of trees would provide useful insight into the magnitude and frequency of past avalanches in the area. One downside of the model is its unsuitableness for direct use in forecasting temporal avalanches, as the formation of general vegetation conditions require a long period of time. However, for the purpose of this project, this model could potentially be used for establishing a static risk factor for each point in the terrain, which is to be included in the overall risk model.
 
 \section{Modelling and visualisation of avalanche hazard in GIS} \label{sec:modelling-avalanche}
 
-In order to effective store large amounts of geographical data for computing hazard map overlays for the project, a geographic information system (GIS) \cite{clarke1986advances} is commonly used to organise avalanche hazard data.
+In order to effectively store large amounts of geographical data for computing hazard map overlays, a geographic information system (GIS) \cite{clarke1986advances} is commonly used to organise avalanche hazard data.
 
 While a majority of implemented avalanche forecasting methods -- such as those discussed in Section \ref{sec:avalanche-forecasting} -- provide generalised risk levels with respect to unique sets of environmental conditions, these generalised risk levels cannot be easily converted into localised hazards in a GIS, as these forecasting methods only operate on smaller subsets of parameters contributing to an avalanche. To evaluate the avalanche hazard of a specific location (e.g. Red Burn in Ben Nevis, Lochaber), a systematic method is often developed to calculate risk for each point in the region, taking into account as many hazard parameters as possible, which will be demonstrated by past researches discussed in this section.
 
@@ -192,7 +192,7 @@ While a realistic imagery of the surface can be produced in the 3D viewer by cov
 
 \subsection{Saturation-based colouring}
 
-This is the simplest colour representation scheme. A single colour determined by one hue value is chosen, and in the context of visualising hazards, the colour of choice is often red \cite{aerts2003testing} \cite{cheong2016evaluating}. The saturation of this colour at different points in the visualisation would vary, dependent on the level of risk at that point. As summarised by Cheong \textit{et al.} \cite[Ch. 2]{cheong2016evaluating}, there have been conflicting conclusions from researches on the effectiveness of saturation-based risk visualisations, when compared with visualisations using other schemes. Experiments also conducted by Cheong \textit{et al.} showed that the accuracy of user decisions under this scheme is good while multitasking, but otherwise not as good. 
+This is the simplest colour representation scheme. A single colour determined by one hue value is chosen, and in the context of visualising hazards, the colour of choice is often red \cite{aerts2003testing} \cite{cheong2016evaluating}. The saturation of this colour at different points in the visualisation would vary, dependent on the level of risk at that point. As summarised by Cheong \textit{et al.} \cite[Ch. 2]{cheong2016evaluating}, there have been conflicting conclusions from researches on the effectiveness of saturation-based risk visualisations, when compared with other schemes. Experiments also conducted by Cheong \textit{et al.} showed that the accuracy of user decisions under this scheme is good while multitasking, but otherwise not as good. 
 
 While the subject of risk mapped by the visualisation of Cheong \textit{et al.} is wildfire hazard, a known visualisation of avalanche hazard under this saturation-based scheme was by Bühler \textit{et al.} \cite{buhler2013automated} as discussed in Section \ref{sec:modelling-avalanche}, although no human-computer interaction (HCI) evaluation was conducted. This scheme is also used by Spachinger \textit{et al.} \cite{spachinger2008flood} for flood risks.
 
@@ -215,7 +215,7 @@ This colour representation scheme is similar to the saturation-based scheme, but
 \caption{\label{fig:eu-avalanche-scale} colour scheme reconstructed from the European Avalanche Hazard Scale, used by the SAIS \cite{sais-report}.}
 \end{figure}
 		
-However, some studies have considered the hue-based scheme used in Figure \ref{fig:eu-avalanche-scale} to be insufficiently effective, most notably by Conger \cite{conger2004review}, who found that using green to represent low risk deviates from the common perception of green being a safe-indicator colour, which is not always the case in avalanche forecasting. Orange was also found to be sometimes inappropriate in association with a risk, and more difficult to print cartographically \cite[Ch. 4.2]{conger2004review}. Therefore Conger has suggested that the risk scale should be rescaled into four, in order to abolish the use of orange. However, other researches such as Braun and Silver \cite[p. 2212]{braun1995interaction} disagree with Conger's assessment of orange.
+However, some studies have considered the hue-based scheme used in Figure \ref{fig:eu-avalanche-scale} to be insufficiently effective, most notably by Conger \cite{conger2004review}, who found that using green to represent low risk deviates from the common perception of green being a safety-indicating colour, which is not always the case in avalanche forecasting. Orange was also found to be sometimes inappropriate in association with a risk, and more difficult to print cartographically \cite[Ch. 4.2]{conger2004review}. Therefore Conger has suggested that the risk scale should be rescaled into four, in order to abolish the use of orange. However, other researches such as Braun and Silver \cite[p. 2212]{braun1995interaction} disagree with Conger's assessment of orange.
 
 HCI evaluations conducted by Cheong \textit{et al.} \cite[Ch. 5]{cheong2016evaluating} concluded that while a hue-based scheme is often most preferred by users, its user decision accuracy is not the best among different colour representation schemes.
  
@@ -253,39 +253,39 @@ As a key component of problem analysis, the preliminary stage gathers requiremen
 
 \textbf{Goal of the application}: to visually represent avalanche hazard levels on a map, with which the user will be able to navigate the terrain with minimised avalanche risk.
 
-\textbf{Usability requirements}: The user must be able to use the application both on a desktop computer (mouse and keyboard) and on a mobile device (touchscreen). Due to the storage limitations of contemporary mobile devices, Internet accessibility is assumed to be available for live transmission of data. The performance requirements of the application shall be low enough to be usable on most modern smartphones and computers.
+\textbf{Usability requirements}: The user must be able to use the application both on a desktop computer (mouse and keyboard) and on a mobile device (touchscreen). Due to the storage limitations of contemporary mobile devices, Internet accessibility is assumed to be available for live transmission of data. The performance requirement of the application shall be low enough to be usable on most modern smartphones and computers.
 
-\textbf{Interaction requirements}: For the basic application (\textbf{Stage 1}), the user shall be able to freely navigate a virtual 2D or 3D scene, on which avalanche risk levels are overlaid on top of an accurate terrain map. The colours used for the avalanche risk levels should follow the scheme used by the SAIS. For the improved application in \textbf{Stage 2}, a new colour coding for risk levels should be developed, and it shall be more distinctive and representative of the risk levels implied. A button should also be added to allow the user to switch the application back to \textbf{Stage 1}'s dynamic risk-only overlay.
+\textbf{Interaction requirements}: For the essential framework (\textbf{Stage 1}), the user shall be able to freely navigate a virtual 2D or 3D scene, on which avalanche risk levels are overlaid on top of an accurate terrain map. The colours used for the avalanche risk levels should follow the scheme used by the SAIS. For the static risk integration in \textbf{Stage 2}, a new colour coding for risk levels should be developed, and it shall be more distinctive and representative of the risk levels implied. A button should also be added to allow the user to switch the application back to \textbf{Stage 1}'s dynamic risk-only overlay.
 
 In \textbf{Stage 3}, a new tool should be added to the user interface. Through the tool, the user shall be able to specify a start point and an end point on the terrain for pathfinding. A slider should be made available so that the user can configure the weight of path and risk when considering a path. The user should also be able to clear the existing paths plotted on the terrain with another button. In addition, this stage shall also add a past avalanche locator tool, which will plot on the terrain one red dot for each historic avalanche recorded by the SAIS. When clicking on the dot the user shall see the time and description of that avalanche. The user should be able to switch the past avalanche time frame, such as in the past month or year.
 
-\textbf{System requirements}: In order to generate the visualisation to the user, the system must be able to process the data required. In \textbf{Stage 1}, the system should be able to retrieve and store the data from the SAIS through web crawling, and pick the correct data for each pixel on the map by reading the height and aspect value from raster files. For the improved application in \textbf{Stage 2}, the system should be able to compute a static risk value based on various terrain properties for each pixel on the map. The static risk value should be converted by the system for suitable visualisation in the new colour coding. 
+\textbf{System requirements}: In order to generate the visualisation to the user, the system must be able to process the data required. In \textbf{Stage 1}, the system should be able to retrieve and store the data from the SAIS through web crawling, and pick the correct data for each pixel on the map by reading the height and aspect value from raster files. For the static risk integration in \textbf{Stage 2}, the system should be able to compute a static risk value based on various terrain properties for each pixel on the map. The static risk value should be converted by the system for suitable visualisation in the new colour coding. 
 
 In \textbf{Stage 3}, the system should be able to compute a path between two points on the terrain specified by the user, based on a specified weighting between minimising path and risk. The system should return a set of coordinates representing the path to be plotted. The pathfinding operation should take a short amount of time for any reasonable input by the user.
 
 \textbf{Development requirements}: The project should be developed in a version control system such as Git, and a detailed deployment documentation should be provided to allow any experienced system administrator to redeploy the application. The code written should be well-documented for future work.
 
-\section{Stage 1: the basic application}
+\section{Stage 1: the essential framework}
 
 While the interaction requirements do not specify whether the risk map should be a 2D or 3D scene, it is decided in the first stage of development that a 3D terrain will be produced by the application, allowing the user the maximum flexibility in navigating and observing the model.
 
-In order to implement the basic functionalities required for \textbf{Stage 1}, it is necessary to first choose the programming languages and associated libraries for the functionalities.
+In order to implement the essential framework required for \textbf{Stage 1}, it is necessary to first choose the programming languages and associated libraries for the functionalities.
 
-Due to the requirement of making the application available to both desktop and mobile devices, the easiest way to develop for both platforms would be to produce a web application, taking advantage of the \href{https://get.webgl.org/}{WebGL} library to render the 3D terrain in web browsers. The Cesium \cite{cesium} framework was chosen to for the front-end of the application, as it already provides almost all the functionalities desired by the requirements, as well as excellent extensibility to implement the rest. The framework uses HTML5, CSS3 and JavaScript. The user interface will be described in \ref{sec:user-interface}.
+Due to the requirement of making the application available to both desktop and mobile devices, the easiest way to develop for both platforms would be to produce a web application, taking advantage of the \href{https://get.webgl.org/}{WebGL} library to render the 3D terrain in web browsers. The Cesium \cite{cesium} framework was chosen to for the front-end of the application, as it already supports almost all the functionalities desired by the requirements, as well as excellent extensibility to implement the rest. The framework uses HTML5, CSS3 and JavaScript. The user interface will be described in \ref{sec:user-interface}.
 
 For the back-end of the application, Python was chosen as the programming language used. In addition to the author's existing expertise with the language, Python also provides a wide range of libraries for interfacing with the required components. The dynamically-typed syntax also allows rapid prototyping and testing of the application. 
 
 The main Python libraries chosen for the operational components of the application are: \href{http://www.seleniumhq.org/}{Selenium} for SAIS data retrieval, \href{http://flask.pocoo.org/}{Flask} for building the API server, \href{https://python-pillow.org/}{Pillow} for imaging the overlay colours, and \href{http://www.numpy.org/}{NumPy} for associated numerical computations.
 
-With languages and libraries chosen, the implementation of the basic application will be relatively straightforward. The back-end will simply read the dynamic risk data from the SAIS (Sections \ref{sec:dynamic-factors} and \ref{subsec:dynamic-data-processing}) based on height and aspect values of each point, generate overlay images and return them to the front-end. The full operation of the system is described in \ref{sec:app-system}.
+With languages and libraries chosen, the implementation of the essential framework will be relatively straightforward. The back-end will simply read the dynamic risk data from the SAIS (Sections \ref{sec:dynamic-factors} and \ref{subsec:dynamic-data-processing}) based on height and aspect values of each point, generate overlay images and return them to the front-end. The full operation of the system is described in \ref{sec:app-system}.
 
-\section{Stage 2: the improved application}
+\section{Stage 2: the static risk integration}
 
 As \textbf{Stage 2} focuses on improving the data model and colour coding, no architectural change will be required at this stage. 
 
-To take into account of static risk factors, additional computations will need to be conducted, the results of which will supplement the image generation process developed in the previous stage. Some techniques used in this stage will be adapted from existing techniques surveyed in Sections \ref{sec:avalanche-forecasting} and \ref{sec:modelling-avalanche}, while others will need to be developed anew, to be discussed in Section \ref{sec:static-factors}.
+To take into account of static risk factors, additional computations will need to be conducted, the results of which will supplement the image generation process developed in the previous stage. Some techniques used in this stage will be adapted from existing techniques surveyed in Sections \ref{sec:avalanche-forecasting} and \ref{sec:modelling-avalanche}, while others will need to be developed anew, to be discussed in \ref{sec:static-factors}.
 
-Minimal changes will need to be made to allow the application to read more data, and compute them differently. The combination of dynamic and static risk models will be discussed in Section \ref{sec:combine-models}. Changes to the risk colour coding at this stage will be covered in \ref{sec:chosen-colour-coding}.
+Minimal changes will need to be made to allow the application to read more data, and compute them differently. The combination of dynamic and static risk models will be discussed in \ref{sec:combine-models}. Changes to the risk colour coding at this stage will be covered in \ref{sec:chosen-colour-coding}.
 
 \section{Stage 3: pathfinding and past avalanches}
 
@@ -293,7 +293,7 @@ The main addition to the application in \textbf{Stage 3} is the risk-adjusted pa
 
 The user interface changes will involve the addition of pathfinding panel according to the requirements, as well as the ability to display the locations and information of past avalanches.
 
-The back-end changes will be more complex. The new pathfinding functionality will require extensive modifications to the standard A* search algorithm (as described in \ref{sec:terrain-pathfinding}) in order to satisfy unique requirements posed by the application, which will be covered in \ref{sec:risky-pathfinding}. This also results in a data API for the API server, to be covered in Section \ref{subsec:data-api}.
+The back-end changes will be more complex. The new pathfinding functionality will require extensive modifications to the standard A* search algorithm (as described in \ref{sec:terrain-pathfinding}) in order to satisfy unique requirements posed by the application, which will be covered in \ref{sec:risky-pathfinding}. This also results in a data API for the API server, to be covered in \ref{subsec:data-api}.
 
 For displaying past avalanches, a new data crawler for past avalanche data will be required (to be discussed in \ref{subsec:past-avalanche-data}), as well as the addition of another data API (to be covered in \ref{subsec:past-avalanche-data}).
 
@@ -307,7 +307,7 @@ The evaluation of the risk model will be covered in Sections \ref{sec:stats-eval
 
 \chapter{Theories and Methodologies} \label{ch:theory}
 
-This chapter provides the details of the theories in avalanche forecasting, spatial analysis, risk representation and search algorithms applied across different stages of the project. Section \ref{sec:dynamic-factors} will be utilised in the construction of basic functionalities in \textbf{Stage 1}, which is improved in \textbf{Stage 2} with the introduction of Sections \ref{sec:static-factors} and \ref{sec:chosen-colour-coding}. Section \ref{sec:risky-pathfinding} provides the basis of algorithm design and implementation in \textbf{Stage 3}. Finally, Section \ref{sec:stats-eval} provides theoretical basis of statistically evaluating the risk model devised against past efforts in \textbf{Stage 4}.
+This chapter provides the details of the theories in avalanche forecasting, spatial analysis, risk representation and search algorithms applied across different stages of the project. Section \ref{sec:dynamic-factors} will be utilised in the construction of essential framework in \textbf{Stage 1}, which is built-on in \textbf{Stage 2} with Sections \ref{sec:static-factors} and \ref{sec:chosen-colour-coding}. Section \ref{sec:risky-pathfinding} provides the basis of algorithm design and implementation in \textbf{Stage 3}. Finally, Section \ref{sec:stats-eval} provides theoretical basis of statistically evaluating the risk model devised against past efforts in \textbf{Stage 4}.
 
 \section{Dynamic risk factors of avalanche release} \label{sec:dynamic-factors}
 
@@ -315,7 +315,7 @@ Dynamic factors in avalanche forecasting are considered as factors that change o
 
 Purves \textit{et al.} \cite{Purves2003343} described the process utilised by the SAIS to forecast avalanche risk in Scottish mountains. Through an NN modelling software tracking observed past avalanches, forecasters will input measurements on temperature, wind and snow conditions, which are then scaled to the same range, and weighted by an autonomous genetic algorithm in order to avoid overfitting on recent avalanche conditions. This process creates a vector in the NN vector-space. The software then provides the input vector's nearest neighbours, the conditions of which then allows experienced forecasters to make a decision on the level of risk for each segment of aspect and altitude in each region. The resulting compass rose-style diagram can be seen in Figure \ref{fig:mapping}.
 
-Based on the existing evaluations of the accuracy of SAIS avalanche forecasts \cite[p. 351]{Purves2003343} \cite{heierli2004verification}, with an accuracy of above 70\% on clear winter days, we have confidence that the dynamic risk model used by the SAIS provides a relatively reliable overview of dynamic avalanche risks across different aspects and altitudes, through a composition of different dynamic factors available to the SAIS observers. Therefore, SAIS risk data were applied directly to the terrain model for the basic application developed in \textbf{Stage 1}.
+Based on the existing evaluations of the accuracy of SAIS avalanche forecasts \cite[p. 351]{Purves2003343} \cite{heierli2004verification}, with an accuracy of above 70\% on clear winter days, we have confidence that the dynamic risk model used by the SAIS provides a relatively reliable overview of dynamic avalanche risks across different aspects and altitudes, through a composition of different dynamic factors available to the SAIS observers. Therefore, SAIS risk data were applied directly to the terrain model for the essential framework developed in \textbf{Stage 1}.
 
 \section{Static risk factors of avalanche release} \label{sec:static-factors} % Surface fitting.
 
@@ -373,7 +373,7 @@ According to Horn \cite{1456186}, the slope angle is simply the inverse tangent 
 S_t = \tan ^{ - 1} (|SLOPE|) = \tan ^{ - 1}(\sqrt{G^{2} + H^{2}})
 \end{equation}
 
-The consensus of most researches is that the majority of avalanches occur between a slope angle range of 25\degree \ and 60\degree, with the highest level of risk near the middle of the range \cite[p. 42]{91097820150101}\cite[p. 112]{mcclung2006avalanche}. Veitinger and Sovilla \cite[p. 2215]{veitinger2016potential} modelled this observation as a bell-shaped curve, which has been adapted by our model. The modification our model made to the curve from the original was moving the symmetrical line in x direction to \textit{x} = 42.5\degree \ to make the curve fit better with the McClung \cite[p. 112]{mcclung2006avalanche} model, as shown in Figure \ref{fig:slope-curve}.
+The consensus of most researches is that the majority of avalanches occur between a slope angle range of 25\degree \ and 60\degree, with the highest level of risk near the middle of the range \cite[p. 42]{91097820150101}\cite[p. 112]{mcclung2006avalanche}. Veitinger and Sovilla \cite[p. 2215]{veitinger2016potential} modelled this observation as a bell-shaped curve, which has been adapted by our model. The modification our model made to the curve was moving the symmetrical line in x direction to \textit{x} = 42.5\degree \ to make the curve fit better with the McClung \cite[p. 112]{mcclung2006avalanche} model, as shown in Figure \ref{fig:slope-curve}.
 
 \begin{figure}[h]
 		\centering
@@ -416,9 +416,9 @@ As observed by McClung \cite[p. 115]{mcclung2006avalanche}, a majority of avalan
 \caption{\label{fig:curvature-curve} A spline for modelling avalanche risk of terrain curvature.}
 \end{figure}
 
-As shown by (\ref{eq:curvature-curve}), the numerical model of the spline is based on the curve of function $y = C^3 + 0.5$, but with a range of $[0, 1]$ to form a numerically-valid risk factor. Extreme curvatures represented by $C > 0.7937$ or $C < -0.7937$ (curvature radius $r < 1.26m$) will be capped at extreme risk probabilities $P = 1$ and $P = 0$ respectively. We believe that the shape of the spline models the aforementioned effects of changing terrain curvature well: as the terrain levels off from a concave, the avalanche risk increases steeply until approaching the linear region, where there is no significance change in the risk level; and as the terrain curvature increases away from this region into convex, the avalanche risk increases again steeply.
+As shown by (\ref{eq:curvature-curve}), the numerical model of the spline is based on the curve of function $y = C^3 + 0.5$, but with a range of $[0, 1]$ to form a numerically-valid risk factor. Extreme curvatures represented by $C > 0.7937$ or $C < -0.7937$ (curvature radius $r < 1.26m$) will be capped at extreme risk probabilities $P = 1$ and $P = 0$ respectively. We believe that the shape of the spline models the aforementioned effects of changing terrain curvature well: as the terrain levels off from a concave, the avalanche risk increases steeply until approaching the linear region, where there is no significance change in the risk level; and as the terrain curvature moves away from this region into convex, the avalanche risk increases again steeply.
 
-In practise, the curvature value $C$ can be easily computed by taking the second derivative of (\ref{eq:surface-polynomial}) with respect to the aspect angle (calculated by $\theta = atan(\frac{H}{G})$) in the fitted neighbourhood, which is:
+In practise, the curvature value $C$ can be easily computed by taking the second derivative of (\ref{eq:surface-polynomial}) with respect to the aspect angle (calculated by $\theta = atan(\frac{H}{G})$) in the fitted neighbourhood \cite[Ch. 6.2.2]{de2007geospatial}, which is:
 
 \begin{equation} \label{eq:curvature-equation}
 \fontsize{10}{11}\selectfont
@@ -467,7 +467,7 @@ P(avalanche) = \frac{P(avalanche | slope\_angle)}{C_s} \cdot \frac{P(avalanche |
 
 \section{Colour visualisation of risk} \label{sec:chosen-colour-coding} 
 
-For the basic application completed in \textbf{Stage 1}, a colour scheme identical to the colour coding used by the SAIS (as shown in Figure \ref{fig:eu-avalanche-scale}) was used for the risk levels (which at \textbf{Stage 1} relies only on the dynamic risk model). However, as described in Section \ref{sec:colour-representation}, past researches have found this colour coding scheme to be ineffective and has the potential to mislead the user. Therefore, a new colour scheme was implemented, as shown in Figure \ref{fig:new-avalanche-scale}.
+For the essential framework completed in \textbf{Stage 1}, a colour scheme identical to the colour coding used by the SAIS (as shown in Figure \ref{fig:eu-avalanche-scale}) was used for the risk levels (which at \textbf{Stage 1} relies only on the dynamic risk model). However, as described in Section \ref{sec:colour-representation}, past researches have found this colour coding scheme to be ineffective and has the potential to mislead the user. Therefore, a new colour scheme was implemented, as shown in Figure \ref{fig:new-avalanche-scale}.
 
 \begin{figure}[h]
 \small
@@ -498,12 +498,12 @@ In particular, the dynamic risk level will determine the value of hue at a point
 
 In practise, thresholding will be applied to all static risk levels in the raster for the scaling of static risk value to saturation. To reduce the influence of extreme values on the visualisation of static risk, the static risk values are scaled between the 1st percentile and the 99th percentile rather than between the minimum and maximum risk values.
 
-The resulting risk colour scheme, used by the improved application of \textbf{Stage 2}, can be seen in Figure \ref{fig:final-colour-scheme}. The effects of static risk controlling saturation can also be observed in Figure \ref{fig:stage1bennevis} (right). 
+The resulting risk colour scheme, used in \textbf{Stage 2}, can be seen in Figure \ref{fig:final-colour-scheme}. The effects of static risk controlling saturation can also be observed in Figure \ref{fig:stage1bennevis} (right). 
 
 \begin{figure}[h]
 		\centering
 		\includegraphics[height=5cm]{final-colour-scheme.png}
-		\caption{\label{fig:final-colour-scheme} The new risk colour scheme implemented in the improved application. Each row represents a dynamic risk level.}
+		\caption{\label{fig:final-colour-scheme} The new risk colour scheme implemented in \textbf{Stage 2}. Each row represents a dynamic risk level.}
 \end{figure}
 
 \section{A* pathfinding in a risk-adjusted environment} \label{sec:risky-pathfinding}
@@ -514,7 +514,7 @@ There are nevertheless a number of challenges when adapting A* search for the sp
 
 \subsection{Vertical distance between two points}
 
-As the height map raster available to the application arranges data in a grid with uniform resolution, vertical distances between neighbouring nodes are consistent. Therefore, the only distinction of distance between two neighbouring nodes is the vertical distance. While it is possible to calculate the linear distance between two points based on trigonometry, this is both computationally expensive for a large data grid and inaccurate: it is unlikely that the terrain surface is smooth and straight between two neighbouring points. As an alternative, it is possible to estimate this distance based on observations and average cases: the Naismith's Rule, as introduced in \ref{sec:terrain-pathfinding}.
+As terrain rasters arranges data in a grid with uniform resolution, horizontal distances between neighbouring nodes are consistent. Therefore, the only distinction of distance between two neighbouring nodes is the vertical distance. While it is possible to calculate the linear distance between two points based on trigonometry, this is both computationally expensive for a large data grid and inaccurate: it is unlikely that the terrain surface is smooth and straight between two neighbouring points. As an alternative, it is possible to estimate this distance based on observations and average cases: the Naismith's Rule, as introduced in \ref{sec:terrain-pathfinding}.
 
 The Naismith's Rule estimates the amount of equivalent distance walked by a mountaineer to ascend or descend each unit of vertical distance, called the Naismith distance. In average case on a natural terrain, it has been estimated that walking on a levelled terrain for 3 miles is equivalent to ascending or descending 2000 feet vertically, which is equivalent to 7.92 meters of walking distance for each meter of vertical distance, as summarised by Scarf \cite{scarf2008mathematical}. This allows a simple conversion process to be established as followed:
 
@@ -564,7 +564,7 @@ Due to the fact that the search will be conducted on a rectangular section of th
 		scaled\_heuristic &= \frac{heuristic\_cost - min\_naismith}{max\_naismith - min\_naismith}
 		\end{aligned}
 		\end{equation}
-		\caption{\label{fig:heuristic-distance} Calculating the scaled heuristic cost.}
+		\caption{\label{fig:heuristic-distance} Calculating the scaled heuristic cost, where \textit{x} represents the longer side of the rectangle.}
 \end{figure}
 
 The heuristic cost of moving to a node can then be calculated by multiplying the risk level of the next node with the estimated Naismith distance to the goal node. The resulting heuristic cost is then scaled to be between the maximum and minimum actual Naismith distances calculated. This combines with the actual cost of moving to the node, as shown in (\ref{eq:heuristic-equation}).
@@ -619,11 +619,11 @@ Finally, the A* search algorithm is performed on the pre-procesed search space. 
 
 In order to determine the quality of the avalanche risk models used by the project, it is essential to conduct some statistical tests on the model. An ordinary approach is to conduct an inferential statistical test such as the Mann-Whitney U test \cite{mann1947test} to determine whether our models accurately determine the locations of actual avalanche releases. However, as there is no prior static risk model applied to the Scottish Highlands that we are aware of, this is not possible.
 
-As described in Section \ref{sec:combine-models}, our static risk model is combined with the dynamic model through multiplication at runtime, due to the dynamic factors changing too frequently to efficiently store a combined model. This presents a major difficulty in evaluating the combined model, in addition to historic SAIS forecasts being incomplete (compass rose only available since 2009 with large gaps), as well as the computational difficulties in storing 5-6 large dynamic risk rasters for each of the thousands of days. Therefore, our statistical evaluation will focus on the static risk model only, as described in Section \ref{sec:risk-model-eval}.
+As described in Section \ref{sec:combine-models}, our static risk model is combined with the dynamic model through multiplication at runtime, as the dynamic factors changes too frequently to efficiently store a combined model. This presents a major difficulty in evaluating the combined model, in addition to historic SAIS forecasts being incomplete (compass rose only available since 2009 with large gaps), as well as the computational difficulties in storing 5-6 large dynamic risk rasters for each of the thousands of days. Therefore, our statistical evaluation will focus on the static risk model only, as described in Section \ref{sec:risk-model-eval}.
 
 \chapter{Design and Implementation of the Application} \label{ch:app-description}
 
-This chapter provides details on the implementation of the software system of the application. Starting with an overview on the architecture design in Section \ref{sec:app-system}, different levels of the implementation will be covered: retrieval and processing of various types of data (\ref{sec:data-processing}), the API servers serving as an intermediate between data and the user interface (\ref{sec:api-server}), and the user interface itself (\ref{sec:user-interface}).
+This chapter provides details on the implementation of the software system. Starting with an overview on the architecture design in Section \ref{sec:app-system}, different levels of the implementation will be covered: retrieval and processing of various types of data (\ref{sec:data-processing}), the API servers serving as an intermediate between data and the user interface (\ref{sec:api-server}), and the user interface itself (\ref{sec:user-interface}).
 
 \section{Architecture of the system} \label{sec:app-system}
 
@@ -632,7 +632,7 @@ As shown in Figure \ref{fig:new-system}, the system is structured across four le
 \begin{figure}[h]
 		\centering
 		\includegraphics[height=8cm]{System-new.pdf}
-		\caption{\label{fig:new-system} The architecture of the system.}
+		\caption{\label{fig:new-system} The architecture of the system. All components in Data Interface, API Servers and Front-end are implemented from scratch during this project, except the Terrain Server.}
 \end{figure}
 
 The Front-end takes the form of a Cesium application running in the user's web browser, served by Nginx running on the application server. Nginx also terminates the TLS connection from the user to ensure secure and tamper-resistant data transmission. As the user interacts with the virtual 3D scene in Cesium, it will automatically request the necessary data from the API servers on the next level -- either overlay images through the Imagery API or route and past avalanche data through the Data API.
@@ -657,13 +657,11 @@ The Scottish Avalanche Information Service (SAIS)\cite{sais} provides forecasts 
 		\caption{\label{fig:compassrose}An example compass rose produced by the SAIS.\cite[p. 4]{sais-report}}
 		\end{figure}
 		
-Unfortunately, the SAIS does not provide an API with which the risk levels making up the compass rose could be retrieved easily. Therefore, it was necessary to build a web crawler (\textit{SAISCrawler}) with the Selenium library \href{http://docs.seleniumhq.org/}{Selenium} to automatically search for and download avalanche forecasts from the SAIS.
-		
-The crawler retrieves forecast data by visiting a predefined list of SAIS location pages, each corresponding to a location under observation, and then locate a list of forecasts conducted for that location. Each forecast has a unique page containing the image link to the compass rose for the forecast, and the URL encoding of the image link contains the altitude thresholds and risk levels that can be stored. 
+Unfortunately, the SAIS does not provide an API with which the risk levels making up the compass rose could be retrieved easily. Therefore, it was necessary to build a web crawler (\textit{SAISCrawler}) with the \href{http://docs.seleniumhq.org/}{Selenium} library to automatically search for and download avalanche forecasts from the SAIS.
 
 Vertically, the forecast data is divided by altitude into two sectors, each of which is further divided by terrain aspect into eight sections, each representing a 30\si{\degree} circular segment, as depicted in Figure \ref{fig:compassrose}. Each segment contains two risk levels: the primary level and the secondary level. Therefore, a total of 32 risk level values are extracted from each compass rose. 
 		
-In conformity with the entity-relationship model, eight forecast records are created for the eight circular segments, each containing the primary and secondary risk levels for the two altitude sectors in that segment, along with the date of forecast and the transition altitudes. These records are stored in the SQLite database \href{https://sqlite.org/}{SQLite} by the crawler. An example set of forecast records is depicted in Figure \ref{fig:sqlite}.
+In conformity with the entity-relationship model, eight forecast records are created for the eight circular segments, each containing the primary and secondary risk levels for the two altitude sectors in that segment, along with the date of forecast and the transition altitudes. These records are stored in a \href{https://sqlite.org/}{SQLite} database by the crawler. An example set of forecast records is depicted in Figure \ref{fig:sqlite}.
 		
     		\begin{figure}[h]
     		\centering
@@ -676,11 +674,7 @@ As a conservative assessment of dynamic risk, the higher of the primary and the 
 
 \subsection{Altitude, aspect and static risk data} \label{subsec:static-risk-processing}
 
-As static risk data originate from analyses of the terrain model, it is necessary to obtain a full Digital Elevation Model (DEM) for the areas of interest (Scottish Highlands). There are a number of available sources for DEM data of the United Kingdom, most notably the EU-DEM Data \cite{eu-dem} provided by the European Commission and the UK Government's Ordnance Survey Data (OS5) \cite{os-5} (mentioned in \ref{sec:modelling-avalanche}).
-		
-The EU-DEM Data covers the entire Western Europe with an accuracy of 25 to 30 meters. The data is available in full, and can be used for both educational and commercial purposes subject to citation requirements. 
-		
-The OS5 Data covers the United Kingdom only, with a superior accuracy of 5 meters, arranged in the British National Grid \cite{osgb-1936} reference system. The data can be requested per-tile either at a cost (no usage restrictions) or free through EDINA (educational uses only), subject to citation requirements.
+As static risk data originate from analyses of the terrain model, it is necessary to obtain a full Digital Elevation Model (DEM) for the areas of interest (Scottish Highlands). There are a number of available sources for DEM data of the United Kingdom, most notably the EU-DEM Data \cite{eu-dem} provided by the European Commission (25-30m resolution, open license), and the UK Government's Ordnance Survey Data (OS5) \cite{os-5} (5m resolution, limited license, mentioned in \ref{sec:modelling-avalanche}).
 		
 With considerations on the nature of the project and the potential uses of the application, the Ordnance Survey Data is used for the course of the project, as an elevation model with higher accuracy is beneficial for accurate computations and evaluations. However, should an expansion of coverage or usage be required, the EU-DEM Data can be processed and used with the same procedures.
 
@@ -713,7 +707,7 @@ The terrain shape files used by Cesium to display 3D terrain models can also be 
 
 As reflected in the requirements, requests from a potential user include the ability to label the location of past avalanches on the map. The SAIS provides an \href{www.sais.gov.uk/avalanche_map/}{Avalanche Map} which labels the time, approximate location and additional descriptions of each past avalanche in the monitored area, as reported by both the SAIS' field forecasters and users of the website. This information is not only useful to the user assessing the avalanche risk of their route, but also a good source of reference data for statistical evaluations of the risk model. However, it is worth noting that the existence, the date, and the location of each avalanche are not exact, as they were not always recorded scientifically. 
 
-A crawler similar to the one used for retrieving SAIS avalanche forecasts (\ref{subsec:dynamic-data-processing}) was written for retrieving past avalanche records. The data is arranged in the format shown in Figure \ref{fig:sais-past-avalanche} and stored in a SQLite database.
+A crawler similar to the one used for retrieving SAIS avalanche forecasts (\ref{subsec:dynamic-data-processing}) was written for retrieving past avalanche records. The data is stored in the format shown in Figure \ref{fig:sais-past-avalanche}.
 
 \begin{figure}[h]
 		\centering
@@ -728,12 +722,12 @@ A crawler similar to the one used for retrieving SAIS avalanche forecasts (\ref{
 		avalanche\_time & TEXT & The date and time of the recorded avalanche. \\ \hline
 		avalanche\_comment & TEXT & Additional descriptions of the avalanche supplied by the SAIS. \\ \hline
 		\end{tabular}
-		\caption{\label{fig:sais-past-avalanche}The format of a stored past avalanche record.}
+		\caption{\label{fig:sais-past-avalanche}The format of a stored past avalanche record, stored in SQLite.}
 \end{figure}
 
-\section{The API servers} \label{sec:api-server}
+\section{The freshly-implemented API servers} \label{sec:api-server}
 
-Serving as the intermediate between the user and the data processors, the API Servers level provide two categories of APIs required for implementing the actions of the application: Data API and Imagery API, both of which will be covered in this section. In order to ensure the continuity of operations, APIs return empty content (empty image or JSON dataset) when an error is encountered instead of exiting with error code, and these errors can be logged for debugging. 
+Serving as the intermediate between the user and the data processors, the API Servers level provide two categories of APIs required for implementing the actions of the application: Data API and Imagery API, both of which will be covered in this section. 
 
 \subsection{Imagery APIs} \label{subsec:imagery-api}
 
@@ -744,7 +738,7 @@ APIs returning an image on valid calls are categorised as Imagery APIs. This inc
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.3]{Retrieval.png}
-		\caption{\label{fig:avalanche-risks-retrieval}A diagram illustrating the retrieval of any raster's data with geodetic coordinates.}
+		\caption{\label{fig:avalanche-risks-retrieval}A diagram illustrating the retrieval of any raster's data with geodetic coordinates. In order to ensure the continuity of operations, APIs return empty content and silently log errors when an error is encountered, instead of breaking out.}
 \end{figure}
 
 \begin{figure}[h]
@@ -810,7 +804,7 @@ APIs returning JSON datasets on valid calls are categorised as Data APIs. This i
 
 \section{The user interface} \label{sec:user-interface}
 
-The user interface of the application is modified from a reference application of the Cesium WebGL library, which runs in most modern web browsers, as shown in Figure \ref{fig:ui}. The vast majority of the interface area are left to the virtual 3D scene that the user can navigate freely in, while the main features of the application are accessed via UI elements on the top-left corner of the interface.
+The user interface of the application is implemented with the Cesium WebGL library, which runs in most modern web browsers, as shown in Figure \ref{fig:ui}. The vast majority of the interface area are left to the virtual 3D scene that the user can navigate freely in, while the main features of the application are accessed via UI elements on the top-left corner of the interface.
 
 \begin{figure}[h]
     		\centering
@@ -851,13 +845,13 @@ A histogram of all risk values is first produced to help determine the risk thre
 \begin{figure}[h]
 		\centering
 		\includegraphics[scale=0.55]{static-risk-distribution.png}
-		\caption{\label{fig:risk-eval-hist}A histogram showing the distribution of risk values in the static risk model. The main histogram is capped at a count of 1,000,000 due to the distinct values of high risk points, as shown in the overview diagram at top-right. The total number of points in the full raster is just under 1,000,000,000.}
+		\caption{\label{fig:risk-eval-hist}A histogram showing the distribution of risk values in the static risk model (1991 to March 16, 2017). The main histogram is capped at a count of 1,000,000 due to the distinct values of high risk points, as shown in the overview diagram at top-right. The total number of points in the full raster is just under 1,000,000,000.}
 \end{figure}
 
 \begin{figure}[h]
 \centering 
 \fontsize{9}{11}\selectfont
-\begin{tabular}{ | c| c|| c| c| c| c| }
+\begin{tabular}{ | c| c|| >{\bfseries}c| c| c| c| }
 \hline
 Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search 250m \\ \hline
 70\% & 30\% & 98.69\% & 98.77\% & 98.79\% & 98.79\%  \\ \hline
@@ -867,7 +861,7 @@ Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search
 99.5\% & 0.5\% & 70.12\% & 88.17\% & 96.48\% & 98.28\%  \\ \hline
 99.9\% & 0.1\% & 27.41\% & 54.44\% & 82.60\% & 94.56\%  \\ \hline
 \end{tabular}
-\caption{\label{fig:stat-eval-table}The accuracy of our model's release area estimation at varying search area extents.}
+\caption{\label{fig:stat-eval-table}The identification rate of our model's release area estimation at varying search area extents. A distinct trade-off between identification rate and false positive rate can be observed: the lower the risk value threshold, the higher the identification rate, but also consequently higher the false-positive rate. Therefore high identification rates at lower risk thresholds are not necessarily ``better'', but a balancing threshold needs to be chosen. This diagram presents a subset of values plotted in Figure \ref{fig:stat-eval-plot}.}
 \end{figure}
 
 \begin{figure}[h]
@@ -876,7 +870,7 @@ Threshold \% & \% of study area & Search 25m & Search 50m & Search 125m & Search
 		\caption{\label{fig:stat-eval-plot}A diagram showing the accuracy of our model's release area estimation at different risk threshold percentiles. Note that \% of area = 100\% - threshold.}
 \end{figure}
 
-Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the changes in size of study areas. Similar to the previous study in the Scottish Highlands by Purves \textit{et al.} \cite{Purves2003343}, our study area is significantly larger than many others, and the lack of precisely recorded avalanches added another layer of complications. It would however appear that searching within an extent of 25 meters covering 0.5\% of study area produces a comparable performance (70.12\%) to other models discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
+Before comparing the accuracy of our model against the performance of release area estimation of other models, it is important to note that percentages values cannot be compared directly due to the differences in size of study areas. Similar to the previous study in the Scottish Highlands by Purves \textit{et al.} \cite{Purves2003343}, our study area is significantly larger than many others, and the lack of precisely recorded avalanches added another layer of complications. Within an extent of 25 meters, covering 0.5\% of study area, our model produces a comparable performance (70.12\%) to others discussed in Section \ref{sec:modelling-avalanche}, as shown in Figure \ref{fig:eval-compare}.
 
 \begin{figure}[h]
 \centering 
@@ -894,7 +888,7 @@ Our Model & slope, aspect, curvature, roughness and dynamic observations & Scott
 \caption{\label{fig:eval-compare}Comparing the accuracy of our model against other release area estimation models, picking the most representative accuracy covering all avalanche releases in other studies. In most cases, the identification accuracy increases as the percentage of area allowed to be identified as risky increases.} 
 \end{figure}
 
-Despite the difficulties in comparing the identification accuracy of our model against other models directly, for the 0.5\% of area of Scottish Highlands identified as most likely avalanche release areas by our model, the positive rate to within 25 meters is above 70\%. This increases to above 90\% for the top 5\% of areas.
+Despite the difficulties in comparing the identification accuracy of our model against other models directly, for the 0.5\% of area of Scottish Highlands identified as most likely avalanche release areas by our model, the positive rate searching within 25 meters is above 70\%. This increases to above 90\% for the top 5\% of areas.
 
 As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains, such as shown in Figure \ref{fig:ui}.
 
