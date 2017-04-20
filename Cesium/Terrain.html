@@ -69,6 +69,8 @@ var south = 56.792807;
 var east = -4.988427;
 var north = 56.798914;
 
+var lookingAtDate = new Date().toISOString().slice(0,10);
+
 var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
 
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
@@ -402,6 +404,7 @@ function switchRiskMap(date) {
         maximumLevel : 15,
         credit: SAISCredit
     });
+    lookingAtDate = date;
     layers.remove(avalanche_layer, true);
     avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
     contour_layer = layers.addImageryProvider(contour_map);
@@ -535,7 +538,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
         return false;
     }
     var risk_weighing = document.getElementById("riskSlider").value;
-    var req_url = avalanche_api_url + '/data/api/v1.0/find_path/' + start_location[0].toString() + '/' + start_location[1].toString() + '/' + end_location[0].toString() + '/' + end_location[1].toString() + '/' + risk_weighing.toString();
+    var req_url = avalanche_api_url + '/data/api/v1.0/find_path/' + start_location[0].toString() + '/' + start_location[1].toString() + '/' + end_location[0].toString() + '/' + end_location[1].toString() + '/' + risk_weighing.toString() + '/' + lookingAtDate.toString();
     var switch_functions = [];
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {

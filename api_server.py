@@ -321,14 +321,19 @@ def get_recent_forecast_dates(longitude, latitude):
 
         return jsonify({})
 
-
 @app.route('/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>', methods=['GET'])
-def get_path(longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
+@app.route('/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>/<string:forecast_date>', methods=['GET'])
+def get_path(longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing, forecast_date=None):
     """ Return a path (series of coordinates) found by A* search based on a weighing of risk against distance. """
 
     not_found_message = ""
 
     try:
+
+        if (forecast_date is not None) and forecast_utils.check_date_string(forecast_date):
+            custom_date = forecast_date
+        else:
+            custom_date = None
 
         risk_weighing = float(risk_weighing)
         if (risk_weighing < 0) or (risk_weighing > 1):
@@ -355,7 +360,7 @@ def get_path(longitude_initial, latitude_initial, longitude_final, latitude_fina
             not_found_message = "Request too large at API."
             abort(400)
 
-        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing)
+        path, message = path_reader.find_path(initial[0], initial[1], final[0], final[1], risk_weighing, custom_date)
 
         if not path:
             not_found_message = "Path finding failed, probably due to excessive data size. Module message: " + message
@@ -392,7 +397,7 @@ def get_past_avalanches(start_date, end_date):
 
                 if not coordinates: # In case of invalid BNG values.
                     continue # Skip this.
-                
+
                 avalanche_item['long'] = coordinates[0]
                 avalanche_item['lat'] = coordinates[1]
                 avalanche_item['time'] = avalanche[4]
@@ -401,7 +406,7 @@ def get_past_avalanches(start_date, end_date):
 
                 # Fix the issue when SAIS labels an avalanche outside raster boundary.
                 if not avalanche_item['height']:
-                    avalanche_item['height'] = 0.0;          
+                    avalanche_item['height'] = 0.0;
 
                 avalanches_data.append(avalanche_item)
 

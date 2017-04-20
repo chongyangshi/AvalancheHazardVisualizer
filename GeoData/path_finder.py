@@ -10,6 +10,7 @@ import numpy as np
 from sys import maxsize
 from math import sqrt, floor
 from time import time
+from datetime import datetime
 from skimage.measure import block_reduce
 
 NAISMITH_CONSTANT = 7.92
@@ -34,7 +35,7 @@ class PathFinder:
         self.__priority_queue = []
 
 
-    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing):
+    def find_path(self, longitude_initial, latitude_initial, longitude_final, latitude_final, risk_weighing, custom_date):
         """ Given initial and final coordinates and a risk-to-distance weighing, find a path. """
 
         # Time the execution.
@@ -51,6 +52,14 @@ class PathFinder:
 
         if not valid_ratio:
             return False, "Invalid risk weighing."
+
+        if custom_date is not None:
+            try:
+                datetime.datetime.strptime(custom_date, '%Y-%m-%d')
+            except ValueError:
+                return False, "Invalid custom date."
+        else:
+            custom_date = datetime.today().strftime('%Y-%m-%d')
 
         self.debug_print("Sanity check completed.")
 
@@ -138,7 +147,7 @@ class PathFinder:
         if not location_ids:
             return False, "Invalid location ID."
         location_id = int(location_ids[0][0])
-        location_forecasts = self._dynamic_risk_cursor.lookup_newest_forecasts_by_location_id(location_id)
+        location_forecasts = self._dynamic_risk_cursor.lookup_forecasts_by_location_id_and_date(location_id, custom_date)
         if location_forecasts is None:
             return False, "No forecast found."
         location_forecast_list = list(location_forecasts)
