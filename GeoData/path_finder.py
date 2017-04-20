@@ -53,15 +53,28 @@ class PathFinder:
         if not valid_ratio:
             return False, "Invalid risk weighing."
 
+        self.debug_print("Sanity check completed.")
+
+        # Process custom date and dynamic risk.
+        location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
+        location_ids = self._dynamic_risk_cursor.select_location_by_name(location_name)
+        if not location_ids:
+            return False, "Invalid location ID."
+        location_id = int(location_ids[0][0])
+        location_forecasts = self._dynamic_risk_cursor.lookup_newest_forecasts_by_location_id(location_id)
+
         if custom_date is not None:
             try:
                 datetime.strptime(custom_date, '%Y-%m-%d')
+                forecasts_of_date = self._dynamic_risk_cursor.lookup_forecasts_by_location_id_and_date(location_id, custom_date)
+                if len(forecasts_of_date) > 0: # Just in case the custom date given is invalid, which happens.
+                    location_forecasts = forecasts_of_date
             except ValueError:
                 return False, "Invalid custom date."
-        else:
-            custom_date = datetime.today().strftime('%Y-%m-%d')
 
-        self.debug_print("Sanity check completed.")
+        if location_forecasts is None:
+            return False, "No forecast found."
+        location_forecast_list = list(location_forecasts)
 
         original_initial = (longitude_initial, latitude_initial)
         original_final = (longitude_final, latitude_final)
@@ -141,17 +154,7 @@ class PathFinder:
         initial_node = (min(initial_node[0], x_max), min(initial_node[1], y_max))
         goal_node = (min(goal_node[0], x_max), min(goal_node[1], y_max))
 
-        # Dynamic properties.
-        location_name = geocoordinate_to_location.get_location_name(longitude_initial, latitude_initial)
-        location_ids = self._dynamic_risk_cursor.select_location_by_name(location_name)
-        if not location_ids:
-            return False, "Invalid location ID."
-        location_id = int(location_ids[0][0])
-        location_forecasts = self._dynamic_risk_cursor.lookup_forecasts_by_location_id_and_date(location_id, custom_date)
-        if location_forecasts is None:
-            return False, "No forecast found."
-        location_forecast_list = list(location_forecasts)
-
+        # Match dynamic risk to the risk grid.
         for y in range(0, len(risk_grid)):
             for x in range(0, len(risk_grid[0])):
                 risk_grid[y, x] = risk_grid[y, x] * base_utils.match_aspect_altitude_to_forecast(location_forecast_list, aspect_grid[y, x], height_grid[y, x])
