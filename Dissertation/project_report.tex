@@ -786,9 +786,9 @@ APIs returning JSON datasets on valid calls are categorised as Data APIs. This i
 
 \begin{figure}[h]
 \begin{lstlisting}[breaklines]
-/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>
+/data/api/v1.0/find_path/<string:longitude_initial>/<string:latitude_initial>/<string:longitude_final>/<string:latitude_final>/<string:risk_weighing>/<string:forecast_date>
 \end{lstlisting}
-{\small Required: (all parameters).}
+{\small Required: all parameters except {\ttfamily forecast\_date}, defaulting today's date.}
 \caption{\label{fig:find-path-doc}The API call format for {\ttfamily find\_path}.}
 \end{figure}
 
@@ -875,7 +875,7 @@ Before comparing the accuracy of our model against the performance of release ar
 \begin{figure}[h]
 \centering 
 \fontsize{9}{11}\selectfont
-\begin{tabular}{ | p{2.2cm}| p{2.5cm} | p{2cm}| p{2cm}| p{2.5cm}| p{1.8cm}|}
+\begin{tabular}{ | p{2.2cm}| p{3.5cm} | p{2cm}| p{2cm}| p{2.5cm}| p{2cm}|}
 \hline
 Study & Method & Location & Study area & \% area identified as risky & Identification accuracy \\ \hline
 Ghinoi and Chung \cite{Ghinoi2005305} & slope, aspect, elevation, crest distance, roughness and curvature & Italian Dolomites & $\approx 230 km^2$ & 7\%-20\% & 67-82\% \\ \hline 
@@ -890,7 +890,13 @@ Our Model & slope, aspect, curvature, roughness and dynamic observations & Scott
 
 Despite the difficulties in comparing the identification accuracy of our model against other models directly, for the 0.5\% of area of Scottish Highlands identified as most likely avalanche release areas by our model, the positive rate searching within 25 meters is above 70\%. This increases to above 90\% for the top 5\% of areas.
 
-As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains, such as shown in Figure \ref{fig:ui}.
+As described in Section \ref{sec:combine-models}, the saturation of risk colour codings are determined by normalising the risk levels to between the 1st and 99th percentiles of all risk values. Therefore we believe that as long as the proportion of high risk points remain small (Figure \ref{fig:risk-eval-hist}), the application will be effective at visualising high avalanche risk spots in the Scottish mountains, such as shown in Figure \ref{fig:visual-confirmation}.
+
+\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.95]{effective.pdf}
+		\caption{\label{fig:visual-confirmation}Combined risk map of two areas in Ben Nevis, Lochaber, overlaid with past avalanche records since 1991. }
+\end{figure}
 
 \chapter{Conclusions} \label{ch:conclusions}
 
