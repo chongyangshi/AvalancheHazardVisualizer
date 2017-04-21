@@ -477,6 +477,8 @@ Sandcastle.addToolbarButton('Hide Static Risk', function() {
 var start_location = null;
 var end_location = null;
 var route_points = new Cesium.EntityCollection();
+var route_colour_index = 0;
+var colour_loop = [Cesium.Color.AQUA, Cesium.Color.BLUEVIOLET, Cesium.Color.BURLYWOOD, Cesium.Color.CADETBLUE, Cesium.Color.CORNSILK, Cesium.Color.DARKCYAN];
 
 Sandcastle.addToolbarButton('Pick start', function() {
     click_handler.setInputAction(function(click){
@@ -563,7 +565,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
                           point_colour = Cesium.Color.GREEN;
                           break;
                           default:
-                          point_colour = Cesium.Color.AQUA;
+                          point_colour = colour_loop[route_colour_index];
 
                       }
                       var point = viewer.entities.add({
@@ -575,6 +577,7 @@ Sandcastle.addToolbarButton('Find a route', function() {
                       });
                       route_points.add(point);
                   }
+                  route_colour_index = (route_colour_index + 1) % (colour_loop.length - 1);
                   document.getElementById("routeText").innerHTML = 'A route has been found.';
                   return true;
 
