@@ -61,7 +61,7 @@ function startup(Cesium) {
 
 // Configurations.
 Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
-var terrain_api_url = "https://terrain.ebornet.com"; // Without trailing backslash.
+// var terrain_api_url = "https://terrain.ebornet.com"; // Without trailing backslash.
 var avalanche_api_url = "https://avalanche.ebornet.com/api"; // Without trailing backslash.
 
 var west = -5.008055;
@@ -106,7 +106,7 @@ var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     requestVertexNormals : true
 });
 viewer.terrainProvider = cesiumTerrainProviderMeshes;
-
+/*
 var OSCredit = new Cesium.Credit("Ordnance Survey (GB) - Provided By EDINA Digimap Ordnance Survey Service");
 var OS5LTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : terrain_api_url + '/tilesets/L',
@@ -138,7 +138,7 @@ var OS5CMTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     credit : OSCredit,
 });
 OS5CMTerrainProviderMeshes.cameraPos = [56.95, -4.60];
-
+*/
 var showStaticRisk = '1';
 var SAISCredit = new Cesium.Credit("Scottish Avalanche Information Service");
 var avalanche_risk_map = new Cesium.UrlTemplateImageryProvider({
@@ -165,7 +165,10 @@ var avalanche_layer = layers.addImageryProvider(avalanche_risk_map);
 var contour_layer = layers.addImageryProvider(contour_map);
 var aspect_layer = null;
 
-Sandcastle.addToolbarMenu([{
+
+Sandcastle.addToolbarMenu([
+/*
+{
     text : 'OS5 Lochaber Terrain',
     onselect : function() {
         viewer.terrainProvider = OS5LTerrainProviderMeshes;
@@ -225,7 +228,8 @@ Sandcastle.addToolbarMenu([{
             duration: 1.0
         });
     }
-}, {
+}, */
+{
     text : 'STK World Terrain',
     onselect : function() {
         viewer.terrainProvider = cesiumTerrainProviderMeshes;
