@@ -62,7 +62,7 @@ function startup(Cesium) {
 // Configurations.
 Cesium.BingMapsApi.defaultKey = 'AsGBZY2y5aMkCSpLIeQnGPcn9MWH71z8UK9_cHfEfWiO8tGCjndA6N6uv5QxLje1';
 // var terrain_api_url = "https://terrain.ebornet.com"; // Without trailing backslash.
-var avalanche_api_url = "https://avalanche.ebornet.com/api"; // Without trailing backslash.
+var avalanche_api_url = "https://avalanchescotland.com/api"; // Without trailing backslash.
 
 var west = -5.008055;
 var south = 56.792807;
@@ -106,8 +106,13 @@ var cesiumTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     requestVertexNormals : true
 });
 viewer.terrainProvider = cesiumTerrainProviderMeshes;
-/*
+
 var OSCredit = new Cesium.Credit("Ordnance Survey (GB) - Provided By EDINA Digimap Ordnance Survey Service");
+viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromRadians(Cesium.Math.toRadians(-5.01), Cesium.Math.toRadians(56.80) , 2500),
+    duration: 1.0
+});
+/*
 var OS5LTerrainProviderMeshes = new Cesium.CesiumTerrainProvider({
     url : terrain_api_url + '/tilesets/L',
     credit : OSCredit,

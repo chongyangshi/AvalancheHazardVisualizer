@@ -5,7 +5,6 @@ import json
 from collections import OrderedDict
 from math import copysign
 from colorsys import hls_to_rgb
-from convertbng.util import convert_lonlat
 from numpy import isnan
 
 from GeoData import rasters, bng_to_lonlat
