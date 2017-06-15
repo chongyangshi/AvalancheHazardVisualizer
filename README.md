@@ -65,8 +65,8 @@ Adapt the NGINX virtual host configuration `Scripts/avalanche.ebornet.com` for y
 
 Now to configure python environment:
 
-        cd /home/BEngProject
-        virtualenv env
+        cd /home/BEngProject/Backend
+        virtualenv env --system-site-packages
         source env/bin/activate
         easy_install GDAL # The only way to correctly install the Python bindings at this time.
         pip install -r DEPENDENCIES #Install the dependencies.
