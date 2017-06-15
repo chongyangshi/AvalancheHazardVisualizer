@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 
-from SAISCrawler.script import db_manager, utils
-from GeoData import raster_reader, rasters, bng_to_lonlat
+from Backend.SAISCrawler.script import db_manager, utils
+from Backend.GeoData import raster_reader, rasters, bng_to_lonlat
 
 THRESHOLD_PERCENTILES_TABLE = [70, 80, 90, 95, 99.5, 99.9]
 THRESHOLD_VALUES_TABLE = [4.662734e-04, 9.898760e-04, 2.906299e-03, 8.608662e-03, 0.1230, 0.3411]

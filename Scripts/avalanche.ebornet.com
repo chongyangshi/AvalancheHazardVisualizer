@@ -30,7 +30,7 @@ server {
         rewrite /api/(.*) /$1 break;
         #proxy_pass http://127.0.0.1:5000;
         include uwsgi_params;
-        uwsgi_pass unix:/home/BEngProject/wsgi.sock;
+        uwsgi_pass unix:/home/BEngProject/Backend/wsgi.sock;
     }
     location ~* \.(?:gif|jpe?g|png)$ {
         expires 6h;
