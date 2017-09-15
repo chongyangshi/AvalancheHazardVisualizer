@@ -191,11 +191,11 @@ class PathFinder:
                         elif (0 <= i <= x_max) and (0 <= j <= y_max):
                             if (abs(i - x) + abs(j - y)) <= 1:
                                 if (j - y) == 0:
-                                    naismith_distance = pixel_res_x + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                    naismith_distance = pixel_res_x + NAISMITH_CONSTANT * max(0, height_grid[j, i] - height_grid[y, x])
                                 else:
-                                    naismith_distance = pixel_res_y + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                    naismith_distance = pixel_res_y + NAISMITH_CONSTANT * max(0, height_grid[j, i] - height_grid[y, x])
                             else:
-                                naismith_distance = pixel_res_d + NAISMITH_CONSTANT * abs(height_grid[j, i] - height_grid[y, x])
+                                naismith_distance = pixel_res_d + NAISMITH_CONSTANT * max(0, height_grid[j, i] - height_grid[y, x])
 
                             if naismith_distance > naismith_max:
                                 naismith_max = naismith_distance
@@ -324,7 +324,7 @@ class PathFinder:
         heuristic_distance = (\
             longer_side_res * abs(dx - dy) + \
             shorter_side * pixel_res_d + \
-            NAISMITH_CONSTANT * abs(node_height - goal_height)\
+            NAISMITH_CONSTANT * max(0, node_height - goal_height)\
             ) * node_risk
         scaled_heuristic = (heuristic_distance - naismith_min) / (naismith_max - naismith_min)
 
