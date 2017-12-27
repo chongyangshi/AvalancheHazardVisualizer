@@ -91,3 +91,9 @@ For 16.04 LTS with systemd:
         sudo systemctl restart nginx
 
 Any problems with installation should be indicated in the relevant logs.
+
+# SAIS Crawling ##
+
+Due to the lack of a public API, the system crawls [SAIS](https://www.sais.gov.uk) pages for avalanche forecasts and past avalanche records. The enabling facilities can be found in ``/Backend/SAISCrawler``, with scripts to execute this process automatically.
+
+At the time of writing (Dec 2017), while the OSX script works, something is broken with Xvfb and Chrome Driver such that selenium will return an error of abnormal Chrome exit. Some changes may be needed to get the Linux script working again.
